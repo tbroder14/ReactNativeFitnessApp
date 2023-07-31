@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Text, View, StyleSheet, FlatList, Pressable, TouchableOpacity, ScrollView } from "react-native";
+import { Text, View, StyleSheet, FlatList, TextInput, Pressable, TouchableOpacity, ScrollView } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { sortedExerciseList } from "./data.js";
 import Modal from "react-native-modal";
@@ -10,6 +10,40 @@ const StartWorkoutPage = () => {
     // for start empty workout modal
     const [startEmptyWorkoutModal, setStartEmptyWorkoutModal] = useState(false);
     // const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
+
+    // workout name useState
+    const startOfWorkoutTime = new Date().getHours()
+    const currentDate = new Date()
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth() + 1
+    const day = currentDate.getDate()
+    const dateWithoutTime = new Date(year, month - 1, day)
+    let currentTemplate = null
+    let currentWorkoutName = ''
+
+    if (currentTemplate === null) {
+        if (startOfWorkoutTime >= 21 || startOfWorkoutTime <= 4) {
+            currentWorkoutName = 'Night Workout'
+        } else if (startOfWorkoutTime >= 5 && startOfWorkoutTime <= 7) {
+            currentWorkoutName = 'Early Morning Workout'
+        } else if (startOfWorkoutTime >= 8 && startOfWorkoutTime <= 10) {
+            currentWorkoutName = 'Morning Workout'
+        } else if (startOfWorkoutTime >= 11 && startOfWorkoutTime <= 13) {
+            currentWorkoutName = 'Mid-day Workout'
+        } else if (startOfWorkoutTime >= 14 && startOfWorkoutTime <= 16) {
+            currentWorkoutName = 'Afternoon Workout'
+        } else if (startOfWorkoutTime >= 17 && startOfWorkoutTime <= 20) {
+            currentWorkoutName = 'Evening Workout'
+        }
+    } else {
+        currentWorkoutName = currentTemplate.name
+    }
+
+    const [workoutName, setWorkoutName] = useState(currentWorkoutName)
+
+    // function updateName(e) {
+    //     setWorkoutName(e.target.value)
+    // }
 
     const handleItemPress = (itemName) => {
         setExerciseNameForModal(itemName);
@@ -106,18 +140,35 @@ const StartWorkoutPage = () => {
                                     flex: 1,
                                     flexDirection: "row",
                                     justifyContent: "center",
-                                    gap: 30
+                                    gap: 30,
+                                    borderBottomColor: 'red',
+                                    borderBottomWidth: 2,
                                 }}
                             >
                                 <Text style={styles.modalText}>Start Workout Text Here</Text>
                                 <Text style={styles.textStyle}>Edit</Text>
                             </View>
 
-                            <ScrollView style={{ height: '85%', borderColor: 'white', borderWidth: 5 }}>
-
+                            <ScrollView style={{ height: '85%' }}>
+                                <View style={{ flex: 1, flexDirection: 'row' }}>
+                                    <Text style={styles.workoutNameLabel}>Workout Name</Text>
+                                    <TextInput
+                                        style={styles.workoutNameTextInput}
+                                        onChangeText={setWorkoutName}
+                                        value={workoutName}
+                                    />
+                                </View>
                                 <Text style={{ color: 'white', margin: 100, borderColor: 'white', borderWidth: 5 }}>This is where exercises go</Text>
                                 <Pressable
-                                    style={[styles.cancelWorkoutButton, styles.buttonClose]}
+                                    style={[styles.addExerciseButton]}
+                                // onPress={() => {
+                                //     setStartEmptyWorkoutModal(!startEmptyWorkoutModal);
+                                // }}
+                                >
+                                    <Text style={styles.textStyle}>Add Exercises</Text>
+                                </Pressable>
+                                <Pressable
+                                    style={[styles.cancelWorkoutButton]}
                                     onPress={() => {
                                         setStartEmptyWorkoutModal(!startEmptyWorkoutModal);
                                     }}
@@ -148,7 +199,7 @@ const styles = StyleSheet.create({
         borderColor: "#D3D3D3",
         padding: 20,
         alignItems: "center",
-        height: "90%",
+        height: "100%",
         width: "120%",
         marginTop: 50,
         shadowColor: '#000',
@@ -172,23 +223,37 @@ const styles = StyleSheet.create({
     },
     buttonOpen: {
         backgroundColor: "#F194FF",
-        textAlign: "center",
+        // textAlign: "center",
     },
     buttonClose: {
-        backgroundColor: "#DB2B39",
+        // textAlign: "center",
+    },
+    addExerciseButton: {
+        borderRadius: 20,
+        padding: 15,
+        elevation: 2,
+        width: '85%',
+        height: 50,
+        margin: 20,
+        color: 'white',
+        backgroundColor: "blue",
+
+        // marginRight: 10,
     },
     cancelWorkoutButton: {
         borderRadius: 20,
         padding: 15,
         elevation: 2,
-        width: 150,
+        width: '85%',
         height: 50,
+        margin: 20,
+        backgroundColor: 'red'
         // marginRight: 10,
     },
     textStyle: {
         color: "#61FF7E",
         fontWeight: "bold",
-        // textAlign: "center",
+        textAlign: "center",
         width: 150,
         marginLeft: 5,
         // flex: 1,
@@ -203,11 +268,31 @@ const styles = StyleSheet.create({
         // alignItems: 'center',
         // justifyContent: 'center'
     },
+    workoutNameLabel: {
+        height: 55,
+        marginTop: 9,
+        width: 100,
+        fontSize: 12,
+        textAlign: 'center',
+        // borderWidth: 1,
+        padding: 10,
+        color: 'white',
+        // borderColor: 'white'
+    },
+    workoutNameTextInput: {
+        height: 60,
+        width: 250,
+        fontSize: 16,
+        margin: 2,
+        borderWidth: 1,
+        borderRadius: 10,
+        padding: 10,
+        color: 'white',
+        borderColor: 'white'
+    },
 })
 
-
 export default StartWorkoutPage;
-
 
 // export default function ActiveWorkoutPage({ setActivePage, setShowButtons, currentTemplate, setCurrentTemplate, currentWorkoutExercises, setCurrentWorkoutExercises, activeWorkoutData, setActiveWorkoutData, workoutData, setWorkoutData }) {
 //

@@ -10,9 +10,7 @@ import {
 } from "react-native-safe-area-context";
 import StartWorkoutPage from "./components/StartWorkoutPage";
 import HistoryPage from "./components/HistoryPage";
-import ProgramPage from "./components/HistoryPage";
-
-
+import ProgramPage from "./components/ProgramPage";
 
 function ExerciseScreen() {
   const insets = useSafeAreaInsets();
@@ -23,10 +21,7 @@ function ExerciseScreen() {
         backgroundColor: "royalblue",
         flex: 1,
         backgroundColor: "#011638",
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
+        paddingBottom: 5
       }}
     >
       <ExercisePage />

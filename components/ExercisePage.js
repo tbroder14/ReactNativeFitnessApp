@@ -5,11 +5,12 @@ import {
   StyleSheet,
   TextInput,
   FlatList,
+  ScrollView,
   Pressable,
   TouchableOpacity,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { sortedExerciseList } from "./data.js";
+import { sortedExerciseList, mainData } from "./data.js";
 import Modal from "react-native-modal";
 
 //                          to do list
@@ -20,24 +21,25 @@ import Modal from "react-native-modal";
 // format the exercise modal
 
 //             feature roadmap
-// ask body outline with muscles and display exercises for selected muscle group (modal?) 
+// add body outline with muscles and display exercises for selected muscle group (modal?) 
 
 const ExercisePage = () => {
+
   // for react-native-dropdown-picker
   const [muscleValue, setMuscleValue] = useState(null);
   const [equipmentValue, setEquipmentValue] = useState(null);
   const [muscleOpen, setMuscleOpen] = useState(false);
   const [equipmentOpen, setEquipmentOpen] = useState(false);
 
-  // for exercise modal
-  const [exerciseModal, setExerciseModal] = useState(false);
-  const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
-
   // displaying sorted list of exercises
   const [searchBarInput, setSearchBarInput] = useState("");
   const [filterExerciseList, setFilterExerciseList] = useState(sortedExerciseList);
   const [muscleSort, setMuscleSort] = useState(null);
   const [equipmentSort, setEquipmentSort] = useState(null);
+
+  // for exercise modal
+  const [exerciseModal, setExerciseModal] = useState(false);
+  const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
 
   const muscles = [
     { label: "Biceps", value: "biceps" },
@@ -49,6 +51,7 @@ const ExercisePage = () => {
     { label: "Core", value: "core" },
     { label: "Back", value: "back" },
     { label: "Calves", value: "calves" },
+    { label: "Clear", value: "clear" }
   ];
 
   const equipment = [
@@ -63,6 +66,13 @@ const ExercisePage = () => {
 
   useEffect(() => {
     let filteredList = sortedExerciseList;
+
+    // this is just for testing
+    if (muscleValue == 'clear') {
+      setFilterExerciseList(filteredList)
+      return
+    }
+    // end testing
 
     if (equipmentValue) {
       filteredList = filteredList.filter(
@@ -87,7 +97,15 @@ const ExercisePage = () => {
 
   }, [equipmentValue, muscleValue, searchBarInput, sortedExerciseList]);
 
-  const Item = ({ name }) => (
+  const handleItemPress = (itemName) => {
+    setExerciseNameForModal(itemName);
+    setExerciseModal(true);
+  };
+
+  // const [filterExerciseList, setFilterExerciseList] = useState(sortedExerciseList);
+  let filteredList = sortedExerciseList;
+
+  const Item = ({ name, handleItemPress }) => (
     <TouchableOpacity onPress={() => handleItemPress(name)}>
       <View style={styles.item}>
         <Text style={styles.title}>{name}</Text>
@@ -95,110 +113,15 @@ const ExercisePage = () => {
     </TouchableOpacity>
   );
 
-  const handleItemPress = (itemName) => {
-    setExerciseNameForModal(itemName);
-    setExerciseModal(true);
-  };
+  const Seperator = () => (
+    <View style={{ height: 1, width: '100%', backgroundColor: 'white' }}>
 
-  return (
-    <View style={[styles.container]}>
-      <View style={{ height: 20 }}></View>
-      <View style={{ marginBottom: 10 }}>
-        <Text
-          style={{
-            color: "#D3D3D3",
-            fontSize: 40,
-            // paddingLeft: 20,
-            paddingBottom: 10,
-            textAlign: 'center'
-          }}
-        >
-          Exercise Page
-        </Text>
-      </View>
-      <View style={{ paddingLeft: 20, paddingRight: 20 }}>
-        <TextInput
-          editable
-          maxLength={50}
-          placeholder={"Search for exercise..."}
-          style={{
-            padding: 10,
-            backgroundColor: "#D3D3D3",
-            fontWeight: "bold",
-          }}
-          onChangeText={(newText) => setSearchBarInput(newText)}
-        />
-      </View>
-      <View style={{ padding: 20, flex: 1, flexDirection: "row", zIndex: 100 }}>
-        <View style={{ width: "50%", paddingRight: 5 }}>
-          <DropDownPicker
-            style={{
-              zIndex: 1000,
-              ...(muscleValue ? styles.selectedExerciseOrEquipment : styles.noSelectedExerciseOrEquipment),
-            }}
-            open={muscleOpen}
-            value={muscleValue}
-            items={muscles}
-            setOpen={setMuscleOpen}
-            setValue={setMuscleValue}
+    </View >
+  )
 
-            textStyle={{
-              color: "#61FF7E",
-            }}
-            labelStyle={{
-              fontWeight: "bold",
-            }}
-            dropDownContainerStyle={{
-              backgroundColor: "#011638",
-            }}
-          />
-        </View>
-        <View style={{ width: "50%" }}>
-          <DropDownPicker
-            style={{
-              zIndex: 1000,
-              ...(equipmentValue
-                ? styles.selectedExerciseOrEquipment
-                : styles.noSelectedExerciseOrEquipment),
-            }}
-            open={equipmentOpen}
-            value={equipmentValue}
-            items={equipment}
-            setOpen={setEquipmentOpen}
-            setValue={setEquipmentValue}
-            textStyle={{
-              color: "#61FF7E",
-            }}
-            labelStyle={{
-              fontWeight: "bold",
-            }}
-            dropDownContainerStyle={{
-              backgroundColor: "#011638",
-            }}
-            selectedItemContainerStyle={{
-              backgroundColor: "black",
-            }}
-          // listItemLabelStyle={{
-          //     color: "red"
-          // }}
-          />
-        </View>
-      </View>
-      <FlatList
-        style={{ marginTop: 50, borderRadius: 10, zIndex: 10 }}
-        data={filterExerciseList}
-        renderItem={({ item }) => <Item name={item.name} />}
-        keyExtractor={(item) => item.name}
-        ListEmptyComponent={() => (
-          <View>
-            {filterExerciseList.length === 0 ? (
-              <Text style={{ fontSize: 18, color: '#61FF7E', textAlign: 'center', marginBottom: 350 }}>
-                No exercise matches your search criteria.
-              </Text>
-            ) : null}
-          </View>
-        )}
-      />
+  const ModalComponent = () => {
+
+    return (
       <View style={styles.centeredView}>
         <Modal
           animationType="slide"
@@ -234,23 +157,135 @@ const ExercisePage = () => {
           </View>
         </Modal>
       </View>
-    </View>
+    )
+  }
+
+  const ListHeader = () => {
+
+    return (
+      <View style={[styles.container]}>
+        <View style={{ marginBottom: 10 }}>
+          <Text
+            style={{
+              color: "#D3D3D3",
+              fontSize: 40,
+              // paddingLeft: 20,
+              paddingBottom: 10,
+              textAlign: 'center'
+            }}
+          >
+            Exercise Page
+          </Text>
+        </View>
+        <View style={{ paddingLeft: 20, paddingRight: 20 }}>
+          <TextInput
+            editable
+            maxLength={50}
+            placeholder={"Search for exercise..."}
+            style={{
+              padding: 10,
+              backgroundColor: "#D3D3D3",
+              fontWeight: "bold",
+            }}
+            onChangeText={(newText) => setSearchBarInput(newText)}
+          />
+        </View>
+        <View style={{ padding: 20, flex: 1, flexDirection: "row" }}>
+          <View style={{ width: "50%", paddingRight: 5 }}>
+            <DropDownPicker
+              style={{
+                ...(muscleValue ? styles.selectedExerciseOrEquipment : styles.noSelectedExerciseOrEquipment),
+              }}
+              open={muscleOpen}
+              value={muscleValue}
+              items={muscles}
+              setOpen={setMuscleOpen}
+              setValue={setMuscleValue}
+
+              textStyle={{
+                color: "#61FF7E",
+              }}
+              labelStyle={{
+                fontWeight: "bold",
+              }}
+              dropDownContainerStyle={{
+                backgroundColor: "#011638",
+                maxHeight: 500
+              }}
+            />
+          </View>
+          <View style={{ width: "50%" }}>
+            <DropDownPicker
+              style={{
+                // zIndex: 1000,
+                ...(equipmentValue
+                  ? styles.selectedExerciseOrEquipment
+                  : styles.noSelectedExerciseOrEquipment),
+              }}
+              open={equipmentOpen}
+              value={equipmentValue}
+              items={equipment}
+              setOpen={setEquipmentOpen}
+              setValue={setEquipmentValue}
+              textStyle={{
+                color: "#61FF7E",
+              }}
+              labelStyle={{
+                fontWeight: "bold",
+              }}
+              dropDownContainerStyle={{
+                backgroundColor: "#011638",
+                maxHeight: 500
+              }}
+              selectedItemContainerStyle={{
+                backgroundColor: "black",
+              }}
+            // listItemLabelStyle={{
+            //     color: "red"
+            // }}
+            />
+          </View>
+        </View>
+      </View>
+    )
+  }
+
+  return (
+    <FlatList
+      style={{ marginTop: 50, borderRadius: 10 }}
+      data={filterExerciseList}
+      stickyHeaderIndices={[0]}
+      renderItem={({ item }) => <Item name={item.name} handleItemPress={handleItemPress} />}
+      keyExtractor={(item) => item.name}
+      ListHeaderComponent={<ListHeader />}
+      ListHeaderComponentStyle={{ backgroundColor: '#011638' }}
+      ListFooterComponent={<ModalComponent />}
+      ItemSeparatorComponent={<Seperator />}
+      ListEmptyComponent={() => (
+        <View>
+          {filterExerciseList.length === 0 ? (
+            <Text style={{ fontSize: 18, color: '#61FF7E', textAlign: 'center', marginBottom: 350 }}>
+              No exercise matches your search criteria.
+            </Text>
+          ) : null}
+        </View>
+      )}
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1
   },
   item: {
-    backgroundColor: "#D3D3D3",
     padding: 20,
     marginVertical: 4,
     marginHorizontal: 16,
   },
   title: {
     fontSize: 16,
-    color: "#011638",
+    color: "white",
   },
   selectedExerciseOrEquipment: {
     backgroundColor: "#011638",

@@ -134,8 +134,24 @@ const exerciseList = [
   },
 ];
 
+const mainData = [
+  {
+    id: 'bench press barbell',
+    title: 'Bench Press (Barbell)'
+  }, {
+    id: 'bench press dumbbells',
+    title: 'Bench Press (Dumbbells)'
+  }, {
+    id: 'squat barbell',
+    title: 'Squat (Barbell)'
+  }, {
+    id: 'squat dumbbells',
+    title: 'Squat (Dumbbells)'
+  }
+]
+
 const sortedExerciseList = exerciseList.sort((a, b) =>
   a.name.localeCompare(b.name)
 );
 
-export { muscle, equipment, sortedExerciseList };
+export { muscle, equipment, sortedExerciseList, mainData };
