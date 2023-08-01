@@ -13,9 +13,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { sortedExerciseList, mainData } from "./data.js";
 import Modal from "react-native-modal";
 
-//                          to do list
-// find alternatives to shortened muscle and equipment dropdown (do modal instead?)
-// adjust filteredList results, so they don't start in the middle of the page (when there are only one to a couple results)
+//             to do list
 // figure out how to unselect muscle and/or equipment dropdown selections
 // button to add new exercise
 // format the exercise modal
@@ -102,7 +100,6 @@ const ExercisePage = () => {
     setExerciseModal(true);
   };
 
-  // const [filterExerciseList, setFilterExerciseList] = useState(sortedExerciseList);
   let filteredList = sortedExerciseList;
 
   const Item = ({ name, handleItemPress }) => (
@@ -210,7 +207,9 @@ const ExercisePage = () => {
               }}
               dropDownContainerStyle={{
                 backgroundColor: "#011638",
-                maxHeight: 500
+                maxHeight: 500,
+                borderColor: 'white'
+
               }}
             />
           </View>
@@ -235,7 +234,8 @@ const ExercisePage = () => {
               }}
               dropDownContainerStyle={{
                 backgroundColor: "#011638",
-                maxHeight: 500
+                maxHeight: 500,
+                borderColor: 'white'
               }}
               selectedItemContainerStyle={{
                 backgroundColor: "black",

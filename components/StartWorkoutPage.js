@@ -5,11 +5,21 @@ import { sortedExerciseList } from "./data.js";
 import Modal from "react-native-modal";
 // import StartEmptyWorkout from "./StartWorkoutPage";
 
+//             to do list
+// bottom sheet/bottom drawer for start empty workout button
+// add exercise modal from button 
+// add new set to exercise
+// dropdown to add note, delete exercise, etc.
+// long hold on exercise title to switch exercise order
+
+//             feature roadmap
+
 const StartWorkoutPage = () => {
 
     // for start empty workout modal
     const [startEmptyWorkoutModal, setStartEmptyWorkoutModal] = useState(false);
     // const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
+    const [addExerciseModal, setAddExerciseModal] = useState(false)
 
     // workout name useState
     const startOfWorkoutTime = new Date().getHours()
@@ -125,16 +135,74 @@ const StartWorkoutPage = () => {
             </View>
 
             <View style={styles.centeredView}>
+            </View >
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                isVisible={startEmptyWorkoutModal}
+                onRequestClose={() => {
+                    setStartEmptyWorkoutModal(!exerciseModal);
+                }}
+            >
+                <View style={styles.modalCenteredView}>
+                    <View style={styles.modalView}>
+                        <View
+                            style={{
+                                flex: 1,
+                                flexDirection: "row",
+                                justifyContent: "center",
+                                gap: 30,
+                                borderBottomColor: 'red',
+                                borderBottomWidth: 2,
+                            }}
+                        >
+                            <Text style={styles.modalText}>Start Workout Text Here</Text>
+                            <Text style={styles.textStyle}>Edit</Text>
+                        </View>
+
+                        <ScrollView style={{ height: '85%' }}>
+                            <View style={{ flex: 1, flexDirection: 'row' }}>
+                                <Text style={styles.workoutNameLabel}>Workout Name</Text>
+                                <TextInput
+                                    style={styles.workoutNameTextInput}
+                                    onChangeText={setWorkoutName}
+                                    value={workoutName}
+                                />
+                            </View>
+                            <Text style={{ color: 'white', margin: 100, borderColor: 'white', borderWidth: 5 }}>This is where exercises go</Text>
+                            <Pressable
+                                style={[styles.addExerciseButton]}
+                                onPress={() => {
+                                    setAddExerciseModal(!setAddExerciseModal);
+                                }}
+                            >
+                                <Text style={styles.textStyle}>Add Exercise</Text>
+                            </Pressable>
+                            <Pressable
+                                style={[styles.cancelWorkoutButton]}
+                                onPress={() => {
+                                    setStartEmptyWorkoutModal(!startEmptyWorkoutModal);
+                                }}
+                            >
+                                <Text style={styles.textStyle}>Cancel Workout</Text>
+                            </Pressable>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+
+            <View style={styles.centeredView}>
                 <Modal
                     animationType="slide"
                     transparent={true}
-                    isVisible={startEmptyWorkoutModal}
+                    isVisible={addExerciseModal}
                     onRequestClose={() => {
-                        setStartEmptyWorkoutModal(!exerciseModal);
+                        setAddExerciseModal(!addExerciseModal);
                     }}
                 >
                     <View style={styles.modalCenteredView}>
-                        <View style={styles.modalView}>
+                        <View style={styles.addExerciseModalView}>
                             <View
                                 style={{
                                     flex: 1,
@@ -145,41 +213,26 @@ const StartWorkoutPage = () => {
                                     borderBottomWidth: 2,
                                 }}
                             >
-                                <Text style={styles.modalText}>Start Workout Text Here</Text>
+                                <Text style={styles.modalText}>Add Exercise</Text>
                                 <Text style={styles.textStyle}>Edit</Text>
                             </View>
 
                             <ScrollView style={{ height: '85%' }}>
-                                <View style={{ flex: 1, flexDirection: 'row' }}>
-                                    <Text style={styles.workoutNameLabel}>Workout Name</Text>
-                                    <TextInput
-                                        style={styles.workoutNameTextInput}
-                                        onChangeText={setWorkoutName}
-                                        value={workoutName}
-                                    />
-                                </View>
                                 <Text style={{ color: 'white', margin: 100, borderColor: 'white', borderWidth: 5 }}>This is where exercises go</Text>
                                 <Pressable
                                     style={[styles.addExerciseButton]}
                                 // onPress={() => {
-                                //     setStartEmptyWorkoutModal(!startEmptyWorkoutModal);
+                                //     setAddExerciseModal(!setAddExerciseModal);
                                 // }}
                                 >
-                                    <Text style={styles.textStyle}>Add Exercises</Text>
-                                </Pressable>
-                                <Pressable
-                                    style={[styles.cancelWorkoutButton]}
-                                    onPress={() => {
-                                        setStartEmptyWorkoutModal(!startEmptyWorkoutModal);
-                                    }}
-                                >
-                                    <Text style={styles.textStyle}>Cancel Workout</Text>
+                                    <Text style={styles.textStyle}>Add Exercise</Text>
                                 </Pressable>
                             </ScrollView>
                         </View>
                     </View>
                 </Modal>
             </View >
+
         </View >
 
     )
@@ -195,6 +248,26 @@ const styles = StyleSheet.create({
     },
     modalView: {
         backgroundColor: "#011638",
+        borderRadius: 10,
+        borderColor: "#D3D3D3",
+        padding: 20,
+        alignItems: "center",
+        height: "100%",
+        width: "120%",
+        marginTop: 50,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        borderColor: 'white',
+        borderWidth: 5
+    },
+    addExerciseModalView: {
+        backgroundColor: "white",
         borderRadius: 10,
         borderColor: "#D3D3D3",
         padding: 20,
@@ -270,20 +343,22 @@ const styles = StyleSheet.create({
     },
     workoutNameLabel: {
         height: 55,
-        marginTop: 9,
+        marginTop: 0,
         width: 100,
-        fontSize: 12,
+        fontSize: 11,
         textAlign: 'center',
-        // borderWidth: 1,
-        padding: 10,
+        padding: 12,
         color: 'white',
-        // borderColor: 'white'
+        // marginRight: 8,
+        // borderColor: 'white',
+        // borderRadius: 10,
+        // borderWidth: 1,
     },
     workoutNameTextInput: {
-        height: 60,
-        width: 250,
+        height: 55,
+        width: 270,
         fontSize: 16,
-        margin: 2,
+        // margin: 2,
         borderWidth: 1,
         borderRadius: 10,
         padding: 10,

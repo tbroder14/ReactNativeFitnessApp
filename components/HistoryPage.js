@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Text, View, StyleSheet } from "react-native";
 
-//                          to do list
-
+//               to do list
+// 
 //             feature roadmap
+// switch between one month, three month, and 12 month views
+// weekly volume (with customizable options -> look at total/weekly volume/reps/sets for an exercise or muscle)
 
 const HistoryPage = () => {
 

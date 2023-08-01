@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import * as React from "react";
 import { Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
@@ -11,6 +12,8 @@ import {
 import StartWorkoutPage from "./components/StartWorkoutPage";
 import HistoryPage from "./components/HistoryPage";
 import ProgramPage from "./components/ProgramPage";
+import Placeholder from "./components/Placeholder";
+
 
 function ExerciseScreen() {
   const insets = useSafeAreaInsets();
@@ -43,7 +46,7 @@ function PlaceholderScreen() {
         paddingRight: insets.right,
       }}
     >
-      <Text>Placeholder!</Text>
+      <Placeholder />
     </View>
   );
 }
