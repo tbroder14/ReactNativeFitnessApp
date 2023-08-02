@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { Text, View, StyleSheet, FlatList, TextInput, Pressable, TouchableOpacity, ScrollView } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { sortedExerciseList } from "./data.js";
 import Modal from "react-native-modal";
-// import StartEmptyWorkout from "./StartWorkoutPage";
 
 //             to do list
 // bottom sheet/bottom drawer for start empty workout button
@@ -14,12 +13,14 @@ import Modal from "react-native-modal";
 
 //             feature roadmap
 
-const StartWorkoutPage = () => {
+const StartWorkoutPage = ({ bottomSheetRef }) => {
 
     // for start empty workout modal
     const [startEmptyWorkoutModal, setStartEmptyWorkoutModal] = useState(false);
     // const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
     const [addExerciseModal, setAddExerciseModal] = useState(false)
+
+    const [test, setTest] = useState('press me')
 
     // workout name useState
     const startOfWorkoutTime = new Date().getHours()
@@ -119,7 +120,8 @@ const StartWorkoutPage = () => {
                     borderRadius: 20,
                 }}
                     onPress={() => {
-                        setStartEmptyWorkoutModal(!startEmptyWorkoutModal);
+                        bottomSheetRef.current?.snapToIndex(1)
+                        setTest('it worked')
                     }}
                 >
                     <Text style={{
@@ -129,7 +131,7 @@ const StartWorkoutPage = () => {
                         letterSpacing: 0.25,
                         color: '#011638',
                     }}>
-                        Start Empty Workout
+                        {test}
                     </Text>
                 </Pressable>
             </View>
@@ -137,7 +139,7 @@ const StartWorkoutPage = () => {
             <View style={styles.centeredView}>
             </View >
 
-            <Modal
+            {/* <Modal
                 animationType="slide"
                 transparent={true}
                 isVisible={startEmptyWorkoutModal}
@@ -190,51 +192,9 @@ const StartWorkoutPage = () => {
                         </ScrollView>
                     </View>
                 </View>
-            </Modal>
-
-            <View style={styles.centeredView}>
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    isVisible={addExerciseModal}
-                    onRequestClose={() => {
-                        setAddExerciseModal(!addExerciseModal);
-                    }}
-                >
-                    <View style={styles.modalCenteredView}>
-                        <View style={styles.addExerciseModalView}>
-                            <View
-                                style={{
-                                    flex: 1,
-                                    flexDirection: "row",
-                                    justifyContent: "center",
-                                    gap: 30,
-                                    borderBottomColor: 'red',
-                                    borderBottomWidth: 2,
-                                }}
-                            >
-                                <Text style={styles.modalText}>Add Exercise</Text>
-                                <Text style={styles.textStyle}>Edit</Text>
-                            </View>
-
-                            <ScrollView style={{ height: '85%' }}>
-                                <Text style={{ color: 'white', margin: 100, borderColor: 'white', borderWidth: 5 }}>This is where exercises go</Text>
-                                <Pressable
-                                    style={[styles.addExerciseButton]}
-                                // onPress={() => {
-                                //     setAddExerciseModal(!setAddExerciseModal);
-                                // }}
-                                >
-                                    <Text style={styles.textStyle}>Add Exercise</Text>
-                                </Pressable>
-                            </ScrollView>
-                        </View>
-                    </View>
-                </Modal>
-            </View >
+            </Modal> */}
 
         </View >
-
     )
 }
 const styles = StyleSheet.create({

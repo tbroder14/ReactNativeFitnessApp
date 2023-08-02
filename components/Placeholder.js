@@ -1,19 +1,83 @@
-// import React, { useRef } from 'react';
-// import { Button, View } from 'react-native';
-// import BottomSheet from '@gorhom/bottom-sheet';
+import React, { useCallback, useRef, useMemo } from "react";
+import { StyleSheet, View, Text, Button } from "react-native";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import {
+    BottomSheetModal,
+    BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 
-// const App = () => {
-//     const bottomSheetRef = useRef < BottomSheet > (null);
+const App = () => {
+    // hooks
+    const sheetRef = useRef(null);
 
-//     const handleClosePress = () => bottomSheetRef.current.close()
+    // variables
+    const data = useMemo(
+        () =>
+            Array(50)
+                .fill(0)
+                .map((_, index) => `index-${index}`),
+        []
+    );
+    const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
 
-//     return (
-//         <View>
-//             <Button title="Close Sheet" onPress={handleClosePress} />
-//             <BottomSheet ref={bottomSheetRef}>
-//             </BottomSheet>
-//         </View>
-//     )
-// }
+    // callbacks
+    const handleSheetChange = useCallback((index) => {
+        console.log("handleSheetChange", index);
+    }, []);
+    const handleSnapPress = useCallback((index) => {
+        sheetRef.current?.snapToIndex(index);
+    }, []);
+    const handleClosePress = useCallback(() => {
+        sheetRef.current?.close();
+    }, []);
 
-// export default App
+    // render
+    const renderItem = useCallback(
+        ({ item }) => (
+            <View style={styles.itemContainer}>
+                <Text>{item}</Text>
+            </View>
+        ),
+        []
+    );
+    return (
+        <View style={styles.container}>
+            <Button title="Snap To 90%" onPress={() => handleSnapPress(2)} />
+            <Button title="Snap To 50%" onPress={() => handleSnapPress(1)} />
+            <Button title="Snap To 25%" onPress={() => handleSnapPress(0)} />
+            <Button title="Close" onPress={() => handleClosePress()} />
+
+
+
+            <BottomSheet
+                ref={sheetRef}
+                snapPoints={snapPoints}
+                onChange={handleSheetChange}
+            >
+                <BottomSheetScrollView
+                    data={data}
+                    keyExtractor={(i) => i}
+                    renderItem={renderItem}
+                    contentContainerStyle={styles.contentContainer}
+                />
+            </BottomSheet>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingTop: 200,
+    },
+    contentContainer: {
+        backgroundColor: "white",
+    },
+    itemContainer: {
+        padding: 6,
+        margin: 6,
+        backgroundColor: "#eee",
+    },
+});
+
+export default App;
