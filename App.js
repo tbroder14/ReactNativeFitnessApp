@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useCallback, useRef, useMemo, useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Pressable, ScrollView, TextInput } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -15,11 +15,14 @@ import ProgramPage from "./components/ProgramPage";
 import Placeholder from "./components/Placeholder";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '@gorhom/bottom-sheet';
+import Modal from "react-native-modal";
 
 //             to do list
 // get navbar to show up over the bottom sheet when bottom sheet at 15%
 // push navbar when bottom sheet is at 90%
-// 
+// slowly add/subtract navbar position when pulling up/down on bottom sheet when it is at the bottom
+
+// can I move the bottom sheet/empty workout to another component? or does all of this code have to be on this page?
 
 //             feature roadmap
 
@@ -122,11 +125,13 @@ const Tab = createBottomTabNavigator();
 export default function App() {
 
   const [bottomSheetBottomInset, setBottomSheetBottomInset] = useState(0)
+  const [addExerciseModal, setAddExerciseModal] = useState(false)
 
   // ref
   const bottomSheetRef = useRef(null);
+  const cancelWorkout = () => bottomSheetRef.current.close()
 
-  // variables
+  // snap point variables
   const snapPoints = useMemo(() => ['15%', '94%'], []);
 
   // callbacks
@@ -190,18 +195,75 @@ export default function App() {
 
         </NavigationContainer>
 
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={1}
-          snapPoints={snapPoints}
-          onChange={handleSheetChanges}
-          enablePanDownToClose={true}
-          bottomInset={bottomSheetBottomInset}
-        >
-          <View style={styles.contentContainer}>
-            <Text>Awesome 🎉</Text>
-          </View>
-        </BottomSheet>
+        <View>
+          <BottomSheet
+            ref={bottomSheetRef}
+            index={1}
+            snapPoints={snapPoints}
+            onChange={handleSheetChanges}
+            // enablePanDownToClose={cancelWorkout}
+            bottomInset={bottomSheetBottomInset}
+          >
+            <View style={styles.contentContainer}>
+              <Text>Awesome 🎉</Text>
+
+              <Pressable
+                style={[styles.addExerciseButton]}
+                onPress={() => {
+                  setAddExerciseModal(!addExerciseModal);
+                }}
+              >
+                <Text style={styles.textStyle}>Add Exercise</Text>
+
+              </Pressable>
+              <Pressable
+                style={[styles.cancelWorkoutButton]}
+                onPress={cancelWorkout}
+              >
+                <Text>Cancel Workout</Text>
+              </Pressable>
+
+              <Modal
+                animationType="slide"
+                transparent={true}
+                isVisible={addExerciseModal}
+                onRequestClose={() => {
+                  setAddExerciseModal(!exerciseModal);
+                }}
+              >
+                <View style={styles.modalCenteredView}>
+                  <View style={styles.addExerciseModalView}>
+                    <View
+                      style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        gap: 30,
+                        borderBottomColor: 'red',
+                        borderBottomWidth: 2,
+                      }}
+                    >
+                    </View>
+
+                    <Pressable
+                      onPress={() => {
+                        setAddExerciseModal(!addExerciseModal);
+                      }}>
+                      <Text style={styles.closeExerciseModal}>Close Modal</Text>
+
+                    </Pressable>
+                    <ScrollView style={{ height: '85%', borderColor: 'red', borderWidth: 5, borderRadius: 10 }}>
+                      <View style={{ flex: 1, flexDirection: 'row' }}>
+                      </View>
+                      <Text style={{ color: 'red', margin: 50, padding: 50, textAlign: 'center' }}>This is where the exercises go for a user to select</Text>
+
+                    </ScrollView>
+                  </View>
+                </View>
+              </Modal>
+            </View>
+          </BottomSheet>
+        </View>
 
       </SafeAreaProvider>
 
@@ -218,5 +280,78 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor: "#011638",
+  },
+  modalCenteredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addExerciseButton: {
+    borderRadius: 20,
+    padding: 15,
+    elevation: 2,
+    width: '85%',
+    height: 50,
+    margin: 20,
+    color: 'white',
+    backgroundColor: "blue",
+    marginTop: 100,
+    // marginRight: 10,
+  },
+  cancelWorkoutButton: {
+    borderRadius: 20,
+    padding: 15,
+    elevation: 2,
+    width: '85%',
+    height: 50,
+    margin: 20,
+    backgroundColor: 'red'
+    // marginRight: 10,
+  },
+  addExerciseModalView: {
+    backgroundColor: "#011638",
+    borderRadius: 10,
+    borderColor: "#D3D3D3",
+    padding: 20,
+    alignItems: "center",
+    height: "90%",
+    width: "100%",
+    marginTop: 50,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    borderColor: 'white',
+    borderWidth: 5
+  },
+  closeExerciseModal: {
+    color: "#61FF7E",
+    fontWeight: "bold",
+    textAlign: "center",
+    width: 150,
+    marginLeft: 5,
+    borderColor: 'black',
+    borderWidth: 5,
+    borderRadius: 10,
+    borderColor: 'white',
+    height: 60,
+    padding: 15,
+    // backgroundColor: 'white'
+    // flex: 1,
+    // margin: 10
+  },
+  textStyle: {
+    color: "#61FF7E",
+    fontWeight: "bold",
+    textAlign: "center",
+    width: 150,
+    marginLeft: 5,
+    // flex: 1,
+    // margin: 10
   },
 })

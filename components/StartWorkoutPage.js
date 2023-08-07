@@ -56,10 +56,10 @@ const StartWorkoutPage = ({ bottomSheetRef }) => {
     //     setWorkoutName(e.target.value)
     // }
 
-    const handleItemPress = (itemName) => {
-        setExerciseNameForModal(itemName);
-        setExerciseModal(true);
-    };
+    // const handleItemPress = (itemName) => {
+    //     setExerciseNameForModal(itemName);
+    //     setExerciseModal(true);
+    // };
 
     return (
         <View style={[styles.container]}>
@@ -226,26 +226,6 @@ const styles = StyleSheet.create({
         borderColor: 'white',
         borderWidth: 5
     },
-    addExerciseModalView: {
-        backgroundColor: "white",
-        borderRadius: 10,
-        borderColor: "#D3D3D3",
-        padding: 20,
-        alignItems: "center",
-        height: "100%",
-        width: "120%",
-        marginTop: 50,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        borderColor: 'white',
-        borderWidth: 5
-    },
     button: {
         borderRadius: 20,
         padding: 10,
@@ -273,16 +253,16 @@ const styles = StyleSheet.create({
 
         // marginRight: 10,
     },
-    cancelWorkoutButton: {
-        borderRadius: 20,
-        padding: 15,
-        elevation: 2,
-        width: '85%',
-        height: 50,
-        margin: 20,
-        backgroundColor: 'red'
-        // marginRight: 10,
-    },
+    // cancelWorkoutButton: {
+    //     borderRadius: 20,
+    //     padding: 15,
+    //     elevation: 2,
+    //     width: '85%',
+    //     height: 50,
+    //     margin: 20,
+    //     backgroundColor: 'red'
+    //     // marginRight: 10,
+    // },
     textStyle: {
         color: "#61FF7E",
         fontWeight: "bold",
