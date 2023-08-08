@@ -7,62 +7,62 @@ import {
 } from '@gorhom/bottom-sheet';
 
 const App = () => {
-    // hooks
-    const sheetRef = useRef(null);
+    // // hooks
+    // const sheetRef = useRef(null);
 
-    // variables
-    const data = useMemo(
-        () =>
-            Array(50)
-                .fill(0)
-                .map((_, index) => `index-${index}`),
-        []
-    );
-    const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
+    // // variables
+    // const data = useMemo(
+    //     () =>
+    //         Array(50)
+    //             .fill(0)
+    //             .map((_, index) => `index-${index}`),
+    //     []
+    // );
+    // const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
 
-    // callbacks
-    const handleSheetChange = useCallback((index) => {
-        console.log("handleSheetChange", index);
-    }, []);
-    const handleSnapPress = useCallback((index) => {
-        sheetRef.current?.snapToIndex(index);
-    }, []);
-    const handleClosePress = useCallback(() => {
-        sheetRef.current?.close();
-    }, []);
+    // // callbacks
+    // const handleSheetChange = useCallback((index) => {
+    //     console.log("handleSheetChange", index);
+    // }, []);
+    // const handleSnapPress = useCallback((index) => {
+    //     sheetRef.current?.snapToIndex(index);
+    // }, []);
+    // const handleClosePress = useCallback(() => {
+    //     sheetRef.current?.close();
+    // }, []);
 
-    // render
-    const renderItem = useCallback(
-        ({ item }) => (
-            <View style={styles.itemContainer}>
-                <Text>{item}</Text>
-            </View>
-        ),
-        []
-    );
-    return (
-        <View style={styles.container}>
-            <Button title="Snap To 90%" onPress={() => handleSnapPress(2)} />
-            <Button title="Snap To 50%" onPress={() => handleSnapPress(1)} />
-            <Button title="Snap To 25%" onPress={() => handleSnapPress(0)} />
-            <Button title="Close" onPress={() => handleClosePress()} />
+    // // render
+    // const renderItem = useCallback(
+    //     ({ item }) => (
+    //         <View style={styles.itemContainer}>
+    //             <Text>{item}</Text>
+    //         </View>
+    //     ),
+    //     []
+    // );
+    // return (
+    //     <View style={styles.container}>
+    //         <Button title="Snap To 90%" onPress={() => handleSnapPress(2)} />
+    //         <Button title="Snap To 50%" onPress={() => handleSnapPress(1)} />
+    //         <Button title="Snap To 25%" onPress={() => handleSnapPress(0)} />
+    //         <Button title="Close" onPress={() => handleClosePress()} />
 
 
 
-            <BottomSheet
-                ref={sheetRef}
-                snapPoints={snapPoints}
-                onChange={handleSheetChange}
-            >
-                <BottomSheetScrollView
-                    data={data}
-                    keyExtractor={(i) => i}
-                    renderItem={renderItem}
-                    contentContainerStyle={styles.contentContainer}
-                />
-            </BottomSheet>
-        </View>
-    );
+    //         <BottomSheet
+    //             ref={sheetRef}
+    //             snapPoints={snapPoints}
+    //             onChange={handleSheetChange}
+    //         >
+    //             <BottomSheetScrollView
+    //                 data={data}
+    //                 keyExtractor={(i) => i}
+    //                 renderItem={renderItem}
+    //                 contentContainerStyle={styles.contentContainer}
+    //             />
+    //         </BottomSheet>
+    //     </View>
+    // );
 };
 
 const styles = StyleSheet.create({

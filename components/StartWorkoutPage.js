@@ -121,7 +121,6 @@ const StartWorkoutPage = ({ bottomSheetRef }) => {
                 }}
                     onPress={() => {
                         bottomSheetRef.current?.snapToIndex(1)
-                        setTest('it worked')
                     }}
                 >
                     <Text style={{
@@ -131,7 +130,7 @@ const StartWorkoutPage = ({ bottomSheetRef }) => {
                         letterSpacing: 0.25,
                         color: '#011638',
                     }}>
-                        {test}
+                        Start Empty Workout
                     </Text>
                 </Pressable>
             </View>

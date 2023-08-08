@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useCallback, useRef, useMemo, useState } from "react";
-import { Text, View, StyleSheet, Pressable, ScrollView, TextInput } from "react-native";
+import { Text, View, StyleSheet, Pressable, ScrollView, TextInput, Animated } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -13,9 +13,9 @@ import StartWorkoutPage from "./components/StartWorkoutPage";
 import HistoryPage from "./components/HistoryPage";
 import ProgramPage from "./components/ProgramPage";
 import Placeholder from "./components/Placeholder";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet from '@gorhom/bottom-sheet';
-import Modal from "react-native-modal";
+import { GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
+import BottomSheet, { BottomSheetFooter } from '@gorhom/bottom-sheet';
+import AddExerciseModal from './components/AddExerciseModal';
 
 //             to do list
 // get navbar to show up over the bottom sheet when bottom sheet at 15%
@@ -122,10 +122,40 @@ function ProgramScreen() {
 
 const Tab = createBottomTabNavigator();
 
+
 export default function App() {
 
-  const [bottomSheetBottomInset, setBottomSheetBottomInset] = useState(0)
-  const [addExerciseModal, setAddExerciseModal] = useState(false)
+  const [addExerciseModal, setAddExerciseModal] = useState(true)
+
+  // workout name useState
+  const startOfWorkoutTime = new Date().getHours()
+  const currentDate = new Date()
+  const year = currentDate.getFullYear()
+  const month = currentDate.getMonth() + 1
+  const day = currentDate.getDate()
+  const dateWithoutTime = new Date(year, month - 1, day)
+  let currentTemplate = null
+  let currentWorkoutName = ''
+
+  if (currentTemplate === null) {
+    if (startOfWorkoutTime >= 21 || startOfWorkoutTime <= 4) {
+      currentWorkoutName = 'Night Workout'
+    } else if (startOfWorkoutTime >= 5 && startOfWorkoutTime <= 7) {
+      currentWorkoutName = 'Early Morning Workout'
+    } else if (startOfWorkoutTime >= 8 && startOfWorkoutTime <= 10) {
+      currentWorkoutName = 'Morning Workout'
+    } else if (startOfWorkoutTime >= 11 && startOfWorkoutTime <= 13) {
+      currentWorkoutName = 'Mid-day Workout'
+    } else if (startOfWorkoutTime >= 14 && startOfWorkoutTime <= 16) {
+      currentWorkoutName = 'Afternoon Workout'
+    } else if (startOfWorkoutTime >= 17 && startOfWorkoutTime <= 20) {
+      currentWorkoutName = 'Evening Workout'
+    }
+  } else {
+    currentWorkoutName = currentTemplate.name
+  }
+
+  const [workoutName, setWorkoutName] = useState(currentWorkoutName)
 
   // ref
   const bottomSheetRef = useRef(null);
@@ -136,12 +166,7 @@ export default function App() {
 
   // callbacks
   const handleSheetChanges = useCallback((index) => {
-    console.log('handleSheetChanges', index);
-    if (index === 0) {
-      setBottomSheetBottomInset(80)
-    } else {
-      setBottomSheetBottomInset(0)
-    }
+
   }, []);
 
   return (
@@ -192,100 +217,81 @@ export default function App() {
             <Tab.Screen name="Exercise" component={ExerciseScreen} />
             <Tab.Screen name="Placeholder" component={PlaceholderScreen} />
           </Tab.Navigator>
-
         </NavigationContainer>
-
-        <View>
-          <BottomSheet
-            ref={bottomSheetRef}
-            index={1}
-            snapPoints={snapPoints}
-            onChange={handleSheetChanges}
-            // enablePanDownToClose={cancelWorkout}
-            bottomInset={bottomSheetBottomInset}
-          >
-            <View style={styles.contentContainer}>
-              <Text>Awesome 🎉</Text>
-
-              <Pressable
-                style={[styles.addExerciseButton]}
-                onPress={() => {
-                  setAddExerciseModal(!addExerciseModal);
-                }}
-              >
-                <Text style={styles.textStyle}>Add Exercise</Text>
-
-              </Pressable>
-              <Pressable
-                style={[styles.cancelWorkoutButton]}
-                onPress={cancelWorkout}
-              >
-                <Text>Cancel Workout</Text>
-              </Pressable>
-
-              <Modal
-                animationType="slide"
-                transparent={true}
-                isVisible={addExerciseModal}
-                onRequestClose={() => {
-                  setAddExerciseModal(!exerciseModal);
-                }}
-              >
-                <View style={styles.modalCenteredView}>
-                  <View style={styles.addExerciseModalView}>
-                    <View
-                      style={{
-                        flex: 1,
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        gap: 30,
-                        borderBottomColor: 'red',
-                        borderBottomWidth: 2,
-                      }}
-                    >
-                    </View>
-
-                    <Pressable
-                      onPress={() => {
-                        setAddExerciseModal(!addExerciseModal);
-                      }}>
-                      <Text style={styles.closeExerciseModal}>Close Modal</Text>
-
-                    </Pressable>
-                    <ScrollView style={{ height: '85%', borderColor: 'red', borderWidth: 5, borderRadius: 10 }}>
-                      <View style={{ flex: 1, flexDirection: 'row' }}>
-                      </View>
-                      <Text style={{ color: 'red', margin: 50, padding: 50, textAlign: 'center' }}>This is where the exercises go for a user to select</Text>
-
-                    </ScrollView>
-                  </View>
-                </View>
-              </Modal>
+        <BottomSheet
+          ref={bottomSheetRef}
+          snapPoints={snapPoints}
+          onChange={handleSheetChanges}
+          index={-1}
+          bottomInset={80}
+        >
+          <View style={styles.contentContainer}>
+            <Text style={{ color: 'white', margin: 30 }}>Awesome 🎉</Text>
+            <View style={{ flex: 1, flexDirection: 'row', gap: 15 }}>
+              <Text style={styles.workoutNameLabel}>Workout Name</Text>
+              <TextInput
+                style={styles.workoutNameTextInput}
+                onChangeText={setWorkoutName}
+                value={workoutName}
+              />
             </View>
-          </BottomSheet>
-        </View>
+            <Pressable
+              style={[styles.addExerciseButton]}
+              onPress={() => {
+                setAddExerciseModal(!addExerciseModal);
+              }}
+            >
+              <Text style={styles.textStyle}>Add Exercise</Text>
 
+            </Pressable>
+            <Pressable
+              style={[styles.cancelWorkoutButton]}
+              onPress={cancelWorkout}
+            >
+              <Text>Cancel Workout</Text>
+            </Pressable>
+            <AddExerciseModal addExerciseModal={addExerciseModal} setAddExerciseModal={setAddExerciseModal} />
+          </View>
+        </BottomSheet>
       </SafeAreaProvider>
-
-    </GestureHandlerRootView >
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    backgroundColor: 'grey',
+    // backgroundColor: 'grey',
   },
   contentContainer: {
     flex: 1,
     alignItems: 'center',
     backgroundColor: "#011638",
   },
-  modalCenteredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  workoutNameLabel: {
+    height: 55,
+    marginTop: 0,
+    width: 75,
+    fontSize: 12,
+    textAlign: 'center',
+    padding: 12,
+    color: 'white',
+    // marginRight: 8,
+    // borderColor: 'white',
+    // borderRadius: 10,
+    // borderWidth: 1,
+  },
+  workoutNameTextInput: {
+    height: 55,
+    width: 270,
+    fontSize: 16,
+    // margin: 2,
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    color: 'white',
+    borderColor: 'white',
+    backgroundColor: 'blue'
   },
   addExerciseButton: {
     borderRadius: 20,
@@ -308,42 +314,6 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: 'red'
     // marginRight: 10,
-  },
-  addExerciseModalView: {
-    backgroundColor: "#011638",
-    borderRadius: 10,
-    borderColor: "#D3D3D3",
-    padding: 20,
-    alignItems: "center",
-    height: "90%",
-    width: "100%",
-    marginTop: 50,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    borderColor: 'white',
-    borderWidth: 5
-  },
-  closeExerciseModal: {
-    color: "#61FF7E",
-    fontWeight: "bold",
-    textAlign: "center",
-    width: 150,
-    marginLeft: 5,
-    borderColor: 'black',
-    borderWidth: 5,
-    borderRadius: 10,
-    borderColor: 'white',
-    height: 60,
-    padding: 15,
-    // backgroundColor: 'white'
-    // flex: 1,
-    // margin: 10
   },
   textStyle: {
     color: "#61FF7E",
