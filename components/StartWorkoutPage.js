@@ -1,144 +1,123 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
-import { Text, View, StyleSheet, FlatList, TextInput, Pressable, TouchableOpacity, ScrollView } from "react-native";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  FlatList,
+  TextInput,
+  Pressable,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { sortedExerciseList } from "./data.js";
 import Modal from "react-native-modal";
+import { hookstate, useHookstate } from "@hookstate/core";
 
 //             to do list
 // bottom sheet/bottom drawer for start empty workout button
-// add exercise modal from button 
+// add exercise modal from button
 // add new set to exercise
 // dropdown to add note, delete exercise, etc.
 // long hold on exercise title to switch exercise order
 
 //             feature roadmap
+//
+//
 
 const StartWorkoutPage = ({ bottomSheetRef }) => {
+  // for start empty workout modal
+  const [startEmptyWorkoutModal, setStartEmptyWorkoutModal] = useState(false);
 
-    // for start empty workout modal
-    const [startEmptyWorkoutModal, setStartEmptyWorkoutModal] = useState(false);
-    // const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
-    const [addExerciseModal, setAddExerciseModal] = useState(false)
+  const [test, setTest] = useState("press me");
 
-    const [test, setTest] = useState('press me')
+  return (
+    <View style={[styles.container]}>
+      <View style={{ height: 20 }}></View>
+      <View style={{ marginBottom: 10 }}>
+        <Text
+          style={{
+            color: "#D3D3D3",
+            fontSize: 40,
+            // paddingLeft: 20,
+            paddingBottom: 10,
+            textAlign: "center",
+          }}
+        >
+          Start Workout
+        </Text>
+      </View>
+      <View style={{ height: 100, marginLeft: 15 }}>
+        <Text style={{ color: "#D3D3D3", fontSize: 25 }}>Templates Here</Text>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "row",
+          gap: 20,
+          margin: 15,
+        }}
+      >
+        <Pressable
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 12,
+            paddingHorizontal: 12,
+            borderRadius: 4,
+            elevation: 3,
+            backgroundColor: "#61FF7E",
+            height: 50,
+            width: 150,
+            borderRadius: 20,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 14,
+              lineHeight: 21,
+              fontWeight: "bold",
+              letterSpacing: 0.25,
+              color: "#011638",
+            }}
+          >
+            New Template
+          </Text>
+        </Pressable>
+        <Pressable
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 12,
+            paddingHorizontal: 12,
+            borderRadius: 4,
+            elevation: 3,
+            backgroundColor: "#61FF7E",
+            height: 50,
+            width: 190,
+            borderRadius: 20,
+          }}
+          onPress={() => {
+            bottomSheetRef.current?.snapToIndex(1);
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 14,
+              lineHeight: 21,
+              fontWeight: "bold",
+              letterSpacing: 0.25,
+              color: "#011638",
+            }}
+          >
+            Start Empty Workout
+          </Text>
+        </Pressable>
+      </View>
 
-    // workout name useState
-    const startOfWorkoutTime = new Date().getHours()
-    const currentDate = new Date()
-    const year = currentDate.getFullYear()
-    const month = currentDate.getMonth() + 1
-    const day = currentDate.getDate()
-    const dateWithoutTime = new Date(year, month - 1, day)
-    let currentTemplate = null
-    let currentWorkoutName = ''
+      <View style={styles.centeredView}></View>
 
-    if (currentTemplate === null) {
-        if (startOfWorkoutTime >= 21 || startOfWorkoutTime <= 4) {
-            currentWorkoutName = 'Night Workout'
-        } else if (startOfWorkoutTime >= 5 && startOfWorkoutTime <= 7) {
-            currentWorkoutName = 'Early Morning Workout'
-        } else if (startOfWorkoutTime >= 8 && startOfWorkoutTime <= 10) {
-            currentWorkoutName = 'Morning Workout'
-        } else if (startOfWorkoutTime >= 11 && startOfWorkoutTime <= 13) {
-            currentWorkoutName = 'Mid-day Workout'
-        } else if (startOfWorkoutTime >= 14 && startOfWorkoutTime <= 16) {
-            currentWorkoutName = 'Afternoon Workout'
-        } else if (startOfWorkoutTime >= 17 && startOfWorkoutTime <= 20) {
-            currentWorkoutName = 'Evening Workout'
-        }
-    } else {
-        currentWorkoutName = currentTemplate.name
-    }
-
-    const [workoutName, setWorkoutName] = useState(currentWorkoutName)
-
-    // function updateName(e) {
-    //     setWorkoutName(e.target.value)
-    // }
-
-    // const handleItemPress = (itemName) => {
-    //     setExerciseNameForModal(itemName);
-    //     setExerciseModal(true);
-    // };
-
-    return (
-        <View style={[styles.container]}>
-            <View style={{ height: 20 }}></View>
-            <View style={{ marginBottom: 10 }}>
-                <Text
-                    style={{
-                        color: "#D3D3D3",
-                        fontSize: 40,
-                        // paddingLeft: 20,
-                        paddingBottom: 10,
-                        textAlign: 'center'
-                    }}
-                >
-                    Start Workout
-                </Text>
-            </View>
-            <View style={{ height: 100, marginLeft: 15 }}>
-                <Text style={{ color: '#D3D3D3', fontSize: 25 }}>
-                    Templates Here
-                </Text>
-            </View>
-            <View style={{
-                flex: 1, flexDirection: "row", gap: 20, margin: 15
-            }}>
-                <Pressable style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingVertical: 12,
-                    paddingHorizontal: 12,
-                    borderRadius: 4,
-                    elevation: 3,
-                    backgroundColor: '#61FF7E',
-                    height: 50,
-                    width: 150,
-                    borderRadius: 20
-                }}>
-                    <Text style={{
-                        fontSize: 14,
-                        lineHeight: 21,
-                        fontWeight: 'bold',
-                        letterSpacing: 0.25,
-                        color: '#011638',
-                    }}>
-                        New Template
-                    </Text>
-                </Pressable>
-                <Pressable style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingVertical: 12,
-                    paddingHorizontal: 12,
-                    borderRadius: 4,
-                    elevation: 3,
-                    backgroundColor: '#61FF7E',
-                    height: 50,
-                    width: 190,
-                    borderRadius: 20,
-                }}
-                    onPress={() => {
-                        bottomSheetRef.current?.snapToIndex(1)
-                    }}
-                >
-                    <Text style={{
-                        fontSize: 14,
-                        lineHeight: 21,
-                        fontWeight: 'bold',
-                        letterSpacing: 0.25,
-                        color: '#011638',
-                    }}>
-                        Start Empty Workout
-                    </Text>
-                </Pressable>
-            </View>
-
-            <View style={styles.centeredView}>
-            </View >
-
-            {/* <Modal
+      {/* <Modal
                 animationType="slide"
                 transparent={true}
                 isVisible={startEmptyWorkoutModal}
@@ -192,119 +171,118 @@ const StartWorkoutPage = ({ bottomSheetRef }) => {
                     </View>
                 </View>
             </Modal> */}
-
-        </View >
-    )
-}
+    </View>
+  );
+};
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
+  container: {
+    flex: 1,
+  },
+  modalCenteredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    backgroundColor: "#011638",
+    borderRadius: 10,
+    borderColor: "#D3D3D3",
+    padding: 20,
+    alignItems: "center",
+    height: "100%",
+    width: "120%",
+    marginTop: 50,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    modalCenteredView: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    modalView: {
-        backgroundColor: "#011638",
-        borderRadius: 10,
-        borderColor: "#D3D3D3",
-        padding: 20,
-        alignItems: "center",
-        height: "100%",
-        width: "120%",
-        marginTop: 50,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        borderColor: 'white',
-        borderWidth: 5
-    },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-        width: 50,
-        height: 50,
-        marginRight: 10,
-    },
-    buttonOpen: {
-        backgroundColor: "#F194FF",
-        // textAlign: "center",
-    },
-    buttonClose: {
-        // textAlign: "center",
-    },
-    addExerciseButton: {
-        borderRadius: 20,
-        padding: 15,
-        elevation: 2,
-        width: '85%',
-        height: 50,
-        margin: 20,
-        color: 'white',
-        backgroundColor: "blue",
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    borderColor: "white",
+    borderWidth: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    width: 50,
+    height: 50,
+    marginRight: 10,
+  },
+  buttonOpen: {
+    backgroundColor: "#F194FF",
+    // textAlign: "center",
+  },
+  buttonClose: {
+    // textAlign: "center",
+  },
+  addExerciseButton: {
+    borderRadius: 20,
+    padding: 15,
+    elevation: 2,
+    width: "85%",
+    height: 50,
+    margin: 20,
+    color: "white",
+    backgroundColor: "blue",
 
-        // marginRight: 10,
-    },
-    // cancelWorkoutButton: {
-    //     borderRadius: 20,
-    //     padding: 15,
-    //     elevation: 2,
-    //     width: '85%',
-    //     height: 50,
-    //     margin: 20,
-    //     backgroundColor: 'red'
-    //     // marginRight: 10,
-    // },
-    textStyle: {
-        color: "#61FF7E",
-        fontWeight: "bold",
-        textAlign: "center",
-        width: 150,
-        marginLeft: 5,
-        // flex: 1,
-        // margin: 10
-    },
-    modalText: {
-        // marginBottom: 15,
-        textAlign: 'center',
-        marginLeft: 100,
-        color: 'white'
-        // flex: 1,
-        // alignItems: 'center',
-        // justifyContent: 'center'
-    },
-    workoutNameLabel: {
-        height: 55,
-        marginTop: 0,
-        width: 100,
-        fontSize: 11,
-        textAlign: 'center',
-        padding: 12,
-        color: 'white',
-        // marginRight: 8,
-        // borderColor: 'white',
-        // borderRadius: 10,
-        // borderWidth: 1,
-    },
-    workoutNameTextInput: {
-        height: 55,
-        width: 270,
-        fontSize: 16,
-        // margin: 2,
-        borderWidth: 1,
-        borderRadius: 10,
-        padding: 10,
-        color: 'white',
-        borderColor: 'white'
-    },
-})
+    // marginRight: 10,
+  },
+  // cancelWorkoutButton: {
+  //     borderRadius: 20,
+  //     padding: 15,
+  //     elevation: 2,
+  //     width: '85%',
+  //     height: 50,
+  //     margin: 20,
+  //     backgroundColor: 'red'
+  //     // marginRight: 10,
+  // },
+  textStyle: {
+    color: "#61FF7E",
+    fontWeight: "bold",
+    textAlign: "center",
+    width: 150,
+    marginLeft: 5,
+    // flex: 1,
+    // margin: 10
+  },
+  modalText: {
+    // marginBottom: 15,
+    textAlign: "center",
+    marginLeft: 100,
+    color: "white",
+    // flex: 1,
+    // alignItems: 'center',
+    // justifyContent: 'center'
+  },
+  workoutNameLabel: {
+    height: 55,
+    marginTop: 0,
+    width: 100,
+    fontSize: 11,
+    textAlign: "center",
+    padding: 12,
+    color: "white",
+    // marginRight: 8,
+    // borderColor: 'white',
+    // borderRadius: 10,
+    // borderWidth: 1,
+  },
+  workoutNameTextInput: {
+    height: 55,
+    width: 270,
+    fontSize: 16,
+    // margin: 2,
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    color: "white",
+    borderColor: "white",
+  },
+});
 
 export default StartWorkoutPage;
 

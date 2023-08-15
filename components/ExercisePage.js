@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { sortedExerciseList, mainData } from "./data.js";
+import { sortedExerciseList } from "./data.js";
 import Modal from "react-native-modal";
 
 //             to do list
@@ -19,10 +19,9 @@ import Modal from "react-native-modal";
 // format the exercise modal
 
 //             feature roadmap
-// add body outline with muscles and display exercises for selected muscle group (modal?) 
+// add body outline with muscles and display exercises for selected muscle group (modal?)
 
 const ExercisePage = () => {
-
   // for react-native-dropdown-picker
   const [muscleValue, setMuscleValue] = useState(null);
   const [equipmentValue, setEquipmentValue] = useState(null);
@@ -31,7 +30,8 @@ const ExercisePage = () => {
 
   // displaying sorted list of exercises
   const [searchBarInput, setSearchBarInput] = useState("");
-  const [filterExerciseList, setFilterExerciseList] = useState(sortedExerciseList);
+  const [filterExerciseList, setFilterExerciseList] =
+    useState(sortedExerciseList);
   const [muscleSort, setMuscleSort] = useState(null);
   const [equipmentSort, setEquipmentSort] = useState(null);
 
@@ -49,7 +49,7 @@ const ExercisePage = () => {
     { label: "Core", value: "core" },
     { label: "Back", value: "back" },
     { label: "Calves", value: "calves" },
-    { label: "Clear", value: "clear" }
+    { label: "Clear", value: "clear" },
   ];
 
   const equipment = [
@@ -66,9 +66,9 @@ const ExercisePage = () => {
     let filteredList = sortedExerciseList;
 
     // this is just for testing
-    if (muscleValue == 'clear') {
-      setFilterExerciseList(filteredList)
-      return
+    if (muscleValue == "clear") {
+      setFilterExerciseList(filteredList);
+      return;
     }
     // end testing
 
@@ -92,7 +92,6 @@ const ExercisePage = () => {
     }
 
     setFilterExerciseList(filteredList);
-
   }, [equipmentValue, muscleValue, searchBarInput, sortedExerciseList]);
 
   const handleItemPress = (itemName) => {
@@ -110,14 +109,11 @@ const ExercisePage = () => {
     </TouchableOpacity>
   );
 
-  const Seperator = () => (
-    <View style={{ height: 1, width: '100%', backgroundColor: 'white' }}>
-
-    </View >
-  )
+  const Separator = () => (
+    <View style={{ height: 1, width: "100%", backgroundColor: "white" }}></View>
+  );
 
   const ModalComponent = () => {
-
     return (
       <View style={styles.centeredView}>
         <Modal
@@ -135,7 +131,7 @@ const ExercisePage = () => {
                   flex: 1,
                   flexDirection: "row",
                   justifyContent: "center",
-                  rowGap: 20
+                  rowGap: 20,
                 }}
               >
                 <Pressable
@@ -154,11 +150,10 @@ const ExercisePage = () => {
           </View>
         </Modal>
       </View>
-    )
-  }
+    );
+  };
 
   const ListHeader = () => {
-
     return (
       <View style={[styles.container]}>
         <View style={{ marginBottom: 10 }}>
@@ -168,7 +163,7 @@ const ExercisePage = () => {
               fontSize: 40,
               // paddingLeft: 20,
               paddingBottom: 10,
-              textAlign: 'center'
+              textAlign: "center",
             }}
           >
             Exercise Page
@@ -191,14 +186,15 @@ const ExercisePage = () => {
           <View style={{ width: "50%", paddingRight: 5 }}>
             <DropDownPicker
               style={{
-                ...(muscleValue ? styles.selectedExerciseOrEquipment : styles.noSelectedExerciseOrEquipment),
+                ...(muscleValue
+                  ? styles.selectedExerciseOrEquipment
+                  : styles.noSelectedExerciseOrEquipment),
               }}
               open={muscleOpen}
               value={muscleValue}
               items={muscles}
               setOpen={setMuscleOpen}
               setValue={setMuscleValue}
-
               textStyle={{
                 color: "#61FF7E",
               }}
@@ -208,8 +204,7 @@ const ExercisePage = () => {
               dropDownContainerStyle={{
                 backgroundColor: "#011638",
                 maxHeight: 500,
-                borderColor: 'white'
-
+                borderColor: "white",
               }}
             />
           </View>
@@ -235,36 +230,45 @@ const ExercisePage = () => {
               dropDownContainerStyle={{
                 backgroundColor: "#011638",
                 maxHeight: 500,
-                borderColor: 'white'
+                borderColor: "white",
               }}
               selectedItemContainerStyle={{
                 backgroundColor: "black",
               }}
-            // listItemLabelStyle={{
-            //     color: "red"
-            // }}
+              // listItemLabelStyle={{
+              //     color: "red"
+              // }}
             />
           </View>
         </View>
       </View>
-    )
-  }
+    );
+  };
 
   return (
     <FlatList
       style={{ marginTop: 50, borderRadius: 10 }}
       data={filterExerciseList}
       stickyHeaderIndices={[0]}
-      renderItem={({ item }) => <Item name={item.name} handleItemPress={handleItemPress} />}
+      renderItem={({ item }) => (
+        <Item name={item.name} handleItemPress={handleItemPress} />
+      )}
       keyExtractor={(item) => item.name}
       ListHeaderComponent={<ListHeader />}
-      ListHeaderComponentStyle={{ backgroundColor: '#011638' }}
+      ListHeaderComponentStyle={{ backgroundColor: "#011638" }}
       ListFooterComponent={<ModalComponent />}
-      ItemSeparatorComponent={<Seperator />}
+      ItemSeparatorComponent={<Separator />}
       ListEmptyComponent={() => (
         <View>
           {filterExerciseList.length === 0 ? (
-            <Text style={{ fontSize: 18, color: '#61FF7E', textAlign: 'center', marginBottom: 350 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                color: "#61FF7E",
+                textAlign: "center",
+                marginBottom: 350,
+              }}
+            >
               No exercise matches your search criteria.
             </Text>
           ) : null}
@@ -276,7 +280,7 @@ const ExercisePage = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   item: {
     padding: 20,
@@ -291,7 +295,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#011638",
     color: "#61FF7E",
     borderColor: "#D3D3D3",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   noSelectedExerciseOrEquipment: {
     backgroundColor: "#364156",
@@ -332,7 +336,7 @@ const styles = StyleSheet.create({
     color: "#0A8754",
     fontWeight: "bold",
     textAlign: "center",
-    width: 10
+    width: 10,
     // flex: 1,
     // margin: 10
   },

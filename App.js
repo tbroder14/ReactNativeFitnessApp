@@ -1,30 +1,42 @@
-import 'react-native-gesture-handler';
+import "react-native-gesture-handler";
 import React, { useCallback, useRef, useMemo, useState } from "react";
-import { Text, View, StyleSheet, Pressable, ScrollView, TextInput, Animated } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Pressable,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import ExercisePage from "./components/ExercisePage";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import BottomSheet from "@gorhom/bottom-sheet";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { hookstate, useHookstate } from "@hookstate/core";
+
+// five bottom tabs
 import StartWorkoutPage from "./components/StartWorkoutPage";
 import HistoryPage from "./components/HistoryPage";
 import ProgramPage from "./components/ProgramPage";
 import Placeholder from "./components/Placeholder";
-import { GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetFooter } from '@gorhom/bottom-sheet';
-import AddExerciseModal from './components/AddExerciseModal';
+import ExercisePage from "./components/ExercisePage";
+
+import AddExerciseModal from "./components/AddExerciseModal";
 
 //             to do list
-// get navbar to show up over the bottom sheet when bottom sheet at 15%
-// push navbar when bottom sheet is at 90%
-// slowly add/subtract navbar position when pulling up/down on bottom sheet when it is at the bottom
-
-// can I move the bottom sheet/empty workout to another component? or does all of this code have to be on this page?
+// figure out how to create a state for workoutExercises and WorkoutData
+// instead of prop drilling the state between multiple components
+// use hookstate, redux, context, etc.?
+//
 
 //             feature roadmap
+//
 
 function ExerciseScreen() {
   const insets = useSafeAreaInsets();
@@ -32,10 +44,9 @@ function ExerciseScreen() {
   return (
     <View
       style={{
-        backgroundColor: "royalblue",
         flex: 1,
         backgroundColor: "#011638",
-        paddingBottom: 5
+        paddingBottom: 5,
       }}
     >
       <ExercisePage />
@@ -65,7 +76,6 @@ function PlaceholderScreen() {
 function StartWorkoutScreen({ bottomSheetRef }) {
   const insets = useSafeAreaInsets();
 
-
   return (
     <View
       style={{
@@ -77,7 +87,6 @@ function StartWorkoutScreen({ bottomSheetRef }) {
       }}
     >
       <StartWorkoutPage bottomSheetRef={bottomSheetRef} />
-
     </View>
   );
 }
@@ -122,52 +131,64 @@ function ProgramScreen() {
 
 const Tab = createBottomTabNavigator();
 
-
 export default function App() {
+  const [addExerciseModal, setAddExerciseModal] = useState(true);
+  const [workoutExercises, setWorkoutExercises] = useState([]);
+  console.log("workoutExercises:", workoutExercises);
 
-  const [addExerciseModal, setAddExerciseModal] = useState(true)
+  // hookstate library
+  // const workoutExercises = hookstate([]);
 
   // workout name useState
-  const startOfWorkoutTime = new Date().getHours()
-  const currentDate = new Date()
-  const year = currentDate.getFullYear()
-  const month = currentDate.getMonth() + 1
-  const day = currentDate.getDate()
-  const dateWithoutTime = new Date(year, month - 1, day)
-  let currentTemplate = null
-  let currentWorkoutName = ''
+  const startOfWorkoutTime = new Date().getHours();
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const day = currentDate.getDate();
+  const dateWithoutTime = new Date(year, month - 1, day);
+  let currentTemplate = null;
+  let currentWorkoutName = "";
 
   if (currentTemplate === null) {
     if (startOfWorkoutTime >= 21 || startOfWorkoutTime <= 4) {
-      currentWorkoutName = 'Night Workout'
+      currentWorkoutName = "Night Workout";
     } else if (startOfWorkoutTime >= 5 && startOfWorkoutTime <= 7) {
-      currentWorkoutName = 'Early Morning Workout'
+      currentWorkoutName = "Early Morning Workout";
     } else if (startOfWorkoutTime >= 8 && startOfWorkoutTime <= 10) {
-      currentWorkoutName = 'Morning Workout'
+      currentWorkoutName = "Morning Workout";
     } else if (startOfWorkoutTime >= 11 && startOfWorkoutTime <= 13) {
-      currentWorkoutName = 'Mid-day Workout'
+      currentWorkoutName = "Mid-day Workout";
     } else if (startOfWorkoutTime >= 14 && startOfWorkoutTime <= 16) {
-      currentWorkoutName = 'Afternoon Workout'
+      currentWorkoutName = "Afternoon Workout";
     } else if (startOfWorkoutTime >= 17 && startOfWorkoutTime <= 20) {
-      currentWorkoutName = 'Evening Workout'
+      currentWorkoutName = "Evening Workout";
     }
   } else {
-    currentWorkoutName = currentTemplate.name
+    currentWorkoutName = currentTemplate.name;
   }
 
-  const [workoutName, setWorkoutName] = useState(currentWorkoutName)
+  const [workoutName, setWorkoutName] = useState(currentWorkoutName);
 
   // ref
   const bottomSheetRef = useRef(null);
-  const cancelWorkout = () => bottomSheetRef.current.close()
+  const cancelWorkout = () => {
+    bottomSheetRef.current.close(), setWorkoutExercises([]);
+  };
 
   // snap point variables
-  const snapPoints = useMemo(() => ['15%', '94%'], []);
+  const snapPoints = useMemo(() => ["15%", "94%"], []);
 
   // callbacks
-  const handleSheetChanges = useCallback((index) => {
+  const handleSheetChanges = useCallback((index) => {}, []);
 
-  }, []);
+  // flatlist items
+  const Item = ({ name }) => (
+    // <TouchableOpacity>
+    <View style={styles.exerciseItem}>
+      <Text style={styles.exerciseTitle}>{name}</Text>
+    </View>
+    // {/* </TouchableOpacity> */}
+  );
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -178,7 +199,7 @@ export default function App() {
             screenOptions={({ route }) => ({
               headerShown: false,
               tabBarStyle: {
-                backgroundColor: "#011638"
+                backgroundColor: "#011638",
               },
               tabBarIcon: ({ focused, color, size }) => {
                 let iconName;
@@ -213,7 +234,12 @@ export default function App() {
           >
             <Tab.Screen name="Program" component={ProgramScreen} />
             <Tab.Screen name="History" component={HistoryScreen} />
-            <Tab.Screen name="Start Workout" children={() => <StartWorkoutScreen bottomSheetRef={bottomSheetRef} />} />
+            <Tab.Screen
+              name="Start Workout"
+              children={() => (
+                <StartWorkoutScreen bottomSheetRef={bottomSheetRef} />
+              )}
+            />
             <Tab.Screen name="Exercise" component={ExerciseScreen} />
             <Tab.Screen name="Placeholder" component={PlaceholderScreen} />
           </Tab.Navigator>
@@ -226,13 +252,28 @@ export default function App() {
           bottomInset={80}
         >
           <View style={styles.contentContainer}>
-            <Text style={{ color: 'white', margin: 30 }}>Awesome 🎉</Text>
-            <View style={{ flex: 1, flexDirection: 'row', gap: 15 }}>
-              <Text style={styles.workoutNameLabel}>Workout Name</Text>
-              <TextInput
-                style={styles.workoutNameTextInput}
-                onChangeText={setWorkoutName}
-                value={workoutName}
+            <View style={styles.workoutNameRow}>
+              <Text style={{ color: "white", margin: 10 }}>Awesome 🎉</Text>
+              <View style={{ flex: 1, flexDirection: "row", gap: 15 }}>
+                <Text style={styles.workoutNameLabel}>Workout Name</Text>
+                <TextInput
+                  style={styles.workoutNameTextInput}
+                  onChangeText={setWorkoutName}
+                  value={workoutName}
+                />
+              </View>
+            </View>
+            <View style={styles.listOfExercises}>
+              <FlatList
+                // style={{ marginTop: 50, borderRadius: 10 }}
+                data={workoutExercises}
+                renderItem={({ item }) => <Item name={item.name} />}
+                keyExtractor={(item) => item.name}
+                // ListHeaderComponent={<ListHeader />}
+                // ListHeaderComponentStyle={{ backgroundColor: '#011638' }}
+                // ListFooterComponent={<ModalComponent />}
+                // ItemSeparatorComponent={<Separator />}
+                // ListEmptyComponent={() => <View>{workoutExercises}</View>}
               />
             </View>
             <Pressable
@@ -242,7 +283,6 @@ export default function App() {
               }}
             >
               <Text style={styles.textStyle}>Add Exercise</Text>
-
             </Pressable>
             <Pressable
               style={[styles.cancelWorkoutButton]}
@@ -250,7 +290,12 @@ export default function App() {
             >
               <Text>Cancel Workout</Text>
             </Pressable>
-            <AddExerciseModal addExerciseModal={addExerciseModal} setAddExerciseModal={setAddExerciseModal} />
+            <AddExerciseModal
+              addExerciseModal={addExerciseModal}
+              setAddExerciseModal={setAddExerciseModal}
+              workoutExercises={workoutExercises}
+              setWorkoutExercises={setWorkoutExercises}
+            />
           </View>
         </BottomSheet>
       </SafeAreaProvider>
@@ -265,17 +310,21 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: "#011638",
+  },
+  workoutNameRow: {
+    flex: 1,
+    marginTop: 10,
   },
   workoutNameLabel: {
     height: 55,
     marginTop: 0,
     width: 75,
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
     padding: 12,
-    color: 'white',
+    color: "white",
     // marginRight: 8,
     // borderColor: 'white',
     // borderRadius: 10,
@@ -289,18 +338,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
-    color: 'white',
-    borderColor: 'white',
-    backgroundColor: 'blue'
+    color: "white",
+    borderColor: "white",
+    backgroundColor: "blue",
   },
   addExerciseButton: {
     borderRadius: 20,
     padding: 15,
     elevation: 2,
-    width: '85%',
+    width: "85%",
     height: 50,
     margin: 20,
-    color: 'white',
+    color: "white",
     backgroundColor: "blue",
     marginTop: 100,
     // marginRight: 10,
@@ -309,11 +358,26 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 15,
     elevation: 2,
-    width: '85%',
+    width: "85%",
     height: 50,
     margin: 20,
-    backgroundColor: 'red'
+    backgroundColor: "red",
     // marginRight: 10,
+  },
+  listOfExercises: {
+    flex: 1,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  exerciseItem: {
+    padding: 16,
+    // marginVertical: 4,
+    // marginHorizontal: 16,
+    backgroundColor: "green",
+  },
+  exerciseTitle: {
+    fontSize: 16,
+    color: "white",
   },
   textStyle: {
     color: "#61FF7E",
@@ -324,4 +388,4 @@ const styles = StyleSheet.create({
     // flex: 1,
     // margin: 10
   },
-})
+});
