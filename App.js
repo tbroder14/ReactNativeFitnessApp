@@ -18,7 +18,6 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { hookstate, useHookstate } from "@hookstate/core";
 
 // five bottom tabs
 import StartWorkoutPage from "./components/StartWorkoutPage";
@@ -33,7 +32,8 @@ import AddExerciseModal from "./components/AddExerciseModal";
 // figure out how to create a state for workoutExercises and WorkoutData
 // instead of prop drilling the state between multiple components
 // use hookstate, redux, context, etc.?
-//
+// 
+// remove bottom unused styles and collapse/clean-up inline styles 
 
 //             feature roadmap
 //
@@ -129,15 +129,53 @@ function ProgramScreen() {
   );
 }
 
+function BottomSheetFooterComponents({
+  addExerciseModal,
+  setAddExerciseModal,
+  bottomSheetRef,
+  setWorkoutExercises,
+}) {
+  const cancelWorkout = () => {
+    bottomSheetRef.current.close(), setWorkoutExercises([]);
+  };
+
+  return (
+    <View style={{ padding: 20, gap: 25 }}>
+      <Pressable
+        style={{
+          borderRadius: 8,
+          backgroundColor: "blue",
+          padding: 10,
+        }}
+        onPress={() => setAddExerciseModal(!addExerciseModal)}
+      >
+        <Text style={{ color: "white", fontSize: 18, textAlign: "center" }}>
+          Add Exercise
+        </Text>
+      </Pressable>
+
+      <Pressable
+        style={{
+          borderRadius: 8,
+          backgroundColor: "red",
+          padding: 10,
+        }}
+        onPress={cancelWorkout}
+      >
+        <Text style={{ color: "white", fontSize: 18, textAlign: "center" }}>
+          Cancel Workout
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
 const Tab = createBottomTabNavigator();
 
 export default function App() {
-  const [addExerciseModal, setAddExerciseModal] = useState(true);
+  const [addExerciseModal, setAddExerciseModal] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState([]);
   console.log("workoutExercises:", workoutExercises);
-
-  // hookstate library
-  // const workoutExercises = hookstate([]);
 
   // workout name useState
   const startOfWorkoutTime = new Date().getHours();
@@ -171,23 +209,144 @@ export default function App() {
 
   // ref
   const bottomSheetRef = useRef(null);
-  const cancelWorkout = () => {
-    bottomSheetRef.current.close(), setWorkoutExercises([]);
-  };
 
   // snap point variables
   const snapPoints = useMemo(() => ["15%", "94%"], []);
 
   // callbacks
-  const handleSheetChanges = useCallback((index) => {}, []);
+  const handleSheetChanges = useCallback((index) => { }, []);
+
+  const Separator = () => (
+    <View style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 20 }}>
+      <View
+        style={{
+          height: 1,
+          width: "100%",
+          backgroundColor: "white",
+        }}
+      ></View>
+    </View>
+  );
 
   // flatlist items
   const Item = ({ name }) => (
-    // <TouchableOpacity>
-    <View style={styles.exerciseItem}>
-      <Text style={styles.exerciseTitle}>{name}</Text>
+    <View style={{ paddingBottom: 20 }}>
+      <View
+        style={{
+          paddingRight: 20,
+          paddingLeft: 20,
+          marginBottom: 20,
+        }}
+      >
+        <Text style={styles.exerciseTitle}>{name}</Text>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          width: "100%",
+          paddingLeft: 20,
+          paddingRight: 20,
+          marginBottom: 10,
+        }}
+      >
+        <Text style={{ color: "white", fontWeight: "bold", width: "15%" }}>
+          Set
+        </Text>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            width: "35%",
+            textAlign: "center",
+            fontSize: 18
+          }}
+        >
+          Previous
+        </Text>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            width: "20%",
+            textAlign: "center",
+            fontSize: 18
+          }}
+        >
+          +lbs
+        </Text>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            width: "20%",
+            textAlign: "center",
+            fontSize: 18
+          }}
+        >
+          Reps
+        </Text>
+        <Text style={{ color: "white", fontWeight: "bold", width: "10%", fontSize: 18 }}>
+          CM
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          width: "100%",
+          paddingLeft: 20,
+          paddingRight: 20,
+          backgroundColor: '#466e67',
+          paddingTop: 8,
+          paddingBottom: 8,
+          alignItems: 'center'
+        }}
+      >
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            width: "15%",
+            paddingLeft: 8,
+            fontSize: 18
+          }}
+        >
+          1
+        </Text>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            width: "35%",
+            textAlign: "center",
+          }}
+        >
+          60x8
+        </Text>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            width: "20%",
+            textAlign: "center",
+          }}
+        >
+          50
+        </Text>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            width: "20%",
+            textAlign: "center",
+          }}
+        >
+          8
+        </Text>
+        <Text style={{ color: "white", fontWeight: "bold", width: "10%" }}>
+          CM
+        </Text>
+      </View>
     </View>
-    // {/* </TouchableOpacity> */}
   );
 
   return (
@@ -250,53 +409,72 @@ export default function App() {
           onChange={handleSheetChanges}
           index={-1}
           bottomInset={80}
+          backgroundStyle={{ backgroundColor: "#011638" }}
+          style={{
+            shadowColor: "gray",
+            shadowOffset: {
+              width: 0,
+              height: 5,
+            },
+            shadowOpacity: 1,
+            shadowRadius: 16.0,
+
+            elevation: 5,
+          }}
+          handleIndicatorStyle={{ backgroundColor: "white" }}
         >
-          <View style={styles.contentContainer}>
-            <View style={styles.workoutNameRow}>
-              <Text style={{ color: "white", margin: 10 }}>Awesome 🎉</Text>
-              <View style={{ flex: 1, flexDirection: "row", gap: 15 }}>
-                <Text style={styles.workoutNameLabel}>Workout Name</Text>
-                <TextInput
-                  style={styles.workoutNameTextInput}
-                  onChangeText={setWorkoutName}
-                  value={workoutName}
-                />
-              </View>
-            </View>
-            <View style={styles.listOfExercises}>
-              <FlatList
-                // style={{ marginTop: 50, borderRadius: 10 }}
-                data={workoutExercises}
-                renderItem={({ item }) => <Item name={item.name} />}
-                keyExtractor={(item) => item.name}
-                // ListHeaderComponent={<ListHeader />}
-                // ListHeaderComponentStyle={{ backgroundColor: '#011638' }}
-                // ListFooterComponent={<ModalComponent />}
-                // ItemSeparatorComponent={<Separator />}
-                // ListEmptyComponent={() => <View>{workoutExercises}</View>}
-              />
-            </View>
-            <Pressable
-              style={[styles.addExerciseButton]}
-              onPress={() => {
-                setAddExerciseModal(!addExerciseModal);
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 15,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingTop: 10,
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ fontSize: 15, color: "white", textAlign: "center" }}>
+              Workout {"\n"} Name
+            </Text>
+            <TextInput
+              style={{
+                fontSize: 18,
+                color: "white",
+                borderColor: "white",
+                borderRadius: 10,
+                borderWidth: 2,
+                paddingTop: 15,
+                paddingBottom: 15,
+                paddingRight: 35,
+                paddingLeft: 35,
               }}
-            >
-              <Text style={styles.textStyle}>Add Exercise</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.cancelWorkoutButton]}
-              onPress={cancelWorkout}
-            >
-              <Text>Cancel Workout</Text>
-            </Pressable>
+              value={workoutName}
+            />
+          </View>
+          <FlatList
+            data={workoutExercises}
+            renderItem={({ item }) => <Item name={item} />}
+            keyExtractor={(item) => {
+              item;
+            }}
+            ItemSeparatorComponent={<Separator />}
+            ListFooterComponent={
+              <BottomSheetFooterComponents
+                setAddExerciseModal={setAddExerciseModal}
+                addExerciseModal={addExerciseModal}
+                bottomSheetRef={bottomSheetRef}
+                setWorkoutExercises={setWorkoutExercises}
+              />
+            }
+          />
+          {
             <AddExerciseModal
               addExerciseModal={addExerciseModal}
               setAddExerciseModal={setAddExerciseModal}
               workoutExercises={workoutExercises}
               setWorkoutExercises={setWorkoutExercises}
             />
-          </View>
+          }
         </BottomSheet>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -306,11 +484,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: 'grey',
   },
   contentContainer: {
-    flex: 1,
-    alignItems: "center",
     backgroundColor: "#011638",
   },
   workoutNameRow: {
@@ -318,23 +493,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   workoutNameLabel: {
-    height: 55,
     marginTop: 0,
     width: 75,
     fontSize: 12,
     textAlign: "center",
     padding: 12,
     color: "white",
-    // marginRight: 8,
-    // borderColor: 'white',
-    // borderRadius: 10,
-    // borderWidth: 1,
   },
   workoutNameTextInput: {
-    height: 55,
     width: 270,
     fontSize: 16,
-    // margin: 2,
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
@@ -352,7 +520,6 @@ const styles = StyleSheet.create({
     color: "white",
     backgroundColor: "blue",
     marginTop: 100,
-    // marginRight: 10,
   },
   cancelWorkoutButton: {
     borderRadius: 20,
@@ -362,22 +529,19 @@ const styles = StyleSheet.create({
     height: 50,
     margin: 20,
     backgroundColor: "red",
-    // marginRight: 10,
   },
   listOfExercises: {
-    flex: 1,
     marginTop: 10,
     marginBottom: 10,
   },
   exerciseItem: {
     padding: 16,
-    // marginVertical: 4,
-    // marginHorizontal: 16,
-    backgroundColor: "green",
+    backgroundColor: "red",
   },
   exerciseTitle: {
     fontSize: 16,
     color: "white",
+    fontWeight: "bold",
   },
   textStyle: {
     color: "#61FF7E",
@@ -385,7 +549,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: 150,
     marginLeft: 5,
-    // flex: 1,
-    // margin: 10
   },
 });

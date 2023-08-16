@@ -14,12 +14,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { FlatList } from "react-native-gesture-handler";
 
 //             to do list
-// select exercises and change the background color
-// add selected exercises to an array
-// when clicking "add", pass selected exercises to StartWorkoutPage
-// receive selected exercises when user returns to AddExerciseModal
-// do I need to create like five different useStates?
-// one for the exercises and one for the workoutData?
+//
 
 //             feature roadmap
 // asdf
@@ -48,8 +43,8 @@ const AddExerciseModal = ({
   const [equipmentSort, setEquipmentSort] = useState(null);
 
   // for exercise modal
-  const [exerciseModal, setExerciseModal] = useState(false);
-  const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
+  // const [exerciseModal, setExerciseModal] = useState(false);
+  // const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
 
   const muscles = [
     { label: "Biceps", value: "biceps" },
@@ -119,9 +114,13 @@ const AddExerciseModal = ({
     }
   };
 
-  const Item = ({ name, handleItemPress }) => (
+  const Item = ({ name, handleItemPress, isSelected }) => (
     <TouchableOpacity onPress={() => handleItemPress(name)}>
-      <View style={styles.exerciseItem}>
+      <View
+        style={
+          isSelected ? styles.exerciseIsSelected : styles.exerciseIsNotSelected
+        }
+      >
         <Text style={styles.exerciseTitle}>{name}</Text>
       </View>
     </TouchableOpacity>
@@ -211,7 +210,6 @@ const AddExerciseModal = ({
             <View style={{ width: "50%", marginRight: 5 }}>
               <DropDownPicker
                 style={{
-                  // zIndex: 1000,
                   ...(equipmentValue
                     ? styles.selectedExerciseOrEquipment
                     : styles.noSelectedExerciseOrEquipment),
@@ -235,9 +233,6 @@ const AddExerciseModal = ({
                 selectedItemContainerStyle={{
                   backgroundColor: "black",
                 }}
-                // listItemLabelStyle={{
-                //     color: "red"
-                // }}
               />
             </View>
           </View>
@@ -246,7 +241,11 @@ const AddExerciseModal = ({
               // style={{ marginTop: 50, borderRadius: 10 }}
               data={filterExerciseList}
               renderItem={({ item }) => (
-                <Item name={item.name} handleItemPress={handleItemPress} />
+                <Item
+                  name={item.name}
+                  handleItemPress={handleItemPress}
+                  isSelected={selectedExercises.includes(item.name)}
+                />
               )}
               keyExtractor={(item) => item.name}
               // ListHeaderComponent={<ListHeader />}
@@ -316,6 +315,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginLeft: 8,
     marginRight: 8,
+    zIndex: 1,
   },
   listOfExercises: {
     flex: 14,
@@ -342,6 +342,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#364156",
     color: "black",
     borderColor: "#D3D3D3",
+  },
+  exerciseIsSelected: {
+    padding: 16,
+    backgroundColor: "green",
+  },
+  exerciseIsNotSelected: {
+    padding: 16,
+    backgroundColor: "#011638",
   },
   textStyle: {
     color: "white",

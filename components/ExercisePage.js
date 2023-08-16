@@ -250,9 +250,7 @@ const ExercisePage = () => {
       style={{ marginTop: 50, borderRadius: 10 }}
       data={filterExerciseList}
       stickyHeaderIndices={[0]}
-      renderItem={({ item }) => (
-        <Item name={item.name} handleItemPress={handleItemPress} />
-      )}
+      renderItem={({ item }) => <Item name={item.name} />}
       keyExtractor={(item) => item.name}
       ListHeaderComponent={<ListHeader />}
       ListHeaderComponentStyle={{ backgroundColor: "#011638" }}

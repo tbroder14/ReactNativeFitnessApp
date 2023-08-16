@@ -5,6 +5,6 @@
     "eslint.format.enable": true,
     "editor.defaultFormatter": "standard.vscode-standard",
     "[javascript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "vscode.typescript-language-features"
     }
 }

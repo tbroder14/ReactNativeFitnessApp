@@ -69,7 +69,7 @@ const exerciseList = [
   },
   {
     name: "Bicep Curl (Barbell)",
-    muscle: "bicep",
+    muscle: "biceps",
     equipment: muscleEnums.barbell,
   },
   {
@@ -136,19 +136,22 @@ const exerciseList = [
 
 const mainData = [
   {
-    id: 'bench press barbell',
-    title: 'Bench Press (Barbell)'
-  }, {
-    id: 'bench press dumbbells',
-    title: 'Bench Press (Dumbbells)'
-  }, {
-    id: 'squat barbell',
-    title: 'Squat (Barbell)'
-  }, {
-    id: 'squat dumbbells',
-    title: 'Squat (Dumbbells)'
-  }
-]
+    id: "bench press barbell",
+    title: "Bench Press (Barbell)",
+  },
+  {
+    id: "bench press dumbbells",
+    title: "Bench Press (Dumbbells)",
+  },
+  {
+    id: "squat barbell",
+    title: "Squat (Barbell)",
+  },
+  {
+    id: "squat dumbbells",
+    title: "Squat (Dumbbells)",
+  },
+];
 
 const sortedExerciseList = exerciseList.sort((a, b) =>
   a.name.localeCompare(b.name)
