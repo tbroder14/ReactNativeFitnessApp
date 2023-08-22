@@ -24,6 +24,8 @@ const AddExerciseModal = ({
   setAddExerciseModal,
   workoutExercises,
   setWorkoutExercises,
+  workoutData,
+  setWorkoutData
 }) => {
   // for react-native-dropdown-picker
   const [muscleValue, setMuscleValue] = useState(null);
@@ -33,7 +35,6 @@ const AddExerciseModal = ({
 
   // for tracking of exercise selection between app.js and AddExerciseModal
   const [selectedExercises, setSelectedExercises] = useState(workoutExercises);
-  console.log("selectedExercises:", selectedExercises);
 
   // displaying sorted list of exercises
   const [searchBarInput, setSearchBarInput] = useState("");
@@ -101,27 +102,40 @@ const AddExerciseModal = ({
     setFilterExerciseList(filteredList);
   }, [equipmentValue, muscleValue, searchBarInput, sortedExerciseList]);
 
-  const handleItemPress = (itemName) => {
+  const handleItemPress = (item) => {
     // add exercise to an array
     // change the background color of the selected exercises
-    if (selectedExercises.includes(itemName)) {
+
+    // formats exercise when it's added from "AddExerciseModal"
+    // may not work since only the name only passed to the app.js page and not the whole object
+    // i could also just pass the whole object through to app.js
+    // or should I add the equipment as well // probably should since it'll be searched with a combo of all three things
+
+    if (selectedExercises.includes(item)) {
       const arrayCopy = [...selectedExercises];
-      const newIndex = selectedExercises.indexOf(itemName);
+      console.log(arrayCopy)
+      const newIndex = selectedExercises.indexOf(item);
       arrayCopy.splice(newIndex, 1);
       setSelectedExercises(arrayCopy);
     } else {
-      setSelectedExercises((prevState) => [...prevState, itemName]);
+      // if item matches the exercise, then add it to the setSelectedExercises
+      // iterate through what array though? Loop through the filterlist/sortlist? 
+      filterExerciseList.map((exercise) => {
+
+      })
+      // 
+      setSelectedExercises((prevState) => [...prevState, item]);
     }
   };
 
-  const Item = ({ name, handleItemPress, isSelected }) => (
-    <TouchableOpacity onPress={() => handleItemPress(name)}>
+  const Item = ({ item, handleItemPress, isSelected }) => (
+    <TouchableOpacity onPress={() => handleItemPress(item)}>
       <View
         style={
           isSelected ? styles.exerciseIsSelected : styles.exerciseIsNotSelected
         }
       >
-        <Text style={styles.exerciseTitle}>{name}</Text>
+        <Text style={styles.exerciseTitle}>{item.name}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -238,13 +252,12 @@ const AddExerciseModal = ({
           </View>
           <View style={styles.listOfExercises}>
             <FlatList
-              // style={{ marginTop: 50, borderRadius: 10 }}
               data={filterExerciseList}
               renderItem={({ item }) => (
                 <Item
-                  name={item.name}
+                  item={item}
                   handleItemPress={handleItemPress}
-                  isSelected={selectedExercises.includes(item.name)}
+                  isSelected={selectedExercises.includes(item)}
                 />
               )}
               keyExtractor={(item) => item.name}
@@ -272,7 +285,7 @@ const AddExerciseModal = ({
           </View>
         </View>
       </View>
-    </Modal>
+    </Modal >
   );
 };
 

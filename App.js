@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import React, { useCallback, useRef, useMemo, useState } from "react";
+import React, { useCallback, useRef, useMemo, useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -31,7 +31,9 @@ import AddExerciseModal from "./components/AddExerciseModal";
 //             to do list
 // figure out how to create a state for workoutExercises and WorkoutData
 // instead of prop drilling the state between multiple components
-// use hookstate, redux, context, etc.?
+// use hookstate, redux, context, etc.
+
+// figure out how to clear selectedExercises in this parent component? 
 // 
 // remove bottom unused styles and collapse/clean-up inline styles 
 
@@ -175,7 +177,7 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [addExerciseModal, setAddExerciseModal] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState([]);
-  console.log("workoutExercises:", workoutExercises);
+  const [workoutData, setWorkoutData] = useState([])
 
   // workout name useState
   const startOfWorkoutTime = new Date().getHours();
@@ -207,6 +209,28 @@ export default function App() {
 
   const [workoutName, setWorkoutName] = useState(currentWorkoutName);
 
+  useEffect(() => {
+    console.log('the useEffect is activated!')
+    const updatedWorkoutData = workoutExercises.reduce((acc, exercise) => {
+      const exerciseExists = workoutData.some((item) => item.name === exercise)
+      if (!exerciseExists) {
+        const newExercise = {
+          name: exercise,
+          sets: [
+            { weight: '50', reps: '10', distance: '0', seconds: '0', notes: '', complete: false },
+            { weight: '60', reps: '8', distance: '0', seconds: '0', notes: '', complete: false }
+          ]
+        }
+        return [...acc, newExercise]
+      }
+      return acc
+    }, workoutData)
+    // console.log(workoutData)
+    const draftWorkoutData = updatedWorkoutData.filter((item) =>
+      workoutExercises.includes(item.name))
+    setWorkoutData(draftWorkoutData)
+  }, [workoutExercises])
+
   // ref
   const bottomSheetRef = useRef(null);
 
@@ -227,9 +251,9 @@ export default function App() {
       ></View>
     </View>
   );
-
-  // flatlist items
-  const Item = ({ name }) => (
+  // Flatlist data items structure/functionality and style
+  const Item = ({ item }) => (
+    // console.log(item),
     <View style={{ paddingBottom: 20 }}>
       <View
         style={{
@@ -238,7 +262,7 @@ export default function App() {
           marginBottom: 20,
         }}
       >
-        <Text style={styles.exerciseTitle}>{name}</Text>
+        <Text style={styles.exerciseTitle}>{item.name}</Text>
       </View>
       <View
         style={{
@@ -301,50 +325,54 @@ export default function App() {
           alignItems: 'center'
         }}
       >
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            width: "15%",
-            paddingLeft: 8,
-            fontSize: 18
-          }}
-        >
-          1
-        </Text>
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            width: "35%",
-            textAlign: "center",
-          }}
-        >
-          60x8
-        </Text>
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            width: "20%",
-            textAlign: "center",
-          }}
-        >
-          50
-        </Text>
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            width: "20%",
-            textAlign: "center",
-          }}
-        >
-          8
-        </Text>
-        <Text style={{ color: "white", fontWeight: "bold", width: "10%" }}>
-          CM
-        </Text>
+        {item.sets.map((sets) => (
+          <View>
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                width: "15%",
+                paddingLeft: 8,
+                fontSize: 18
+              }}
+            >
+              1
+            </Text>
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                width: "35%",
+                textAlign: "center",
+              }}
+            >
+              60x8
+            </Text>
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                width: "20%",
+                textAlign: "center",
+              }}
+            >
+              50
+            </Text>
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                width: "20%",
+                textAlign: "center",
+              }}
+            >
+              8
+            </Text>
+            <Text style={{ color: "white", fontWeight: "bold", width: "10%" }}>
+              CM
+            </Text>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -453,9 +481,9 @@ export default function App() {
           </View>
           <FlatList
             data={workoutExercises}
-            renderItem={({ item }) => <Item name={item} />}
+            renderItem={({ item }) => <Item item={item} />}
             keyExtractor={(item) => {
-              item;
+              item.name;
             }}
             ItemSeparatorComponent={<Separator />}
             ListFooterComponent={
@@ -473,6 +501,8 @@ export default function App() {
               setAddExerciseModal={setAddExerciseModal}
               workoutExercises={workoutExercises}
               setWorkoutExercises={setWorkoutExercises}
+              workoutData={workoutData}
+              setWorkoutData={setWorkoutData}
             />
           }
         </BottomSheet>
