@@ -174,8 +174,8 @@ const AddExerciseModal = ({
               {/* // add Exercise button */}
               <Pressable
                 onPress={() => {
-                  setWorkoutExercises(selectedExercises),
-                    setAddExerciseModal(!addExerciseModal);
+                  setWorkoutExercises(selectedExercises)
+                  setAddExerciseModal(!addExerciseModal)
                 }}
               >
                 <Text style={styles.textStyle}>Add</Text>

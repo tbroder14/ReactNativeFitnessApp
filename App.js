@@ -1,5 +1,11 @@
 import "react-native-gesture-handler";
-import React, { useCallback, useRef, useMemo, useState, useEffect } from "react";
+import React, {
+  useCallback,
+  useRef,
+  useMemo,
+  useState,
+  useEffect,
+} from "react";
 import {
   Text,
   View,
@@ -33,9 +39,9 @@ import AddExerciseModal from "./components/AddExerciseModal";
 // instead of prop drilling the state between multiple components
 // use hookstate, redux, context, etc.
 
-// figure out how to clear selectedExercises in this parent component? 
-// 
-// remove bottom unused styles and collapse/clean-up inline styles 
+// figure out how to clear selectedExercises in this parent component?
+//
+// remove bottom unused styles and collapse/clean-up inline styles
 
 //             feature roadmap
 //
@@ -177,7 +183,7 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [addExerciseModal, setAddExerciseModal] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState([]);
-  const [workoutData, setWorkoutData] = useState([])
+  const [workoutData, setWorkoutData] = useState([]);
 
   // workout name useState
   const startOfWorkoutTime = new Date().getHours();
@@ -210,35 +216,51 @@ export default function App() {
   const [workoutName, setWorkoutName] = useState(currentWorkoutName);
 
   useEffect(() => {
-    console.log('the useEffect is activated!')
-    const updatedWorkoutData = workoutExercises.reduce((acc, exercise) => {
-      const exerciseExists = workoutData.some((item) => item.name === exercise)
-      if (!exerciseExists) {
-        const newExercise = {
-          name: exercise,
-          sets: [
-            { weight: '50', reps: '10', distance: '0', seconds: '0', notes: '', complete: false },
-            { weight: '60', reps: '8', distance: '0', seconds: '0', notes: '', complete: false }
-          ]
-        }
-        return [...acc, newExercise]
-      }
-      return acc
-    }, workoutData)
-    // console.log(workoutData)
-    const draftWorkoutData = updatedWorkoutData.filter((item) =>
-      workoutExercises.includes(item.name))
-    setWorkoutData(draftWorkoutData)
-  }, [workoutExercises])
+
+    // formats workoutExercises to include array of sets
+    workoutExercises.forEach((i) => {
+      i.sets = [
+        {
+          weight: "50",
+          reps: "10",
+          distance: "0",
+          seconds: "0",
+          notes: "",
+          complete: false,
+        },
+      ];
+    });
+    setWorkoutData(workoutExercises);
+  }, [workoutExercises]);
 
   // ref
   const bottomSheetRef = useRef(null);
-
   // snap point variables
   const snapPoints = useMemo(() => ["15%", "94%"], []);
 
   // callbacks
   const handleSheetChanges = useCallback((index) => { }, []);
+
+  const addSet = (exerciseName) => {
+    const copyOfWorkoutData = [...workoutData]
+
+    copyOfWorkoutData.forEach((i) => {
+      if (exerciseName === i.name) {
+        const newSet = {
+          weight: "50",
+          reps: "8",
+          distance: "0",
+          seconds: "0",
+          notes: "",
+          complete: false,
+        }
+        i.sets.push(newSet)
+      }
+    })
+    setWorkoutData(workoutData => ([
+      ...copyOfWorkoutData
+    ]))
+  }
 
   const Separator = () => (
     <View style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 20 }}>
@@ -253,7 +275,6 @@ export default function App() {
   );
   // Flatlist data items structure/functionality and style
   const Item = ({ item }) => (
-    // console.log(item),
     <View style={{ paddingBottom: 20 }}>
       <View
         style={{
@@ -282,7 +303,7 @@ export default function App() {
             fontWeight: "bold",
             width: "35%",
             textAlign: "center",
-            fontSize: 18
+            fontSize: 18,
           }}
         >
           Previous
@@ -293,7 +314,7 @@ export default function App() {
             fontWeight: "bold",
             width: "20%",
             textAlign: "center",
-            fontSize: 18
+            fontSize: 18,
           }}
         >
           +lbs
@@ -304,76 +325,98 @@ export default function App() {
             fontWeight: "bold",
             width: "20%",
             textAlign: "center",
-            fontSize: 18
+            fontSize: 18,
           }}
         >
           Reps
         </Text>
-        <Text style={{ color: "white", fontWeight: "bold", width: "10%", fontSize: 18 }}>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            width: "10%",
+            fontSize: 18,
+          }}
+        >
           CM
         </Text>
       </View>
-      <View
+
+      {item.sets?.map((sets) => (
+        <View
+          style={{
+            flexDirection: "row",
+            width: "100%",
+            paddingLeft: 20,
+            paddingRight: 20,
+            backgroundColor: "#466e67",
+            paddingTop: 8,
+            paddingBottom: 8,
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: "white",
+              fontWeight: "bold",
+              width: "15%",
+              paddingLeft: 8,
+              fontSize: 18,
+            }}
+          >
+            1
+          </Text>
+          <Text
+            style={{
+              color: "white",
+              fontWeight: "bold",
+              width: "35%",
+              textAlign: "center",
+            }}
+          >
+            60x8
+          </Text>
+          <Text
+            style={{
+              color: "white",
+              fontWeight: "bold",
+              width: "20%",
+              textAlign: "center",
+            }}
+          >
+            {sets.weight}
+          </Text>
+          <Text
+            style={{
+              color: "white",
+              fontWeight: "bold",
+              width: "20%",
+              textAlign: "center",
+            }}
+          >
+            {sets.reps}
+          </Text>
+          <Text style={{ color: "white", fontWeight: "bold", width: "10%" }}>
+            CM
+          </Text>
+        </View>
+      ))}
+      <Pressable
         style={{
-          flexDirection: "row",
-          width: "100%",
-          paddingLeft: 20,
-          paddingRight: 20,
-          backgroundColor: '#466e67',
-          paddingTop: 8,
-          paddingBottom: 8,
-          alignItems: 'center'
+          margin: 10,
+          paddingLeft: 160,
+          paddingRight: 50,
+          paddingTop: 20,
+          paddingBottom: 20,
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: "green",
+          backgroundColor: "yellow",
         }}
+        onPress={() => addSet(item.name)}
       >
-        {item.sets.map((sets) => (
-          <View>
-            <Text
-              style={{
-                color: "white",
-                fontWeight: "bold",
-                width: "15%",
-                paddingLeft: 8,
-                fontSize: 18
-              }}
-            >
-              1
-            </Text>
-            <Text
-              style={{
-                color: "white",
-                fontWeight: "bold",
-                width: "35%",
-                textAlign: "center",
-              }}
-            >
-              60x8
-            </Text>
-            <Text
-              style={{
-                color: "white",
-                fontWeight: "bold",
-                width: "20%",
-                textAlign: "center",
-              }}
-            >
-              50
-            </Text>
-            <Text
-              style={{
-                color: "white",
-                fontWeight: "bold",
-                width: "20%",
-                textAlign: "center",
-              }}
-            >
-              8
-            </Text>
-            <Text style={{ color: "white", fontWeight: "bold", width: "10%" }}>
-              CM
-            </Text>
-          </View>
-        ))}
-      </View>
+        <Text style={{ color: "purple" }}>Add Set</Text>
+      </Pressable>
     </View>
   );
 
@@ -480,7 +523,7 @@ export default function App() {
             />
           </View>
           <FlatList
-            data={workoutExercises}
+            data={workoutData}
             renderItem={({ item }) => <Item item={item} />}
             keyExtractor={(item) => {
               item.name;
