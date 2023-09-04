@@ -27,6 +27,7 @@ const AddExerciseModal = ({
   workoutData,
   setWorkoutData
 }) => {
+
   // for react-native-dropdown-picker
   const [muscleValue, setMuscleValue] = useState(null);
   const [equipmentValue, setEquipmentValue] = useState(null);
@@ -38,14 +39,9 @@ const AddExerciseModal = ({
 
   // displaying sorted list of exercises
   const [searchBarInput, setSearchBarInput] = useState("");
-  const [filterExerciseList, setFilterExerciseList] =
-    useState(sortedExerciseList);
+  const [filterExerciseList, setFilterExerciseList] = useState(sortedExerciseList);
   const [muscleSort, setMuscleSort] = useState(null);
   const [equipmentSort, setEquipmentSort] = useState(null);
-
-  // for exercise modal
-  // const [exerciseModal, setExerciseModal] = useState(false);
-  // const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
 
   const muscles = [
     { label: "Biceps", value: "biceps" },
@@ -113,7 +109,6 @@ const AddExerciseModal = ({
 
     if (selectedExercises.includes(item)) {
       const arrayCopy = [...selectedExercises];
-      console.log(arrayCopy)
       const newIndex = selectedExercises.indexOf(item);
       arrayCopy.splice(newIndex, 1);
       setSelectedExercises(arrayCopy);

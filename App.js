@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -31,6 +32,8 @@ import HistoryPage from "./components/HistoryPage";
 import ProgramPage from "./components/ProgramPage";
 import Placeholder from "./components/Placeholder";
 import ExercisePage from "./components/ExercisePage";
+import Modal from "react-native-modal";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 import AddExerciseModal from "./components/AddExerciseModal";
 
@@ -39,7 +42,14 @@ import AddExerciseModal from "./components/AddExerciseModal";
 // instead of prop drilling the state between multiple components
 // use hookstate, redux, context, etc.
 
+// format/style sets/text input parts 
+// reorder exercises by long press and moving exercise
+// how to delete exercise -> three buttons to dropdown menu? OR do a bottom sheet/bottom modal? 
+// swipe to delete specific set
+
 // figure out how to clear selectedExercises in this parent component?
+// get Cancel Workout button to work? by updating setWorkoutExercises to empty array, which is then passed to AddExerciseModal.js
+// cancelWorkout = line 153
 //
 // remove bottom unused styles and collapse/clean-up inline styles
 
@@ -142,9 +152,12 @@ function BottomSheetFooterComponents({
   setAddExerciseModal,
   bottomSheetRef,
   setWorkoutExercises,
+  workoutExercises
 }) {
-  const cancelWorkout = () => {
-    bottomSheetRef.current.close(), setWorkoutExercises([]);
+  const cancelWorkout = ({ setWorkoutExercises }) => {
+    // why is this not clearing workoutExercises to an empty array? 
+    setWorkoutExercises([]);
+    bottomSheetRef.current.close();
   };
 
   return (
@@ -168,7 +181,7 @@ function BottomSheetFooterComponents({
           backgroundColor: "red",
           padding: 10,
         }}
-        onPress={cancelWorkout}
+        onPress={() => cancelWorkout({ setWorkoutExercises })}
       >
         <Text style={{ color: "white", fontSize: 18, textAlign: "center" }}>
           Cancel Workout
@@ -182,6 +195,7 @@ const Tab = createBottomTabNavigator();
 
 export default function App() {
   const [addExerciseModal, setAddExerciseModal] = useState(false);
+  const [threeButtonModal, setThreeButtonModal] = useState(false)
   const [workoutExercises, setWorkoutExercises] = useState([]);
   const [workoutData, setWorkoutData] = useState([]);
 
@@ -215,20 +229,24 @@ export default function App() {
 
   const [workoutName, setWorkoutName] = useState(currentWorkoutName);
 
+  // formats workoutExercises to include array of sets
   useEffect(() => {
-
-    // formats workoutExercises to include array of sets
     workoutExercises.forEach((i) => {
-      i.sets = [
-        {
-          weight: "50",
-          reps: "10",
-          distance: "0",
-          seconds: "0",
-          notes: "",
-          complete: false,
-        },
-      ];
+      // The some() method returns true (and stops) if the function returns true for one of the array elements 
+      const doesExerciseExist = workoutData.some((item) => item.name === i.name)
+      // formats if exercise is not already in workoutData
+      if (!doesExerciseExist) {
+        i.sets = [
+          {
+            weight: "50",
+            reps: "10",
+            distance: "0",
+            seconds: "0",
+            notes: "",
+            complete: false,
+          },
+        ];
+      }
     });
     setWorkoutData(workoutExercises);
   }, [workoutExercises]);
@@ -262,6 +280,31 @@ export default function App() {
     ]))
   }
 
+  // still needs some work, it's not keeping checked sets when new exercise is added 
+  const handleCheckboxChange = (exercise, index) => {
+    const exerciseName = exercise.name
+    const setIndex = index
+
+    setWorkoutData((prevData) => {
+      const updatedData = prevData.map((e) => {
+        if (exerciseName === e.name) {
+          const updatedSets = e.sets.map((set, index) => {
+            if (index === setIndex) {
+              return { ...set, complete: !e.sets[setIndex].complete }
+            }
+            return set
+          })
+          return {
+            ...e,
+            sets: updatedSets
+          }
+        }
+        return e
+      })
+      return updatedData
+    })
+  }
+
   const Separator = () => (
     <View style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 20 }}>
       <View
@@ -284,6 +327,9 @@ export default function App() {
         }}
       >
         <Text style={styles.exerciseTitle}>{item.name}</Text>
+        <Pressable>
+
+        </Pressable>
       </View>
       <View
         style={{
@@ -294,7 +340,13 @@ export default function App() {
           marginBottom: 10,
         }}
       >
-        <Text style={{ color: "white", fontWeight: "bold", width: "15%" }}>
+        <Text style={{
+          color: "white",
+          fontWeight: "bold",
+          width: "10%",
+          textAlign: 'center',
+          fontSize: 16,
+        }}>
           Set
         </Text>
         <Text
@@ -303,7 +355,7 @@ export default function App() {
             fontWeight: "bold",
             width: "35%",
             textAlign: "center",
-            fontSize: 18,
+            fontSize: 16,
           }}
         >
           Previous
@@ -312,9 +364,9 @@ export default function App() {
           style={{
             color: "white",
             fontWeight: "bold",
-            width: "20%",
+            width: "22.5%",
             textAlign: "center",
-            fontSize: 18,
+            fontSize: 16,
           }}
         >
           +lbs
@@ -323,9 +375,9 @@ export default function App() {
           style={{
             color: "white",
             fontWeight: "bold",
-            width: "20%",
+            width: "22.5%",
             textAlign: "center",
-            fontSize: 18,
+            fontSize: 16,
           }}
         >
           Reps
@@ -335,89 +387,141 @@ export default function App() {
             color: "white",
             fontWeight: "bold",
             width: "10%",
-            fontSize: 18,
+            fontSize: 16,
+            textAlign: 'right'
           }}
         >
           CM
         </Text>
       </View>
 
-      {item.sets?.map((sets) => (
-        <View
-          style={{
-            flexDirection: "row",
-            width: "100%",
-            paddingLeft: 20,
-            paddingRight: 20,
-            backgroundColor: "#466e67",
-            paddingTop: 8,
-            paddingBottom: 8,
-            alignItems: "center",
-          }}
+      {item.sets?.map((sets, index) => (
+        <Swipeable
+        // onSwipeableOpen(right)
+        // renderRightActions={rightSwipeAction}
         >
-          <Text
+          <View
             style={{
-              color: "white",
-              fontWeight: "bold",
-              width: "15%",
-              paddingLeft: 8,
-              fontSize: 18,
+              flexDirection: "row",
+              width: "100%",
+              paddingLeft: 20,
+              paddingRight: 20,
+              // backgroundColor: "#466e67",
+              paddingTop: 8,
+              paddingBottom: 8,
+              alignItems: "center",
             }}
           >
-            1
-          </Text>
-          <Text
-            style={{
-              color: "white",
-              fontWeight: "bold",
-              width: "35%",
-              textAlign: "center",
-            }}
-          >
-            60x8
-          </Text>
-          <Text
-            style={{
-              color: "white",
-              fontWeight: "bold",
-              width: "20%",
-              textAlign: "center",
-            }}
-          >
-            {sets.weight}
-          </Text>
-          <Text
-            style={{
-              color: "white",
-              fontWeight: "bold",
-              width: "20%",
-              textAlign: "center",
-            }}
-          >
-            {sets.reps}
-          </Text>
-          <Text style={{ color: "white", fontWeight: "bold", width: "10%" }}>
-            CM
-          </Text>
-        </View>
-      ))}
+            <Text
+              style={{
+                color: "#011638",
+                fontWeight: "bold",
+                width: "10%",
+                paddingLeft: 8,
+                fontSize: 16,
+                overflow: 'hidden',
+                backgroundColor: '#61FF7E',
+                borderWidth: 2,
+                borderRadius: 6,
+                padding: 6,
+                marginRight: 5,
+                textAlign: 'center'
+              }}
+            >
+              {index + 1}
+            </Text>
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                width: "35%",
+                textAlign: "center",
+              }}
+            >
+              60x8
+            </Text>
+            <TextInput
+              style={{
+                fontWeight: "bold",
+                width: "20%",
+                textAlign: "center",
+                backgroundColor: '#61FF7E',
+                borderColor: 'red',
+                borderRadius: 8,
+                paddingTop: 6,
+                paddingBottom: 6,
+                marginRight: 5,
+                color: '#011638'
+              }}
+              // onChangeText={onChangeNumber}
+              // value={number}
+              placeholder={sets.weight}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={{
+                color: "#011638",
+                fontWeight: "bold",
+                width: "20%",
+                textAlign: "center",
+                backgroundColor: '#61FF7E',
+                borderColor: 'red',
+                borderRadius: 8,
+                // padding: 6,
+                paddingTop: 6,
+                paddingBottom: 6,
+                marginRight: 5
+              }}
+              // onChangeText={onChangeNumber}
+              // value={number}
+              placeholder={sets.reps}
+              keyboardType="numeric"
+            />
+            <BouncyCheckbox
+              // size={25}
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                width: "10%",
+                fontSize: 16,
+                textAlign: 'right',
+                padding: 10,
+                borderRadius: 6
+              }}
+              isChecked={sets.complete}
+              disableText={true}
+              onPress={() => handleCheckboxChange(item, index)}
+              innerIconStyle={{
+                borderRadius: 2,
+                borderWidth: 2
+              }}
+              unfillColor="#FFFFFF"
+            // text="Custom Checkbox"
+            // iconStyle={{ borderColor: "red" }}
+            // innerIconStyle={{ borderWidth: 2 }}
+            // textStyle={{ fontFamily: "JosefinSans-Regular" }}
+            />
+          </View>
+        </Swipeable>
+      ))
+      }
       <Pressable
         style={{
           margin: 10,
           paddingLeft: 160,
           paddingRight: 50,
-          paddingTop: 20,
-          paddingBottom: 20,
+          paddingTop: 13,
+          paddingBottom: 13,
           borderRadius: 10,
           borderWidth: 1,
-          borderColor: "green",
-          backgroundColor: "yellow",
+          borderColor: "#61FF7E",
+          backgroundColor: "#61FF7E",
         }}
         onPress={() => addSet(item.name)}
       >
-        <Text style={{ color: "purple" }}>Add Set</Text>
+        <Text style={{ color: "#011638", fontWeight: "bold", }}>Add Set</Text>
       </Pressable>
-    </View>
+    </View >
   );
 
   return (
@@ -535,6 +639,7 @@ export default function App() {
                 addExerciseModal={addExerciseModal}
                 bottomSheetRef={bottomSheetRef}
                 setWorkoutExercises={setWorkoutExercises}
+                workoutExercises={workoutExercises}
               />
             }
           />
@@ -612,7 +717,7 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
   },
   exerciseTitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: "white",
     fontWeight: "bold",
   },
