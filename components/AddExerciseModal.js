@@ -24,8 +24,6 @@ const AddExerciseModal = ({
   setAddExerciseModal,
   workoutExercises,
   setWorkoutExercises,
-  workoutData,
-  setWorkoutData
 }) => {
 
   // for react-native-dropdown-picker
@@ -102,23 +100,12 @@ const AddExerciseModal = ({
     // add exercise to an array
     // change the background color of the selected exercises
 
-    // formats exercise when it's added from "AddExerciseModal"
-    // may not work since only the name only passed to the app.js page and not the whole object
-    // i could also just pass the whole object through to app.js
-    // or should I add the equipment as well // probably should since it'll be searched with a combo of all three things
-
     if (selectedExercises.includes(item)) {
       const arrayCopy = [...selectedExercises];
       const newIndex = selectedExercises.indexOf(item);
       arrayCopy.splice(newIndex, 1);
       setSelectedExercises(arrayCopy);
     } else {
-      // if item matches the exercise, then add it to the setSelectedExercises
-      // iterate through what array though? Loop through the filterlist/sortlist? 
-      filterExerciseList.map((exercise) => {
-
-      })
-      // 
       setSelectedExercises((prevState) => [...prevState, item]);
     }
   };
@@ -155,6 +142,7 @@ const AddExerciseModal = ({
         <View style={styles.addExerciseModalView}>
           <View style={styles.topRow}>
             <View style={styles.topRowLeftSide}>
+              {/* BUG: when below pressable is clicked, does not include selected exercise already present when addExerciseModal is reopened */}
               <Pressable
                 style={styles.closeExerciseModal}
                 onPress={() => {

@@ -46,6 +46,7 @@ import AddExerciseModal from "./components/AddExerciseModal";
 // reorder exercises by long press and moving exercise
 // how to delete exercise -> three buttons to dropdown menu? OR do a bottom sheet/bottom modal? 
 // swipe to delete specific set
+// keep entered data in text inputs when added sets or new/removed exercises => onchange, I believe
 
 // figure out how to clear selectedExercises in this parent component?
 // get Cancel Workout button to work? by updating setWorkoutExercises to empty array, which is then passed to AddExerciseModal.js
@@ -229,26 +230,31 @@ export default function App() {
 
   const [workoutName, setWorkoutName] = useState(currentWorkoutName);
 
-  // formats workoutExercises to include array of sets
   useEffect(() => {
-    workoutExercises.forEach((i) => {
-      // The some() method returns true (and stops) if the function returns true for one of the array elements 
-      const doesExerciseExist = workoutData.some((item) => item.name === i.name)
-      // formats if exercise is not already in workoutData
-      if (!doesExerciseExist) {
-        i.sets = [
-          {
-            weight: "50",
-            reps: "10",
-            distance: "0",
-            seconds: "0",
-            notes: "",
-            complete: false,
-          },
-        ];
-      }
+
+    // determines the differences between workoutExercises (from AddExerciseModal) and workoutData
+    let differences = workoutExercises.filter(exercise => {
+      return !workoutData.some(exercise2 => exercise2.name === exercise.name);
     });
-    setWorkoutData(workoutExercises);
+
+    // formats new exercises (the differences) to proper format with sets 
+    differences.forEach((i) => {
+      i.sets = [
+        {
+          weight: "50",
+          reps: "10",
+          distance: "0",
+          seconds: "0",
+          notes: "",
+          complete: false,
+        },
+      ];
+    })
+
+    // combines two arrays 
+    const combinedWorkoutDataAndDifferences = [...workoutData, ...differences]
+
+    setWorkoutData(combinedWorkoutDataAndDifferences)
   }, [workoutExercises]);
 
   // ref
@@ -275,34 +281,33 @@ export default function App() {
         i.sets.push(newSet)
       }
     })
-    setWorkoutData(workoutData => ([
-      ...copyOfWorkoutData
-    ]))
+
+    setWorkoutData(copyOfWorkoutData)
   }
 
-  // still needs some work, it's not keeping checked sets when new exercise is added 
   const handleCheckboxChange = (exercise, index) => {
     const exerciseName = exercise.name
     const setIndex = index
+    const copyOfWorkoutData = [...workoutData]
 
-    setWorkoutData((prevData) => {
-      const updatedData = prevData.map((e) => {
-        if (exerciseName === e.name) {
-          const updatedSets = e.sets.map((set, index) => {
-            if (index === setIndex) {
-              return { ...set, complete: !e.sets[setIndex].complete }
-            }
-            return set
-          })
-          return {
-            ...e,
-            sets: updatedSets
+    const updatedData = copyOfWorkoutData.map((e) => {
+      if (exerciseName === e.name) {
+        const updatedSets = e.sets.map((set, index) => {
+          if (index === setIndex) {
+            return { ...set, complete: !e.sets[setIndex].complete }
           }
+          return set
+        })
+        return {
+          ...e,
+          sets: updatedSets
         }
-        return e
-      })
-      return updatedData
+      }
+      return e
     })
+    // is possibly delayed by one checkmark? 
+    setWorkoutData(updatedData)
+
   }
 
   const Separator = () => (
@@ -316,6 +321,7 @@ export default function App() {
       ></View>
     </View>
   );
+
   // Flatlist data items structure/functionality and style
   const Item = ({ item }) => (
     <View style={{ paddingBottom: 20 }}>
@@ -478,9 +484,7 @@ export default function App() {
               keyboardType="numeric"
             />
             <BouncyCheckbox
-              // size={25}
               style={{
-                color: "white",
                 fontWeight: "bold",
                 width: "10%",
                 fontSize: 16,
@@ -492,10 +496,16 @@ export default function App() {
               disableText={true}
               onPress={() => handleCheckboxChange(item, index)}
               innerIconStyle={{
-                borderRadius: 2,
-                borderWidth: 2
+                borderRadius: 4,
+                borderWidth: 2,
               }}
-              unfillColor="#FFFFFF"
+              iconStyle={{
+                borderRadius: 6,
+              }}
+              unfillColor="white"
+              fillColor="#61FF7E"
+
+
             // text="Custom Checkbox"
             // iconStyle={{ borderColor: "red" }}
             // innerIconStyle={{ borderWidth: 2 }}
@@ -505,7 +515,9 @@ export default function App() {
         </Swipeable>
       ))
       }
+
       <Pressable
+
         style={{
           margin: 10,
           paddingLeft: 160,
@@ -586,13 +598,13 @@ export default function App() {
           bottomInset={80}
           backgroundStyle={{ backgroundColor: "#011638" }}
           style={{
-            shadowColor: "gray",
-            shadowOffset: {
-              width: 0,
-              height: 5,
-            },
-            shadowOpacity: 1,
-            shadowRadius: 16.0,
+            // shadowColor: "gray",
+            // shadowOffset: {
+            //   width: 0,
+            //   height: 5,
+            // },
+            // shadowOpacity: 1,
+            // shadowRadius: 16.0,
 
             elevation: 5,
           }}
@@ -649,8 +661,6 @@ export default function App() {
               setAddExerciseModal={setAddExerciseModal}
               workoutExercises={workoutExercises}
               setWorkoutExercises={setWorkoutExercises}
-              workoutData={workoutData}
-              setWorkoutData={setWorkoutData}
             />
           }
         </BottomSheet>
