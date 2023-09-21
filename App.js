@@ -8,15 +8,18 @@ import React, {
 } from "react";
 import {
   Text,
+  Animated,
   View,
   StyleSheet,
   Pressable,
   FlatList,
   TextInput,
   TouchableOpacity,
+  TextComponent,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { Directions, RectButton } from 'react-native-gesture-handler';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -32,20 +35,29 @@ import HistoryPage from "./components/HistoryPage";
 import ProgramPage from "./components/ProgramPage";
 import Placeholder from "./components/Placeholder";
 import ExercisePage from "./components/ExercisePage";
-import Modal from "react-native-modal";
+import ExerciseThreeDotsBottomSheet from "./components/ExerciseThreeDotsBottomSheet";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
-
 import AddExerciseModal from "./components/AddExerciseModal";
+import DraggableFlatList, {
+  ScaleDecorator,
+} from "react-native-draggable-flatlist";
+import Collapsible from 'react-native-collapsible';
+
+
 
 //             to do list
 // figure out how to create a state for workoutExercises and WorkoutData
 // instead of prop drilling the state between multiple components
 // use hookstate, redux, context, etc.
 
+// 9/6/23
+// long press to reorder exercises -> https://github.com/computerjazz/react-native-draggable-flatlist/
+// three button dropdown/bottom sheet to delete exercise -> style and finalize (make parent function that is called by component)
+// onchange for weights/reps; also, not have keyboard drop after entering one number 
+// bug with changing/updating WorkoutName
+
 // format/style sets/text input parts 
 // reorder exercises by long press and moving exercise
-// how to delete exercise -> three buttons to dropdown menu? OR do a bottom sheet/bottom modal? 
-// swipe to delete specific set
 // keep entered data in text inputs when added sets or new/removed exercises => onchange, I believe
 
 // figure out how to clear selectedExercises in this parent component?
@@ -156,8 +168,6 @@ function BottomSheetFooterComponents({
   workoutExercises
 }) {
   const cancelWorkout = ({ setWorkoutExercises }) => {
-    // why is this not clearing workoutExercises to an empty array? 
-    setWorkoutExercises([]);
     bottomSheetRef.current.close();
   };
 
@@ -199,6 +209,8 @@ export default function App() {
   const [threeButtonModal, setThreeButtonModal] = useState(false)
   const [workoutExercises, setWorkoutExercises] = useState([]);
   const [workoutData, setWorkoutData] = useState([]);
+  const [exerciseForThreeDotsBS, setExerciseForThreeDotsBS] = useState('')
+  const [collapseHandler, setCollapseHandler] = useState(false)
 
   // workout name useState
   const startOfWorkoutTime = new Date().getHours();
@@ -231,7 +243,6 @@ export default function App() {
   const [workoutName, setWorkoutName] = useState(currentWorkoutName);
 
   useEffect(() => {
-
     // determines the differences between workoutExercises (from AddExerciseModal) and workoutData
     let differences = workoutExercises.filter(exercise => {
       return !workoutData.some(exercise2 => exercise2.name === exercise.name);
@@ -259,12 +270,15 @@ export default function App() {
 
   // ref
   const bottomSheetRef = useRef(null);
+  const threeDotsBottomSheetRef = useRef(null);
+
   // snap point variables
   const snapPoints = useMemo(() => ["15%", "94%"], []);
 
   // callbacks
   const handleSheetChanges = useCallback((index) => { }, []);
 
+  // adds a new set to an exercise
   const addSet = (exerciseName) => {
     const copyOfWorkoutData = [...workoutData]
 
@@ -322,219 +336,365 @@ export default function App() {
     </View>
   );
 
-  // Flatlist data items structure/functionality and style
-  const Item = ({ item }) => (
-    <View style={{ paddingBottom: 20 }}>
-      <View
-        style={{
-          paddingRight: 20,
-          paddingLeft: 20,
-          marginBottom: 20,
-        }}
-      >
-        <Text style={styles.exerciseTitle}>{item.name}</Text>
-        <Pressable>
+  // swipeable functionality to delete one set in an exercise
+  const renderRightActions = (progress, dragX) => {
+    const trans = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0],
+    });
 
-        </Pressable>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          width: "100%",
-          paddingLeft: 20,
-          paddingRight: 20,
-          marginBottom: 10,
-        }}
-      >
-        <Text style={{
-          color: "white",
-          fontWeight: "bold",
-          width: "10%",
-          textAlign: 'center',
-          fontSize: 16,
+    const pressHandler = () => {
+
+    };
+    return (
+      <Animated.View style={{ flex: 1, transform: [{ translateX: trans }] }}>
+        <RectButton style={{
+          alignItems: 'center',
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          backgroundColor: 'red'
         }}>
-          Set
-        </Text>
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            width: "35%",
-            textAlign: "center",
+          <Text style={{
+            color: 'white',
             fontSize: 16,
-          }}
-        >
-          Previous
-        </Text>
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            width: "22.5%",
-            textAlign: "center",
-            fontSize: 16,
-          }}
-        >
-          +lbs
-        </Text>
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            width: "22.5%",
-            textAlign: "center",
-            fontSize: 16,
-          }}
-        >
-          Reps
-        </Text>
-        <Text
-          style={{
-            color: "white",
-            fontWeight: "bold",
-            width: "10%",
-            fontSize: 16,
-            textAlign: 'right'
-          }}
-        >
-          CM
-        </Text>
-      </View>
+            backgroundColor: 'transparent',
+            padding: 10,
+          }}>
+            Delete
+          </Text>
+        </RectButton>
+      </Animated.View>
+    );
+  };
 
-      {item.sets?.map((sets, index) => (
-        <Swipeable
-        // onSwipeableOpen(right)
-        // renderRightActions={rightSwipeAction}
-        >
+  // this will delete a set after a swipeable action 
+  const removeThis = (item, sets, index) => {
+    const setIndex = index
+    const exerciseName = item.name
+    const copyOfWorkoutData = [...workoutData]
+
+    copyOfWorkoutData.forEach((i) => {
+      if (i.name === exerciseName) {
+        i.sets.forEach((j, index) => {
+          if (index === setIndex) {
+            i.sets.splice(setIndex, 1)
+          }
+        })
+      }
+    })
+
+    setWorkoutData(copyOfWorkoutData)
+
+  }
+
+  // this brings up a bottom sheet with options for a specific exercise
+  const exerciseThreeDotsOptions = (item) => {
+    threeDotsBottomSheetRef.current.snapToIndex(0)
+  }
+
+  // this deletes an exercise from workoutData from ExerciseThreeDotsBottomSheet
+  function deleteExerciseFunction(exerciseName) {
+
+    const newArrayWithoutExercise = workoutData.filter(function (i) {
+      return i.name !== exerciseName
+    })
+
+    setWorkoutExercises(newArrayWithoutExercise)
+    setWorkoutData(newArrayWithoutExercise)
+    setExerciseForThreeDotsBS('')
+    threeDotsBottomSheetRef.current.forceClose()
+  }
+
+  function makeMovable() {
+    console.log('long press registered')
+  }
+
+  // const renderDraggableItem = ({ item, drag, isActive }) => {
+  //   return (
+  //     <ScaleDecorator>
+  //       <TouchableOpacity
+  //         onLongPress={drag}
+  //         disabled={isActive}
+  //         style={{ backgroundColor: isActive ? "red" : "green", padding: 25 }}
+  //       >
+  //         <Text>{item.name}</Text>
+  //       </TouchableOpacity>
+  //     </ScaleDecorator>
+  //   );
+  // };
+
+  // Flatlist data items structure/functionality and style
+  const draggableItem = ({ item, drag, isActive }) => {
+
+    const [weightChange, setWeightChange] = useState(0)
+
+    const onChangeWeight = (weight, index, item) => {
+      const exerciseName = item.name
+      const setIndex = index
+      const copyOfWorkoutData = [...workoutData]
+
+      const updatedData = copyOfWorkoutData.map((i) => {
+        if (exerciseName === i.name) {
+          const updatedSets = i.sets.map((set, index) => {
+            if (index === setIndex) {
+              return { ...set, weight: weight }
+            }
+            return set
+          })
+          return {
+            ...i,
+            sets: updatedSets
+          }
+        }
+        return i
+      })
+
+      setWorkoutData(updatedData)
+
+    }
+
+    const onChangeReps = (reps, index) => {
+      const setIndex = index
+    }
+
+    // const collapseHandlerFunction = () => {
+    //   drag
+    //   setCollapseHandler(true)
+    // }
+
+    return (
+      <ScaleDecorator>
+        <View style={{ paddingBottom: 20, backgroundColor: '#011638' }}>
           <View
             style={{
-              flexDirection: "row",
-              width: "100%",
-              paddingLeft: 20,
               paddingRight: 20,
-              // backgroundColor: "#466e67",
-              paddingTop: 8,
-              paddingBottom: 8,
-              alignItems: "center",
+              paddingLeft: 20,
+              marginBottom: 20,
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            <Text
+            <TouchableOpacity
+              onLongPress={() => {
+                setCollapseHandler(true)
+                setTimeout(() => {
+                  drag()
+                }, 300);
+              }}
+              disabled={isActive}
+            >
+              <Text style={styles.exerciseTitle}>{item.name}</Text>
+            </TouchableOpacity>
+            <Pressable onPress={() => { exerciseThreeDotsOptions(item), setExerciseForThreeDotsBS(item.name) }}>
+              <Ionicons name="ellipsis-horizontal-outline" size={30} color={'white'} />
+            </Pressable>
+          </View>
+          <Collapsible collapsed={collapseHandler} align='center'>
+            <View
               style={{
-                color: "#011638",
-                fontWeight: "bold",
-                width: "10%",
-                paddingLeft: 8,
-                fontSize: 16,
-                overflow: 'hidden',
-                backgroundColor: '#61FF7E',
-                borderWidth: 2,
-                borderRadius: 6,
-                padding: 6,
-                marginRight: 5,
-                textAlign: 'center'
+                flexDirection: "row",
+                width: "100%",
+                paddingLeft: 20,
+                paddingRight: 20,
+                marginBottom: 10,
               }}
             >
-              {index + 1}
-            </Text>
-            <Text
-              style={{
+              <Text style={{
                 color: "white",
                 fontWeight: "bold",
-                width: "35%",
-                textAlign: "center",
-              }}
-            >
-              60x8
-            </Text>
-            <TextInput
-              style={{
-                fontWeight: "bold",
-                width: "20%",
-                textAlign: "center",
-                backgroundColor: '#61FF7E',
-                borderColor: 'red',
-                borderRadius: 8,
-                paddingTop: 6,
-                paddingBottom: 6,
-                marginRight: 5,
-                color: '#011638'
-              }}
-              // onChangeText={onChangeNumber}
-              // value={number}
-              placeholder={sets.weight}
-              keyboardType="numeric"
-            />
-            <TextInput
-              style={{
-                color: "#011638",
-                fontWeight: "bold",
-                width: "20%",
-                textAlign: "center",
-                backgroundColor: '#61FF7E',
-                borderColor: 'red',
-                borderRadius: 8,
-                // padding: 6,
-                paddingTop: 6,
-                paddingBottom: 6,
-                marginRight: 5
-              }}
-              // onChangeText={onChangeNumber}
-              // value={number}
-              placeholder={sets.reps}
-              keyboardType="numeric"
-            />
-            <BouncyCheckbox
-              style={{
-                fontWeight: "bold",
                 width: "10%",
+                textAlign: 'center',
                 fontSize: 16,
-                textAlign: 'right',
-                padding: 10,
-                borderRadius: 6
+              }}>
+                Set
+              </Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  width: "35%",
+                  textAlign: "center",
+                  fontSize: 16,
+                }}
+              >
+                Previous
+              </Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  width: "22.5%",
+                  textAlign: "center",
+                  fontSize: 16,
+                }}
+              >
+                +lbs
+              </Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  width: "22.5%",
+                  textAlign: "center",
+                  fontSize: 16,
+                }}
+              >
+                Reps
+              </Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  width: "10%",
+                  fontSize: 16,
+                  textAlign: 'right'
+                }}
+              >
+                CM
+              </Text>
+            </View>
+            {item.sets?.map((sets, index) => (
+              <Swipeable
+                renderRightActions={renderRightActions}
+                onSwipeableWillOpen={() => removeThis(item, sets, index)}
+                rightThreshold={250}
+                style={{
+                  backgroundColor: '#011638'
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    width: "100%",
+                    paddingLeft: 20,
+                    paddingRight: 20,
+                    backgroundColor: "#011638",
+                    paddingTop: 8,
+                    paddingBottom: 8,
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#011638",
+                      fontWeight: "bold",
+                      width: "10%",
+                      paddingLeft: 8,
+                      fontSize: 16,
+                      overflow: 'hidden',
+                      backgroundColor: '#61FF7E',
+                      borderWidth: 2,
+                      borderRadius: 6,
+                      padding: 6,
+                      marginRight: 5,
+                      textAlign: 'center'
+                    }}
+                  >
+                    {index + 1}
+                  </Text>
+                  <Text
+                    style={{
+                      color: "white",
+                      fontWeight: "bold",
+                      width: "35%",
+                      textAlign: "center",
+                    }}
+                  >
+                    60x8
+                  </Text>
+                  <TextInput
+                    style={{
+                      fontWeight: "bold",
+                      width: "20%",
+                      textAlign: "center",
+                      backgroundColor: '#61FF7E',
+                      borderColor: 'red',
+                      borderRadius: 8,
+                      paddingTop: 6,
+                      paddingBottom: 6,
+                      marginRight: 5,
+                      color: '#011638'
+                    }}
+                    onChangeText={(weight) => onChangeWeight(weight, index, item)}
+                    value={sets.weight}
+                    placeholder={sets.weight}
+                    keyboardType="numeric"
+                    maxLength={999}
+                  />
+                  <TextInput
+                    style={{
+                      color: "#011638",
+                      fontWeight: "bold",
+                      width: "20%",
+                      textAlign: "center",
+                      backgroundColor: '#61FF7E',
+                      borderColor: 'red',
+                      borderRadius: 8,
+                      // padding: 6,
+                      paddingTop: 6,
+                      paddingBottom: 6,
+                      marginRight: 5
+                    }}
+                    onChangeText={(reps) => onChangeReps(reps, index)}
+                    // value={number}
+                    placeholder={sets.reps}
+                    keyboardType="numeric"
+                  />
+                  <BouncyCheckbox
+                    style={{
+                      fontWeight: "bold",
+                      width: "10%",
+                      fontSize: 16,
+                      textAlign: 'right',
+                      padding: 10,
+                      borderRadius: 6
+                    }}
+                    isChecked={sets.complete}
+                    disableText={true}
+                    onPress={() => handleCheckboxChange(item, index)}
+                    innerIconStyle={{
+                      borderRadius: 4,
+                      borderWidth: 2,
+                    }}
+                    iconStyle={{
+                      borderRadius: 6,
+                    }}
+                    unfillColor="white"
+                    fillColor="#61FF7E"
+
+
+                  // text="Custom Checkbox"
+                  // iconStyle={{ borderColor: "red" }}
+                  // innerIconStyle={{ borderWidth: 2 }}
+                  // textStyle={{ fontFamily: "JosefinSans-Regular" }}
+                  />
+                </View>
+              </Swipeable>
+            ))}
+            <Pressable
+              style={{
+                margin: 10,
+                paddingLeft: 160,
+                paddingRight: 50,
+                paddingTop: 13,
+                paddingBottom: 13,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: "#61FF7E",
+                backgroundColor: "#61FF7E",
               }}
-              isChecked={sets.complete}
-              disableText={true}
-              onPress={() => handleCheckboxChange(item, index)}
-              innerIconStyle={{
-                borderRadius: 4,
-                borderWidth: 2,
-              }}
-              iconStyle={{
-                borderRadius: 6,
-              }}
-              unfillColor="white"
-              fillColor="#61FF7E"
-
-
-            // text="Custom Checkbox"
-            // iconStyle={{ borderColor: "red" }}
-            // innerIconStyle={{ borderWidth: 2 }}
-            // textStyle={{ fontFamily: "JosefinSans-Regular" }}
-            />
-          </View>
-        </Swipeable>
-      ))
-      }
-
-      <Pressable
-
-        style={{
-          margin: 10,
-          paddingLeft: 160,
-          paddingRight: 50,
-          paddingTop: 13,
-          paddingBottom: 13,
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: "#61FF7E",
-          backgroundColor: "#61FF7E",
-        }}
-        onPress={() => addSet(item.name)}
-      >
-        <Text style={{ color: "#011638", fontWeight: "bold", }}>Add Set</Text>
-      </Pressable>
-    </View >
-  );
+              onPress={() => addSet(item.name)}
+            >
+              <Text style={{ color: "#011638", fontWeight: "bold", }}>Add Set</Text>
+            </Pressable>
+          </Collapsible>
+        </View >
+      </ScaleDecorator >
+    )
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -638,7 +798,7 @@ export default function App() {
               value={workoutName}
             />
           </View>
-          <FlatList
+          {/* <FlatList
             data={workoutData}
             renderItem={({ item }) => <Item item={item} />}
             keyExtractor={(item) => {
@@ -654,9 +814,25 @@ export default function App() {
                 workoutExercises={workoutExercises}
               />
             }
+          /> */}
+          <DraggableFlatList
+            data={workoutData}
+            onDragEnd={() => setCollapseHandler(false)}
+            keyExtractor={(item) => item.name}
+            renderItem={draggableItem}
+            ItemSeparatorComponent={<Separator />}
+            ListFooterComponent={() =>
+              <BottomSheetFooterComponents
+                setAddExerciseModal={setAddExerciseModal}
+                addExerciseModal={addExerciseModal}
+                bottomSheetRef={bottomSheetRef}
+                setWorkoutExercises={setWorkoutExercises}
+                workoutExercises={workoutExercises}
+              />
+            }
           />
           {
-            <AddExerciseModal
+            < AddExerciseModal
               addExerciseModal={addExerciseModal}
               setAddExerciseModal={setAddExerciseModal}
               workoutExercises={workoutExercises}
@@ -664,8 +840,9 @@ export default function App() {
             />
           }
         </BottomSheet>
+        <ExerciseThreeDotsBottomSheet threeDotsBottomSheetRef={threeDotsBottomSheetRef} deleteExerciseFunction={deleteExerciseFunction} ExerciseName={exerciseForThreeDotsBS} />
       </SafeAreaProvider>
-    </GestureHandlerRootView>
+    </GestureHandlerRootView >
   );
 }
 

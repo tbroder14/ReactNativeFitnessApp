@@ -32,8 +32,13 @@ const AddExerciseModal = ({
   const [muscleOpen, setMuscleOpen] = useState(false);
   const [equipmentOpen, setEquipmentOpen] = useState(false);
 
+
   // for tracking of exercise selection between app.js and AddExerciseModal
   const [selectedExercises, setSelectedExercises] = useState(workoutExercises);
+
+  useEffect(() => {
+    setSelectedExercises(workoutExercises)
+  }, [workoutExercises])
 
   // displaying sorted list of exercises
   const [searchBarInput, setSearchBarInput] = useState("");
@@ -150,7 +155,7 @@ const AddExerciseModal = ({
                   setAddExerciseModal(!addExerciseModal);
                 }}
               >
-                <Ionicons name="close-outline" color={"white"} size={40} />
+                <Ionicons name="close-outline" color={"white"} size={35} />
               </Pressable>
             </View>
             <View style={styles.topRowRightSide}>
@@ -276,7 +281,7 @@ const styles = StyleSheet.create({
   modalCenteredView: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
   addExerciseModalView: {
     backgroundColor: "#011638",
@@ -292,11 +297,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    padding: 10
   },
   topRow: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
+    marginBottom: 5
   },
   topRowRightSide: {
     margin: 10,
@@ -350,7 +357,7 @@ const styles = StyleSheet.create({
   textStyle: {
     color: "white",
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: 16,
     // textAlign: "center",
     // width: 10
     // flex: 1,
