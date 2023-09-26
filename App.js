@@ -25,16 +25,12 @@ import DraggableFlatList, { ScaleDecorator, } from "react-native-draggable-flatl
 import Collapsible from 'react-native-collapsible';
 
 //             to do list
-// figure out how to create a state for workoutExercises and WorkoutData instead of prop drilling the state between multiple components
-// use hookstate, redux, context, etc.
-// save to local data 
-
+// figure out how to create a state for workoutExercises and WorkoutData instead of prop drilling (i.e. use hookstate, redux, context, etc.)
+// save completed workouts or templates to local data
 // long press to reorder exercises -> https://github.com/computerjazz/react-native-draggable-flatlist/
-// three button dropdown/bottom sheet to delete exercise -> style 
+// three button dropdown/bottom sheet to delete exercise -> complete styling  
 // format/style sets/text input parts 
-// create modals to confirm cancel workout and save workout (which all determines if all sets are complete)
-// format row when set is completed 
-
+// create logic in SaveWorkoutConfirmationModal that checks if all sets are completed when hitting the "Save" button
 // remove bottom unused styles and collapse/clean-up inline styles
 // refactor code to simplify app.js; possibly move things to single component files 
 
@@ -622,20 +618,10 @@ export default function App() {
                   }}
                 >
                   <Text
-                    style={{
-                      color: "#011638",
-                      fontWeight: "bold",
-                      width: "10%",
-                      paddingLeft: 8,
-                      fontSize: 16,
-                      overflow: 'hidden',
-                      backgroundColor: '#61FF7E',
-                      borderWidth: 0,
-                      borderRadius: 6,
-                      padding: 6,
-                      marginRight: 5,
-                      textAlign: 'center'
-                    }}
+                    style={[
+                      styles.setColumn,
+                      sets.complete ? { color: 'white' } : styles.setColumnSetNotComplete
+                    ]}
                   >
                     {index + 1}
                   </Text>
@@ -650,18 +636,10 @@ export default function App() {
                     60x8
                   </Text>
                   <TextInput
-                    style={{
-                      fontWeight: "bold",
-                      width: "20%",
-                      textAlign: "center",
-                      backgroundColor: '#61FF7E',
-                      borderColor: 'red',
-                      borderRadius: 8,
-                      paddingTop: 6,
-                      paddingBottom: 6,
-                      marginRight: 5,
-                      color: '#011638'
-                    }}
+                    style={[
+                      styles.weightColumn,
+                      sets.complete ? { color: 'white' } : styles.weightColumnSetNotComplete
+                    ]}
                     onChangeText={(weight) => onChangeWeight(weight, index, item)}
                     value={sets.weight}
                     placeholder={sets.weight}
@@ -669,19 +647,11 @@ export default function App() {
                     maxLength={999}
                   />
                   <TextInput
-                    style={{
-                      color: "#011638",
-                      fontWeight: "bold",
-                      width: "20%",
-                      textAlign: "center",
-                      backgroundColor: '#61FF7E',
-                      borderColor: 'red',
-                      borderRadius: 8,
-                      // padding: 6,
-                      paddingTop: 6,
-                      paddingBottom: 6,
-                      marginRight: 5
-                    }}
+                    style={[
+                      styles.repsColumn,
+                      sets.complete ? { color: 'white' } : styles.repsColumnSetNotComplete
+
+                    ]}
                     onChangeText={(reps) => onChangeReps(reps, index, item)}
                     value={sets.reps}
                     placeholder={sets.reps}
@@ -977,5 +947,50 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: 150,
     marginLeft: 5,
+  },
+  setColumn: {
+    color: "#011638",
+    fontWeight: "bold",
+    width: "10%",
+    paddingLeft: 8,
+    fontSize: 16,
+    overflow: 'hidden',
+    padding: 6,
+    marginRight: 5,
+    textAlign: 'center'
+  },
+  setColumnSetNotComplete: {
+    backgroundColor: '#61FF7E',
+    borderWidth: 0,
+    borderRadius: 6,
+  },
+  weightColumn: {
+    fontWeight: "bold",
+    width: "20%",
+    textAlign: "center",
+    paddingTop: 6,
+    paddingBottom: 6,
+    marginRight: 5,
+    color: '#011638'
+  },
+  weightColumnSetNotComplete: {
+    backgroundColor: '#61FF7E',
+    borderColor: 'red',
+    borderRadius: 8,
+  },
+  repsColumn: {
+    color: "#011638",
+    fontWeight: "bold",
+    width: "20%",
+    textAlign: "center",
+    // padding: 6,
+    paddingTop: 6,
+    paddingBottom: 6,
+    marginRight: 5
+  },
+  repsColumnSetNotComplete: {
+    backgroundColor: '#61FF7E',
+    borderColor: 'red',
+    borderRadius: 8,
   },
 });
