@@ -38,6 +38,7 @@ const AddExerciseModal = ({
 
   useEffect(() => {
     setSelectedExercises(workoutExercises)
+    // console.log('selected exercises', selectedExercises)
   }, [workoutExercises])
 
   // displaying sorted list of exercises
@@ -102,16 +103,16 @@ const AddExerciseModal = ({
   }, [equipmentValue, muscleValue, searchBarInput, sortedExerciseList]);
 
   const handleItemPress = (item) => {
-    // add exercise to an array
-    // change the background color of the selected exercises
+    const exerciseName = item.name
 
-    if (selectedExercises.includes(item)) {
-      const arrayCopy = [...selectedExercises];
-      const newIndex = selectedExercises.indexOf(item);
-      arrayCopy.splice(newIndex, 1);
-      setSelectedExercises(arrayCopy);
-    } else {
-      setSelectedExercises((prevState) => [...prevState, item]);
+    if (selectedExercises.some(exercise => exercise.name === item.name)) {
+      const arrayWithoutExercise = selectedExercises.filter(exercise => {
+        return exerciseName !== exercise.name
+      })
+      setSelectedExercises(arrayWithoutExercise)
+    }
+    else {
+      setSelectedExercises([...selectedExercises, item]);
     }
   };
 
@@ -151,7 +152,7 @@ const AddExerciseModal = ({
               <Pressable
                 style={styles.closeExerciseModal}
                 onPress={() => {
-                  setSelectedExercises([]);
+                  // setSelectedExercises([]);
                   setAddExerciseModal(!addExerciseModal);
                 }}
               >
@@ -241,11 +242,11 @@ const AddExerciseModal = ({
           <View style={styles.listOfExercises}>
             <FlatList
               data={filterExerciseList}
-              renderItem={({ item }) => (
+              renderItem={({ item, index }) => (
                 <Item
                   item={item}
-                  handleItemPress={handleItemPress}
-                  isSelected={selectedExercises.includes(item)}
+                  handleItemPress={() => handleItemPress(item, index)}
+                  isSelected={selectedExercises.some(exercise => exercise.name === item.name)}
                 />
               )}
               keyExtractor={(item) => item.name}

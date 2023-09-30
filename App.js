@@ -33,11 +33,12 @@ import Collapsible from 'react-native-collapsible';
 // create logic in SaveWorkoutConfirmationModal that checks if all sets are completed when hitting the "Save" button
 // remove bottom unused styles and collapse/clean-up inline styles
 // refactor code to simplify app.js; possibly move things to single component files 
+// on Strong app, when you select "Add Exercises", none are selected -> meaning, you could have two more or more of the same exercise in the same workout 
 
 //             bugs
-// when the 'add set' button is pressed, it moves the sets down and messes with the formatting 
-// workoutname box shrinks and expands depending on length of name 
 // clicking "X" in AddExerciseModal should return exercises to originals and remove changes
+// if there are three sets and I delete the second one, the delete slider remains open on the (newly) second set 
+// 
 
 //             feature roadmap
 // save workoutdata to local storage
@@ -140,7 +141,9 @@ function ProgramScreen() {
 function BottomSheetFooterComponents({
   addExerciseModal,
   setAddExerciseModal,
-  setCancelWorkoutConfirmationModal
+  setCancelWorkoutConfirmationModal,
+  setWorkoutExercises,
+  workoutData
 }) {
 
   const cancelWorkout = () => {
@@ -156,7 +159,11 @@ function BottomSheetFooterComponents({
           backgroundColor: "blue",
           padding: 10,
         }}
-        onPress={() => setAddExerciseModal(!addExerciseModal)}
+        onPress={() => {
+          setAddExerciseModal(!addExerciseModal)
+          setWorkoutExercises(workoutData)
+        }
+        }
       >
         <Text style={{ color: "white", fontSize: 18, textAlign: "center" }}>
           Add Exercise
@@ -230,8 +237,13 @@ export default function App() {
 
   useEffect(() => {
 
+    // try filter and some stuff here 
+    // const results = arrayOne.filter(({ value: id1 }) => !arrayTwo.some(({ value: id2 }) => id2 === id1));
+
+
     // determines if any exercises in workoutExercise aren't formatted properly 
-    let newExercise = workoutExercises.filter(exercise => !workoutData.includes(exercise))
+    let newExercise = workoutExercises.filter((exercise) => !workoutData.some((exercise2) => exercise2.name === exercise.name))
+    // console.log('newExercise', newExercise)
 
     // formats new exercises to proper format with sets 
     newExercise.forEach((i) => {
@@ -247,16 +259,65 @@ export default function App() {
       ];
     })
 
-    // checks to see if workoutExercises and workoutData have the same exercises after adding/removing exercises from AddExerciseModal
-    const exercisesToRemove = workoutData.filter(exercise => !workoutExercises.includes(exercise));
+    const exerciseToBeRemoved = workoutData.filter((exercise) => !workoutExercises.some((exercise2) => exercise2.name === exercise.name))
+    // console.log('exerciseToBeRemoved', exerciseToBeRemoved)
 
-    // removes exercise from workoutData
-    const filteredWorkoutData = workoutData.filter(exercise => !exercisesToRemove.includes(exercise))
+    // const results = arrayOne.filter(({ value: id1 }) => !arrayTwo.some(({ value: id2 }) => id2 === id1));
+    const filteredWorkoutData = workoutData.filter((exercise) => !exerciseToBeRemoved.some((exercise2) => exercise2.name === exercise.name));
+    // console.log('filteredWorkoutData', filteredWorkoutData)
 
-    // combines two arrays 
     const updatedWorkoutData = [...filteredWorkoutData, ...newExercise]
 
     setWorkoutData(updatedWorkoutData)
+
+    // if (workoutData.length === 0) {
+    //   const newExercises = workoutExercises.map(i => {
+    //     i.sets = [{
+    //       weight: "50",
+    //       reps: "10",
+    //       distance: "0",
+    //       seconds: "0",
+    //       notes: "",
+    //       complete: false,
+    //     }]
+
+    //     return i
+    //   })
+
+    //   setWorkoutData(workoutExercises)
+
+    // } else {
+    //   const newWorkouts = workoutExercises.map(i => {
+    //     let found = false
+    //     let exerciseObject
+    //     workoutData.forEach(j => {
+    //       if (j.name === i.name) {
+    //         found = true
+    //         exerciseObject = j
+    //       }
+    //     });
+
+    //     return found ? exerciseObject : i
+
+    //   })
+
+    //   const newWorkoutsWithSets = newWorkouts.map(i => {
+    //     if (i.sets) return
+
+    //     i.sets = [{
+    //       weight: "50",
+    //       reps: "10",
+    //       distance: "0",
+    //       seconds: "0",
+    //       notes: "",
+    //       complete: false,
+    //     }]
+    //   })
+    //   setWorkoutData(newWorkoutsWithSets)
+    // }
+
+    // console.log('here ------------> ', workoutData)
+
   }, [workoutExercises]);
 
   // ref
@@ -271,9 +332,8 @@ export default function App() {
 
   // adds a new set to an exercise
   const addSet = (exerciseName) => {
-    const copyOfWorkoutData = [...workoutData]
 
-    copyOfWorkoutData.forEach((i) => {
+    copyOfWorkoutData = workoutData.map((i) => {
       if (exerciseName === i.name) {
         const newSet = {
           weight: "50",
@@ -283,7 +343,20 @@ export default function App() {
           notes: "",
           complete: false,
         }
-        i.sets.push(newSet)
+
+        const newObj = {
+          equipment: i.equipment,
+          muscle: i.muscle,
+          name: i.name,
+          sets: [
+            ...i.sets,
+            newSet
+          ]
+        }
+        return newObj
+
+      } else {
+        return i
       }
     })
 
@@ -312,11 +385,12 @@ export default function App() {
     })
     // is possibly delayed by one checkmark? 
     setWorkoutData(updatedData)
+    // console.log(workoutData)
 
   }
 
   const Separator = () => (
-    <View style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 20 }}>
+    <View style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 10 }}>
       <View
         style={{
           height: 1,
@@ -337,6 +411,7 @@ export default function App() {
     const pressHandler = () => {
 
     };
+
     return (
       <Animated.View style={{ flex: 1, transform: [{ translateX: trans }] }}>
         <RectButton style={{
@@ -391,8 +466,13 @@ export default function App() {
       return i.name !== exerciseName
     })
 
-    setWorkoutExercises(newArrayWithoutExercise)
+    // console.log('newArrayDeletedExercise', newArrayWithoutExercise)
+    // let newExercise = workoutExercises.filter((exercise) => !workoutData.some((exercise2) => exercise2.name === exercise.name))
+
+    // do I need to update setWorkoutExercises? Yes, to make sure the exercises in AddExerciseModal are as updated as possible 
+    // console.log('workoutExercises', workoutExercises)
     setWorkoutData(newArrayWithoutExercise)
+    setWorkoutExercises(newArrayWithoutExercise)
     setExerciseForThreeDotsBS('')
     threeDotsBottomSheetRef.current.forceClose()
   }
@@ -531,7 +611,7 @@ export default function App() {
               <Ionicons name="ellipsis-horizontal-outline" size={30} color={'white'} />
             </Pressable>
           </View>
-          <Collapsible collapsed={collapseHandler} align='center'>
+          <Collapsible collapsed={collapseHandler} >
             <View
               style={{
                 flexDirection: "row",
@@ -650,7 +730,6 @@ export default function App() {
                     style={[
                       styles.repsColumn,
                       sets.complete ? { color: 'white' } : styles.repsColumnSetNotComplete
-
                     ]}
                     onChangeText={(reps) => onChangeReps(reps, index, item)}
                     value={sets.reps}
@@ -658,14 +737,7 @@ export default function App() {
                     keyboardType="numeric"
                   />
                   <BouncyCheckbox
-                    style={{
-                      fontWeight: "bold",
-                      width: "10%",
-                      fontSize: 16,
-                      textAlign: 'right',
-                      padding: 10,
-                      borderRadius: 6
-                    }}
+                    style={styles.bouncyCheckmark}
                     isChecked={sets.complete}
                     disableText={true}
                     onPress={() => handleCheckboxChange(item, index)}
@@ -783,6 +855,8 @@ export default function App() {
               justifyContent: "center",
               alignItems: "center",
               paddingTop: 10,
+              paddingLeft: 20,
+              paddingRight: 20,
               marginBottom: 20,
             }}
           >
@@ -798,8 +872,10 @@ export default function App() {
                 borderWidth: 2,
                 paddingTop: 15,
                 paddingBottom: 15,
-                paddingRight: 35,
-                paddingLeft: 35,
+                paddingRight: 15,
+                paddingLeft: 15,
+                flex: 1,
+                textAlign: 'center'
               }}
               value={workoutName}
               onChange={updateName}
@@ -842,6 +918,7 @@ export default function App() {
                 setWorkoutExercises={setWorkoutExercises}
                 workoutExercises={workoutExercises}
                 setWorkoutData={setWorkoutData}
+                workoutData={workoutData}
                 setCancelWorkoutConfirmationModal={setCancelWorkoutConfirmationModal}
               />
             }
@@ -993,4 +1070,12 @@ const styles = StyleSheet.create({
     borderColor: 'red',
     borderRadius: 8,
   },
+  bouncyCheckmark: {
+    fontWeight: "bold",
+    width: "10%",
+    fontSize: 16,
+    textAlign: 'right',
+    padding: 10,
+    borderRadius: 6
+  }
 });
