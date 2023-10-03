@@ -243,7 +243,6 @@ export default function App() {
 
     // determines if any exercises in workoutExercise aren't formatted properly 
     let newExercise = workoutExercises.filter((exercise) => !workoutData.some((exercise2) => exercise2.name === exercise.name))
-    // console.log('newExercise', newExercise)
 
     // formats new exercises to proper format with sets 
     newExercise.forEach((i) => {
@@ -260,11 +259,9 @@ export default function App() {
     })
 
     const exerciseToBeRemoved = workoutData.filter((exercise) => !workoutExercises.some((exercise2) => exercise2.name === exercise.name))
-    // console.log('exerciseToBeRemoved', exerciseToBeRemoved)
 
     // const results = arrayOne.filter(({ value: id1 }) => !arrayTwo.some(({ value: id2 }) => id2 === id1));
     const filteredWorkoutData = workoutData.filter((exercise) => !exerciseToBeRemoved.some((exercise2) => exercise2.name === exercise.name));
-    // console.log('filteredWorkoutData', filteredWorkoutData)
 
     const updatedWorkoutData = [...filteredWorkoutData, ...newExercise]
 
@@ -385,7 +382,6 @@ export default function App() {
     })
     // is possibly delayed by one checkmark? 
     setWorkoutData(updatedData)
-    // console.log(workoutData)
 
   }
 
@@ -466,11 +462,6 @@ export default function App() {
       return i.name !== exerciseName
     })
 
-    // console.log('newArrayDeletedExercise', newArrayWithoutExercise)
-    // let newExercise = workoutExercises.filter((exercise) => !workoutData.some((exercise2) => exercise2.name === exercise.name))
-
-    // do I need to update setWorkoutExercises? Yes, to make sure the exercises in AddExerciseModal are as updated as possible 
-    // console.log('workoutExercises', workoutExercises)
     setWorkoutData(newArrayWithoutExercise)
     setWorkoutExercises(newArrayWithoutExercise)
     setExerciseForThreeDotsBS('')
@@ -497,9 +488,7 @@ export default function App() {
 
   function saveWorkout() {
     setSaveWorkoutConfirmationModal(true)
-    // do we want a confirmation message to appear? 
-    // console.log('this workout would be saved')
-    // console.log(workoutData)
+    // do we want a confirmation message to appear?
 
     // const testFinalWorkoutData =
     //
@@ -517,8 +506,6 @@ export default function App() {
     //   workoutName,
     //   workoutData
     // }
-
-    // console.log(finalWorkoutData)
 
     // clear workoutdata back to nothing
     // clear workout exercises 
@@ -944,6 +931,9 @@ export default function App() {
             < SaveWorkoutConfirmationModal
               setSaveWorkoutConfirmationModal={setSaveWorkoutConfirmationModal}
               setWorkoutData={setWorkoutData}
+              workoutName={workoutName}
+              dateWithoutTime={dateWithoutTime}
+              workoutData={workoutData}
               setWorkoutExercises={setWorkoutExercises}
               saveWorkoutConfirmationModal={saveWorkoutConfirmationModal}
               closeBottomSheet={closeBottomSheet}

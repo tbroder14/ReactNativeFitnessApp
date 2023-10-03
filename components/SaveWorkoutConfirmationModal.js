@@ -12,7 +12,10 @@ const SaveWorkoutConfirmationModal = ({
     setWorkoutData,
     setWorkoutExercises,
     saveWorkoutConfirmationModal,
-    closeBottomSheet
+    closeBottomSheet,
+    workoutName,
+    dateWithoutTime,
+    workoutData
 }) => {
 
     return (
@@ -38,6 +41,13 @@ const SaveWorkoutConfirmationModal = ({
                                     backgroundColor: 'green'
                                 }}
                                 onPress={() => {
+                                    const finalWorkoutData = {
+                                        date: dateWithoutTime,
+                                        workoutName,
+                                        workoutData
+                                    }
+
+                                    console.log('finalworkoutdata', finalWorkoutData)
                                     setWorkoutExercises([])
                                     setWorkoutData([])
                                     closeBottomSheet()
