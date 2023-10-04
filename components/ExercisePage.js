@@ -12,6 +12,7 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import { sortedExerciseList } from "./data.js";
 import Modal from "react-native-modal";
+import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
 
 //             to do list
 // figure out how to unselect muscle and/or equipment dropdown selections
@@ -27,6 +28,9 @@ const ExercisePage = () => {
   const [equipmentValue, setEquipmentValue] = useState(null);
   const [muscleOpen, setMuscleOpen] = useState(false);
   const [equipmentOpen, setEquipmentOpen] = useState(false);
+
+  // brings up modal to create new exercise
+  const [createNewExercise, setCreateNewExercise] = useState(false)
 
   // displaying sorted list of exercises
   const [searchBarInput, setSearchBarInput] = useState("");
@@ -156,13 +160,26 @@ const ExercisePage = () => {
   const ListHeader = () => {
     return (
       <View style={[styles.container]}>
-        <View style={{ marginBottom: 10 }}>
+        <View style={{ marginBottom: 15, flexDirection: 'row', gap: 20 }}>
+          <Pressable style={{
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: 'white',
+            padding: 10,
+            marginLeft: 20
+          }}
+            onPress={() => setCreateNewExercise(true)}>
+            <Text style={{
+              color: "#D3D3D3",
+              fontSize: 14,
+            }}>Add</Text>
+          </Pressable>
           <Text
             style={{
               color: "#D3D3D3",
-              fontSize: 40,
+              fontSize: 30,
               // paddingLeft: 20,
-              paddingBottom: 10,
+              // paddingBottom: 10,
               textAlign: "center",
             }}
           >
@@ -235,15 +252,17 @@ const ExercisePage = () => {
               selectedItemContainerStyle={{
                 backgroundColor: "black",
               }}
-              // listItemLabelStyle={{
-              //     color: "red"
-              // }}
+            // listItemLabelStyle={{
+            //     color: "red"
+            // }}
             />
           </View>
+          <CreateNewExerciseModal createNewExercise={createNewExercise} setCreateNewExercise={setCreateNewExercise} />
         </View>
       </View>
     );
   };
+
 
   return (
     <FlatList
@@ -272,8 +291,10 @@ const ExercisePage = () => {
           ) : null}
         </View>
       )}
+
     />
   );
+
 };
 
 const styles = StyleSheet.create({

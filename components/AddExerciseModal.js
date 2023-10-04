@@ -12,6 +12,7 @@ import { sortedExerciseList } from "./data.js";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import DropDownPicker from "react-native-dropdown-picker";
 import { FlatList } from "react-native-gesture-handler";
+import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
 
 //             to do list
 //
@@ -32,6 +33,8 @@ const AddExerciseModal = ({
   const [muscleOpen, setMuscleOpen] = useState(false);
   const [equipmentOpen, setEquipmentOpen] = useState(false);
 
+  // brings up modal to create new exercise
+  const [createNewExercise, setCreateNewExercise] = useState(false)
 
   // for tracking of exercise selection between app.js and AddExerciseModal
   const [selectedExercises, setSelectedExercises] = useState(workoutExercises);
@@ -273,6 +276,13 @@ const AddExerciseModal = ({
             />
           </View>
         </View>
+        <CreateNewExerciseModal
+          createNewExercise={createNewExercise}
+          setCreateNewExercise={setCreateNewExercise}
+          addExerciseModal={addExerciseModal}
+          setAddExerciseModal={setAddExerciseModal}
+        />
+
       </View>
     </Modal >
   );
