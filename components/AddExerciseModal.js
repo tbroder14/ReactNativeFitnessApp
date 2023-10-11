@@ -35,6 +35,7 @@ const AddExerciseModal = ({
 
   // brings up modal to create new exercise
   const [createNewExercise, setCreateNewExercise] = useState(false)
+  const [comingFromAddExerciseModal, setComingFromAddExerciseModal] = useState(true)
 
   // for tracking of exercise selection between app.js and AddExerciseModal
   const [selectedExercises, setSelectedExercises] = useState(workoutExercises);
@@ -151,7 +152,6 @@ const AddExerciseModal = ({
         <View style={styles.addExerciseModalView}>
           <View style={styles.topRow}>
             <View style={styles.topRowLeftSide}>
-              {/* BUG: when below pressable is clicked, does not include selected exercise already present when addExerciseModal is reopened */}
               <Pressable
                 style={styles.closeExerciseModal}
                 onPress={() => {
@@ -160,6 +160,13 @@ const AddExerciseModal = ({
                 }}
               >
                 <Ionicons name="close-outline" color={"white"} size={35} />
+              </Pressable>
+              <Pressable style={{
+                paddingTop: 10,
+                paddingLeft: 8
+              }}
+                onPress={() => setCreateNewExercise(true)}>
+                <Text style={styles.textStyle}>New</Text>
               </Pressable>
             </View>
             <View style={styles.topRowRightSide}>
@@ -281,6 +288,8 @@ const AddExerciseModal = ({
           setCreateNewExercise={setCreateNewExercise}
           addExerciseModal={addExerciseModal}
           setAddExerciseModal={setAddExerciseModal}
+          comingFromAddExerciseModal={comingFromAddExerciseModal}
+          setComingFromAddExerciseModal={setComingFromAddExerciseModal}
         />
 
       </View>
@@ -316,6 +325,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 5
   },
+  topRowLeftSide: {
+    flexDirection: 'row'
+  }
+  ,
   topRowRightSide: {
     margin: 10,
   },

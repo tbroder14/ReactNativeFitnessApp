@@ -1,14 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  TextInput,
-  FlatList,
-  ScrollView,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { Text, View, StyleSheet, TextInput, FlatList, Pressable, TouchableOpacity } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { sortedExerciseList } from "./data.js";
 import Modal from "react-native-modal";
@@ -34,10 +25,9 @@ const ExercisePage = () => {
 
   // displaying sorted list of exercises
   const [searchBarInput, setSearchBarInput] = useState("");
-  const [filterExerciseList, setFilterExerciseList] =
-    useState(sortedExerciseList);
   const [muscleSort, setMuscleSort] = useState(null);
   const [equipmentSort, setEquipmentSort] = useState(null);
+  const [filterExerciseList, setFilterExerciseList] = useState(sortedExerciseList);
 
   // for exercise modal
   const [exerciseModal, setExerciseModal] = useState(false);
@@ -65,6 +55,27 @@ const ExercisePage = () => {
     { label: "Machine", value: "machine" },
     { label: "Other", value: "other" },
   ];
+
+  // useFocusEffect(
+
+  //   useCallback(() => {
+  //     const getData = async () => {
+  //       try {
+  //         const jsonValue = await AsyncStorage.getItem('masterExerciseList');
+  //         const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+  //         setHistoryData(jsonValue)
+  //         console.log('retrieved data')
+  //         console.log(historyData)
+  //       } catch (e) {
+  //         // error reading value
+  //         console.log(e)
+  //       }
+  //     };
+
+  //     getData()
+  //   }, [historyData])
+  // );
+
 
   useEffect(() => {
     let filteredList = sortedExerciseList;

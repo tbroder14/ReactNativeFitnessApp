@@ -1,5 +1,6 @@
 import { Text, View, StyleSheet, Pressable, } from "react-native";
 import Modal from "react-native-modal";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //             to do list
 //
@@ -15,7 +16,8 @@ const SaveWorkoutConfirmationModal = ({
     closeBottomSheet,
     workoutName,
     dateWithoutTime,
-    workoutData
+    workoutData,
+    currentWorkoutName
 }) => {
 
     return (
@@ -41,17 +43,39 @@ const SaveWorkoutConfirmationModal = ({
                                     backgroundColor: 'green'
                                 }}
                                 onPress={() => {
-                                    const finalWorkoutData = {
+                                    const finalWorkoutData = [{
                                         date: dateWithoutTime,
                                         workoutName,
                                         workoutData
-                                    }
+                                    }]
 
                                     console.log('finalworkoutdata', finalWorkoutData)
-                                    setWorkoutExercises([])
-                                    setWorkoutData([])
-                                    closeBottomSheet()
-                                    setSaveWorkoutConfirmationModal(false)
+
+                                    const storeData = async (finalWorkoutData) => {
+                                        try {
+                                            const jsonValue = JSON.stringify(finalWorkoutData);
+                                            // const oldData = await AsyncStorage.getItem('history')
+                                            // const stringifiedFinalWorkoutData = JSON.stringify(finalWorkoutData)
+                                            // const updatedData = [...oldData, stringifiedFinalWorkoutData]
+                                            // get already existing data
+                                            // add new workout data to existing data
+                                            // set item of combined data to storage 
+
+                                            await AsyncStorage.setItem('history', jsonValue);
+                                            console.log('item saved')
+
+                                            setWorkoutExercises([])
+                                            setWorkoutData([])
+                                            closeBottomSheet()
+                                            onChangeWorkoutName(currentWorkoutName)
+                                            setSaveWorkoutConfirmationModal(false)
+                                        } catch (e) {
+                                            // saving error
+                                            console.log(e)
+                                        }
+                                    };
+                                    storeData(finalWorkoutData)
+
                                 }}
                             >
                                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 24 }}>Save Workout</Text>

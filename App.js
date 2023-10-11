@@ -28,6 +28,7 @@ import Collapsible from 'react-native-collapsible';
 // figure out how to create a state for workoutExercises and WorkoutData instead of prop drilling (i.e. use hookstate, redux, context, etc.)
 // save completed workouts or templates to local data
 // long press to reorder exercises -> https://github.com/computerjazz/react-native-draggable-flatlist/
+// saving new order of collapisble exercises 
 // three button dropdown/bottom sheet to delete exercise -> complete styling  
 // format/style sets/text input parts 
 // create logic in SaveWorkoutConfirmationModal that checks if all sets are completed when hitting the "Save" button
@@ -38,7 +39,8 @@ import Collapsible from 'react-native-collapsible';
 //             bugs
 // clicking "X" in AddExerciseModal should return exercises to originals and remove changes
 // if there are three sets and I delete the second one, the delete slider remains open on the (newly) second set 
-// 
+// when changing workoutName, keyboard stays up
+// workoutName edits remain between saving of multiple workouts 
 
 //             feature roadmap
 // save workoutdata to local storage
@@ -143,11 +145,16 @@ function BottomSheetFooterComponents({
   setAddExerciseModal,
   setCancelWorkoutConfirmationModal,
   setWorkoutExercises,
-  workoutData
+  workoutData,
+  closeBottomSheet
 }) {
 
   const cancelWorkout = () => {
-    setCancelWorkoutConfirmationModal(true)
+    if (workoutData.length === 0) {
+      closeBottomSheet()
+    } else {
+      setCancelWorkoutConfirmationModal(true)
+    }
   };
 
 
@@ -199,6 +206,7 @@ export default function App() {
   const [collapseHandler, setCollapseHandler] = useState(false)
 
   // workout name useState
+
   const startOfWorkoutTime = new Date().getHours();
   const currentDate = new Date();
   const year = currentDate.getFullYear();
@@ -225,11 +233,12 @@ export default function App() {
   } else {
     currentWorkoutName = currentTemplate.name;
   }
+  const [workoutName, onChangeWorkoutName] = useState(currentWorkoutName);
 
-  const [workoutName, setWorkoutName] = useState(currentWorkoutName);
-  function updateName() {
-    setWorkoutName()
-  }
+  // function updateName(text) {
+  //   console.log(text)
+  //   setWorkoutName(text)
+  // }
 
   const closeBottomSheet = () => {
     bottomSheetRef.current.close()
@@ -493,8 +502,9 @@ export default function App() {
     // const testFinalWorkoutData =
     //
     //   date: "5/14/2012",
-    //   exerciseName:
     //   workoutName: workoutName,
+
+    //   exerciseName:
     //   equipment: "",
     //   set: [
     //     { weight: "50", reps: "10", distance: "0", seconds: "0", notes: "" },
@@ -789,6 +799,7 @@ export default function App() {
                     break;
                   case "History":
                     iconName = "bar-chart";
+                    //load history data
                     break;
                   case "Start Workout":
                     iconName = "add-outline";
@@ -865,7 +876,8 @@ export default function App() {
                 textAlign: 'center'
               }}
               value={workoutName}
-              onChange={updateName}
+              onChange={onChangeWorkoutName}
+              placeholder={currentWorkoutName}
             />
             <Pressable
               style={{ borderColor: 'white', borderRadius: 10, borderWidth: 2 }}
@@ -907,6 +919,7 @@ export default function App() {
                 setWorkoutData={setWorkoutData}
                 workoutData={workoutData}
                 setCancelWorkoutConfirmationModal={setCancelWorkoutConfirmationModal}
+                closeBottomSheet={closeBottomSheet}
               />
             }
           />
@@ -937,6 +950,8 @@ export default function App() {
               setWorkoutExercises={setWorkoutExercises}
               saveWorkoutConfirmationModal={saveWorkoutConfirmationModal}
               closeBottomSheet={closeBottomSheet}
+              onChangeWorkoutName={onChangeWorkoutName}
+              currentWorkoutName={currentWorkoutName}
             />
           }
         </BottomSheet>
