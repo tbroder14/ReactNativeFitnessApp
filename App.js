@@ -246,10 +246,6 @@ export default function App() {
 
   useEffect(() => {
 
-    // try filter and some stuff here 
-    // const results = arrayOne.filter(({ value: id1 }) => !arrayTwo.some(({ value: id2 }) => id2 === id1));
-
-
     // determines if any exercises in workoutExercise aren't formatted properly 
     let newExercise = workoutExercises.filter((exercise) => !workoutData.some((exercise2) => exercise2.name === exercise.name))
 
@@ -268,61 +264,9 @@ export default function App() {
     })
 
     const exerciseToBeRemoved = workoutData.filter((exercise) => !workoutExercises.some((exercise2) => exercise2.name === exercise.name))
-
-    // const results = arrayOne.filter(({ value: id1 }) => !arrayTwo.some(({ value: id2 }) => id2 === id1));
     const filteredWorkoutData = workoutData.filter((exercise) => !exerciseToBeRemoved.some((exercise2) => exercise2.name === exercise.name));
-
     const updatedWorkoutData = [...filteredWorkoutData, ...newExercise]
-
     setWorkoutData(updatedWorkoutData)
-
-    // if (workoutData.length === 0) {
-    //   const newExercises = workoutExercises.map(i => {
-    //     i.sets = [{
-    //       weight: "50",
-    //       reps: "10",
-    //       distance: "0",
-    //       seconds: "0",
-    //       notes: "",
-    //       complete: false,
-    //     }]
-
-    //     return i
-    //   })
-
-    //   setWorkoutData(workoutExercises)
-
-    // } else {
-    //   const newWorkouts = workoutExercises.map(i => {
-    //     let found = false
-    //     let exerciseObject
-    //     workoutData.forEach(j => {
-    //       if (j.name === i.name) {
-    //         found = true
-    //         exerciseObject = j
-    //       }
-    //     });
-
-    //     return found ? exerciseObject : i
-
-    //   })
-
-    //   const newWorkoutsWithSets = newWorkouts.map(i => {
-    //     if (i.sets) return
-
-    //     i.sets = [{
-    //       weight: "50",
-    //       reps: "10",
-    //       distance: "0",
-    //       seconds: "0",
-    //       notes: "",
-    //       complete: false,
-    //     }]
-    //   })
-    //   setWorkoutData(newWorkoutsWithSets)
-    // }
-
-    // console.log('here ------------> ', workoutData)
 
   }, [workoutExercises]);
 

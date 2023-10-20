@@ -91,34 +91,28 @@ const CreateNewExerciseModal = ({
                                     equipment: equipmentValue
                                 }
 
-                                // console.log(finalNewExercise)
+                                // format object if equipment is barbell, dumbbells, machine, cable, or kettlebells to include it in the name
+                                // or just include all of them in the name? even bodyweight/other
+                                // what about weighted push-ups or pull-ups or something? how should I format those? 
+                                // 
+
 
                                 // logic that prevents savings when 
                                 const storeData = async (finalNewExercise) => {
                                     try {
-                                        // testing 
-                                        const dataBefore = await AsyncStorage.getItem('masterExerciseList');
-                                        console.log('data before', dataBefore)
-                                        // end testing 
-
                                         const oldData = await AsyncStorage.getItem('masterExerciseList')
+                                        const parsedOldData = JSON.parse(oldData)
+                                        console.log('parsed old data:', parsedOldData)
                                         if (oldData === null) {
-                                            await AsyncStorage.setItem('masterExerciseList', JSON.stringify(finalNewExercise));
+                                            await AsyncStorage.setItem('masterExerciseList', JSON.stringify([finalNewExercise]));
 
                                         } else {
-                                            const updatedData = [oldData, finalNewExercise]
-                                            // console.log('updatedData', updatedData)
-                                            // const parsedUpdatedData = JSON.parse(updatedData)
-                                            // console.log('parsedUpdatedData', parsedUpdatedData)
-                                            await AsyncStorage.setItem('masterExerciseList', JSON.stringify(updatedData));
+                                            parsedOldData.push(finalNewExercise)
+                                            await AsyncStorage.setItem('masterExerciseList', JSON.stringify(parsedOldData));
                                         }
-
-                                        // testing 
-                                        const dataAfter = await AsyncStorage.getItem('masterExerciseList');
-                                        console.log('data after', dataAfter)
-                                        // end testing 
-
                                         console.log('item saved')
+                                        const currentData = await AsyncStorage.getItem('masterExerciseList')
+                                        console.log('current data:', currentData)
                                         setCreateNewExercise(false)
                                     } catch (e) {
                                         // saving error
@@ -126,7 +120,6 @@ const CreateNewExerciseModal = ({
                                     }
                                 };
                                 storeData(finalNewExercise)
-
                             }}>
                             <Text>Save</Text>
                         </Pressable>
