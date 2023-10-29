@@ -153,8 +153,8 @@ const mainData = [
   },
 ];
 
-const sortedExerciseList = exerciseList.sort((a, b) =>
+const baseExerciseList = exerciseList.sort((a, b) =>
   a.name.localeCompare(b.name)
 );
 
-export { muscle, equipment, sortedExerciseList, mainData };
+export { muscle, equipment, baseExerciseList, mainData };

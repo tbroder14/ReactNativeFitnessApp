@@ -20,7 +20,7 @@ import ExerciseThreeDotsBottomSheet from "./components/ExerciseThreeDotsBottomSh
 import CancelWorkoutConfirmationModal from "./components/CancelWorkoutConfirmationModal";
 import SaveWorkoutConfirmationModal from "./components/SaveWorkoutConfirmationModal";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
-import AddExerciseModal from "./components/AddExerciseModal";
+import AddExerciseToWorkoutModal from "./components/AddExerciseToWorkoutModal";
 import DraggableFlatList, { ScaleDecorator, } from "react-native-draggable-flatlist";
 import Collapsible from 'react-native-collapsible';
 
@@ -111,7 +111,7 @@ function HistoryScreen() {
         flex: 1,
         backgroundColor: "#011638",
         paddingTop: insets.top,
-        paddingBottom: insets.bottom,
+        // paddingBottom: insets.bottom,
         paddingLeft: insets.left,
         paddingRight: insets.right,
       }}
@@ -206,13 +206,13 @@ export default function App() {
   const [collapseHandler, setCollapseHandler] = useState(false)
 
   // workout name useState
-
   const startOfWorkoutTime = new Date().getHours();
   const currentDate = new Date();
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
   const day = currentDate.getDate();
   const dateWithoutTime = new Date(year, month - 1, day);
+  // const Date(year, month, day, hours, minutes, seconds)
   let currentTemplate = null;
   let currentWorkoutName = "";
 
@@ -868,7 +868,7 @@ export default function App() {
             }
           />
           {
-            < AddExerciseModal
+            < AddExerciseToWorkoutModal
               addExerciseModal={addExerciseModal}
               setAddExerciseModal={setAddExerciseModal}
               workoutExercises={workoutExercises}

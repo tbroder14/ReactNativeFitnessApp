@@ -1,17 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Text, View, StyleSheet, Pressable, } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { TextInput } from "react-native-gesture-handler";
 import Modal from "react-native-modal";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
 
-
-const CreateNewExerciseModal = ({
-    setCreateNewExercise,
-    createNewExercise,
-}) => {
+const CreateNewExerciseModal = ({ setCreateNewExercise, createNewExercise, completeExerciseList }) => {
 
     // for react-native-dropdown-picker
     const [muscleValue, setMuscleValue] = useState(null);
@@ -30,20 +25,20 @@ const CreateNewExerciseModal = ({
         setMuscleOpen(false);
     }, []);
 
-    clearAll = async () => {
+    deleteData = async () => {
         try {
-            await AsyncStorage.clear()
+            await AsyncStorage.removeItem('userAddedExerciseList')
         } catch (e) {
-            // clear error
+            // remove error
         }
 
-        console.log('Done.')
+        console.log('All history data has been deleted.')
     }
-
     const muscles = [
         { label: 'Biceps', value: 'biceps' },
         { label: 'Triceps', value: 'triceps' },
         { label: 'Chest', value: 'chest' },
+        { label: 'Shoulders', value: 'shoulders' },
         { label: 'Hamstrings', value: 'hamstrings' },
         { label: 'Quadriceps', value: 'quadriceps' },
         { label: 'Glutes', value: 'glutes' },
@@ -75,7 +70,6 @@ const CreateNewExerciseModal = ({
                         <Pressable
                             style={styles.closeExerciseModal}
                             onPress={() => {
-                                // setSelectedExercises([]);
                                 setCreateNewExercise(false)
                             }}
                         >
@@ -85,41 +79,55 @@ const CreateNewExerciseModal = ({
                         <Pressable
                             style={{ borderColor: 'black', borderWidth: 2, borderRadius: 6, padding: 10 }}
                             onPress={() => {
-                                const finalNewExercise = {
-                                    name: newExercise,
-                                    muscle: muscleValue,
-                                    equipment: equipmentValue
-                                }
-
-                                // format object if equipment is barbell, dumbbells, machine, cable, or kettlebells to include it in the name
-                                // or just include all of them in the name? even bodyweight/other
-                                // what about weighted push-ups or pull-ups or something? how should I format those? 
-                                // 
-
-
-                                // logic that prevents savings when 
-                                const storeData = async (finalNewExercise) => {
-                                    try {
-                                        const oldData = await AsyncStorage.getItem('masterExerciseList')
-                                        const parsedOldData = JSON.parse(oldData)
-                                        console.log('parsed old data:', parsedOldData)
-                                        if (oldData === null) {
-                                            await AsyncStorage.setItem('masterExerciseList', JSON.stringify([finalNewExercise]));
-
-                                        } else {
-                                            parsedOldData.push(finalNewExercise)
-                                            await AsyncStorage.setItem('masterExerciseList', JSON.stringify(parsedOldData));
+                                // prevents saving new exercise when equipmentValue or muscleValue are not selected or textInput is not entered
+                                if (newExercise === '' || equipmentValue === null || muscleValue === null) {
+                                    console.log('not all information entered --> exercise will not be submitted')
+                                } else {
+                                    //formats exercise properly 
+                                    let finalNewExercise = {}
+                                    const newExerciseNameTrimmed = newExercise.trim()
+                                    if (equipmentValue === 'barbell' || equipmentValue === 'dumbbells' || equipmentValue === 'machine' || equipmentValue === 'cable' || equipmentValue === 'kettlebell') {
+                                        finalNewExercise = {
+                                            name: newExerciseNameTrimmed + ' (' + equipmentValue[0].toUpperCase() + equipmentValue.substring(1) + ')',
+                                            muscle: muscleValue,
+                                            equipment: equipmentValue
                                         }
-                                        console.log('item saved')
-                                        const currentData = await AsyncStorage.getItem('masterExerciseList')
-                                        console.log('current data:', currentData)
-                                        setCreateNewExercise(false)
-                                    } catch (e) {
-                                        // saving error
-                                        console.log(e)
+                                    } else {
+                                        finalNewExercise = {
+                                            name: newExerciseNameTrimmed,
+                                            muscle: muscleValue,
+                                            equipment: equipmentValue
+                                        }
                                     }
-                                };
-                                storeData(finalNewExercise)
+
+                                    // check and see if exercise already exists, if yes, throw catch 
+                                    // can I do this within the try/catch? instead of here? 
+
+                                    // else stores new exercise
+                                    const storeData = async (finalNewExercise) => {
+                                        try {
+                                            const oldData = await AsyncStorage.getItem('userAddedExerciseList')
+                                            const parsedOldData = JSON.parse(oldData)
+                                            console.log('parsed old data:', parsedOldData)
+                                            if (oldData === null) {
+                                                await AsyncStorage.setItem('userAddedExerciseList', JSON.stringify([finalNewExercise]));
+
+                                            } else {
+                                                parsedOldData.push(finalNewExercise)
+                                                await AsyncStorage.setItem('userAddedExerciseList', JSON.stringify(parsedOldData));
+                                            }
+                                            console.log('item saved')
+                                            const currentData = await AsyncStorage.getItem('userAddedExerciseList')
+                                            console.log('current data:', currentData)
+                                            completeExerciseList()
+                                            setCreateNewExercise(false)
+                                        } catch (e) {
+                                            // saving error
+                                            console.log(e)
+                                        }
+                                    };
+                                    storeData(finalNewExercise)
+                                }
                             }}>
                             <Text>Save</Text>
                         </Pressable>
@@ -192,7 +200,7 @@ const CreateNewExerciseModal = ({
                         />
                     </View>
                     <View style={{ justifyContent: 'flex-end', alignItems: 'center' }}>
-                        <Pressable style={{ padding: 25, borderRadius: 10, borderWidth: 2, borderColor: 'white', backgroundColor: 'red' }} onPress={clearAll}>
+                        <Pressable style={{ padding: 25, borderRadius: 10, borderWidth: 2, borderColor: 'white', backgroundColor: 'red' }} onPress={deleteData}>
                             <Text style={{ color: 'white', fontSize: 20, fontWeight: 700 }}>DELETE ALL DATA</Text>
                         </Pressable>
                     </View>

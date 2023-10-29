@@ -1,6 +1,6 @@
-import { Text, View, StyleSheet, Pressable, } from "react-native";
+import { Text, View, StyleSheet, Pressable } from "react-native";
 import Modal from "react-native-modal";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //             to do list
 //
@@ -17,8 +17,17 @@ const SaveWorkoutConfirmationModal = ({
     workoutName,
     dateWithoutTime,
     workoutData,
-    currentWorkoutName
+    currentWorkoutName,
 }) => {
+
+    const startOfWorkoutTime = new Date().getHours();
+    const currentDate = new Date();
+    // const year = currentDate.getFullYear();
+    // const month = currentDate.getMonth() + 1;
+    // const day = currentDate.getDate();
+    // const dateWithoutTime = new Date(year, month - 1, day);
+    // const Date(year, month, day, hours, minutes, seconds)
+    // const endOfWorkoutTime = new Date(year, month, day, hours, minutes)
 
     return (
         <Modal
@@ -29,56 +38,76 @@ const SaveWorkoutConfirmationModal = ({
             <View style={styles.modalCenteredView}>
                 <View style={styles.addExerciseModalView}>
                     <View>
-                        <View style={{
-                            paddingBottom: 25,
-                            paddingTop: 25
-
-                        }}>
+                        <View
+                            style={{
+                                paddingBottom: 25,
+                                paddingTop: 25,
+                            }}
+                        >
                             <Pressable
                                 style={{
                                     padding: 15,
                                     borderRadius: 10,
                                     borderWidth: 2,
-                                    borderColor: 'green',
-                                    backgroundColor: 'green'
+                                    borderColor: "green",
+                                    backgroundColor: "green",
                                 }}
                                 onPress={() => {
-                                    const finalWorkoutData = [{
-                                        date: dateWithoutTime,
-                                        workoutName,
-                                        workoutData
-                                    }]
+                                    // check for all sets to be completed
 
-                                    console.log('finalworkoutdata', finalWorkoutData)
+                                    // save workout data
+                                    const finalWorkoutData = [
+                                        {
+                                            date: currentDate,
+                                            workoutName,
+                                            workoutData,
+                                        },
+                                    ];
+
+                                    console.log("final workout data", finalWorkoutData);
 
                                     const storeData = async (finalWorkoutData) => {
                                         try {
-                                            const jsonValue = JSON.stringify(finalWorkoutData);
-                                            // const oldData = await AsyncStorage.getItem('history')
-                                            // const stringifiedFinalWorkoutData = JSON.stringify(finalWorkoutData)
-                                            // const updatedData = [...oldData, stringifiedFinalWorkoutData]
-                                            // get already existing data
-                                            // add new workout data to existing data
-                                            // set item of combined data to storage 
+                                            const oldHistoryData = await AsyncStorage.getItem(
+                                                "history"
+                                            );
+                                            const parsedOldHistoryData = JSON.parse(oldHistoryData);
+                                            if (oldHistoryData === null) {
+                                                await AsyncStorage.setItem(
+                                                    "history",
+                                                    JSON.stringify([finalWorkoutData])
+                                                );
+                                            } else {
+                                                parsedOldHistoryData.unshift(finalWorkoutData);
+                                                await AsyncStorage.setItem(
+                                                    "history",
+                                                    JSON.stringify(parsedOldHistoryData)
+                                                );
+                                            }
+                                            console.log("workout saved");
 
-                                            await AsyncStorage.setItem('history', jsonValue);
-                                            console.log('item saved')
+                                            // verifies workout data was saved
+                                            const currentData = await AsyncStorage.getItem("history");
+                                            console.log("current workout data:", currentData);
 
-                                            setWorkoutExercises([])
-                                            setWorkoutData([])
-                                            closeBottomSheet()
-                                            onChangeWorkoutName(currentWorkoutName)
-                                            setSaveWorkoutConfirmationModal(false)
+                                            setWorkoutExercises([]);
+                                            setWorkoutData([]);
+                                            closeBottomSheet();
+                                            // onChangeWorkoutName(currentWorkoutName)
+                                            setSaveWorkoutConfirmationModal(false);
                                         } catch (e) {
                                             // saving error
-                                            console.log(e)
+                                            console.log(e);
                                         }
                                     };
-                                    storeData(finalWorkoutData)
-
+                                    storeData(finalWorkoutData);
                                 }}
                             >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 24 }}>Save Workout</Text>
+                                <Text
+                                    style={{ color: "white", textAlign: "center", fontSize: 24 }}
+                                >
+                                    Save Workout
+                                </Text>
                             </Pressable>
                         </View>
                         <View>
@@ -87,21 +116,24 @@ const SaveWorkoutConfirmationModal = ({
                                     padding: 15,
                                     borderRadius: 10,
                                     borderWidth: 2,
-                                    borderColor: 'blue',
-                                    backgroundColor: 'blue'
+                                    borderColor: "blue",
+                                    backgroundColor: "blue",
                                 }}
                                 onPress={() => {
-                                    setSaveWorkoutConfirmationModal(false)
+                                    setSaveWorkoutConfirmationModal(false);
                                 }}
                             >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 24 }}>Resume</Text>
+                                <Text
+                                    style={{ color: "white", textAlign: "center", fontSize: 24 }}
+                                >
+                                    Resume
+                                </Text>
                             </Pressable>
                         </View>
                     </View>
-
                 </View>
             </View>
-        </Modal >
+        </Modal>
     );
 };
 
@@ -109,7 +141,7 @@ const styles = StyleSheet.create({
     modalCenteredView: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
     },
     addExerciseModalView: {
         backgroundColor: "#011638",
@@ -125,7 +157,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-        padding: 10
+        padding: 10,
     },
 });
 

@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  Pressable,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import { Text, View, StyleSheet, Pressable, TextInput, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
-import { sortedExerciseList } from "./data.js";
+import { baseExerciseList } from "./data.js";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import DropDownPicker from "react-native-dropdown-picker";
 import { FlatList } from "react-native-gesture-handler";
@@ -20,12 +13,7 @@ import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
 //             feature roadmap
 // asdf
 
-const AddExerciseModal = ({
-  addExerciseModal,
-  setAddExerciseModal,
-  workoutExercises,
-  setWorkoutExercises,
-}) => {
+const AddExerciseModal = ({ addExerciseModal, setAddExerciseModal, workoutExercises, setWorkoutExercises, }) => {
 
   // for react-native-dropdown-picker
   const [muscleValue, setMuscleValue] = useState(null);
@@ -47,7 +35,7 @@ const AddExerciseModal = ({
 
   // displaying sorted list of exercises
   const [searchBarInput, setSearchBarInput] = useState("");
-  const [filterExerciseList, setFilterExerciseList] = useState(sortedExerciseList);
+  const [filterExerciseList, setFilterExerciseList] = useState(baseExerciseList);
   const [muscleSort, setMuscleSort] = useState(null);
   const [equipmentSort, setEquipmentSort] = useState(null);
 
@@ -75,7 +63,7 @@ const AddExerciseModal = ({
   ];
 
   useEffect(() => {
-    let filteredList = sortedExerciseList;
+    let filteredList = baseExerciseList;
 
     // this is just for testing
     if (muscleValue == "clear") {
@@ -104,7 +92,7 @@ const AddExerciseModal = ({
     }
 
     setFilterExerciseList(filteredList);
-  }, [equipmentValue, muscleValue, searchBarInput, sortedExerciseList]);
+  }, [equipmentValue, muscleValue, searchBarInput, baseExerciseList]);
 
   const handleItemPress = (item) => {
     const exerciseName = item.name

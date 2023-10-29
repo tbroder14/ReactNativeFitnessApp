@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TextInput, FlatList, Pressable, TouchableOpacity } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { sortedExerciseList } from "./data.js";
+import { baseExerciseList } from "./data.js";
 import Modal from "react-native-modal";
 import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ExerciseModal from "./ExerciseModal.js"
 
 //             to do list
 // figure out how to unselect muscle and/or equipment dropdown selections
@@ -27,7 +29,8 @@ const ExercisePage = () => {
   const [searchBarInput, setSearchBarInput] = useState("");
   const [muscleSort, setMuscleSort] = useState(null);
   const [equipmentSort, setEquipmentSort] = useState(null);
-  const [filterExerciseList, setFilterExerciseList] = useState(sortedExerciseList);
+  const [filterExerciseList, setFilterExerciseList] = useState([]);
+  const [masterExerciseList, setMasterExerciseList] = useState([])
 
   // for exercise modal
   const [exerciseModal, setExerciseModal] = useState(false);
@@ -56,33 +59,12 @@ const ExercisePage = () => {
     { label: "Other", value: "other" },
   ];
 
-  // useFocusEffect(
-
-  //   useCallback(() => {
-  //     const getData = async () => {
-  //       try {
-  //         const jsonValue = await AsyncStorage.getItem('masterExerciseList');
-  //         const data = jsonValue != null ? JSON.parse(jsonValue) : null;
-  //         setHistoryData(jsonValue)
-  //         console.log('retrieved data')
-  //         console.log(historyData)
-  //       } catch (e) {
-  //         // error reading value
-  //         console.log(e)
-  //       }
-  //     };
-
-  //     getData()
-  //   }, [historyData])
-  // );
-
-
   useEffect(() => {
-    let filteredList = sortedExerciseList;
+    let filteredList = masterExerciseList;
 
     // this is just for testing
     if (muscleValue == "clear") {
-      setFilterExerciseList(filteredList);
+      setFilterExerciseList(completeExerciseList);
       return;
     }
     // end testing
@@ -107,14 +89,36 @@ const ExercisePage = () => {
     }
 
     setFilterExerciseList(filteredList);
-  }, [equipmentValue, muscleValue, searchBarInput, sortedExerciseList]);
+  }, [equipmentValue, muscleValue, searchBarInput, baseExerciseList]);
 
-  const handleItemPress = (itemName) => {
+  useEffect(() => {
+    completeExerciseList()
+  }, [])
+
+  const completeExerciseList = async () => {
+    try {
+      const oldData = await AsyncStorage.getItem('userAddedExerciseList')
+      const parsedOldData = JSON.parse(oldData)
+      if (oldData === null) {
+        setFilterExerciseList(baseExerciseList)
+
+      } else {
+        // console.log('parsedOldData:', parsedOldData)
+        const combinedArrays = parsedOldData.concat(baseExerciseList)
+        const sortedCombinedArrays = combinedArrays.sort((a, b) => a.name.localeCompare(b.name))
+        setMasterExerciseList(sortedCombinedArrays)
+        setFilterExerciseList(sortedCombinedArrays)
+      }
+    } catch (e) {
+      // saving error
+      console.log(e)
+    }
+  };
+
+  function handleItemPress(itemName) {
     setExerciseNameForModal(itemName);
     setExerciseModal(true);
   };
-
-  let filteredList = sortedExerciseList;
 
   const Item = ({ name, handleItemPress }) => (
     <TouchableOpacity onPress={() => handleItemPress(name)}>
@@ -127,46 +131,6 @@ const ExercisePage = () => {
   const Separator = () => (
     <View style={{ height: 1, width: "100%", backgroundColor: "white" }}></View>
   );
-
-  const ModalComponent = () => {
-    return (
-      <View style={styles.centeredView}>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          isVisible={exerciseModal}
-          onRequestClose={() => {
-            setExerciseModal(!exerciseModal);
-          }}
-        >
-          <View style={styles.modalCenteredView}>
-            <View style={styles.modalView}>
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  rowGap: 20,
-                }}
-              >
-                <Pressable
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => {
-                    setExerciseModal(!exerciseModal);
-                    setExerciseNameForModal(undefined);
-                  }}
-                >
-                  <Text style={styles.textStyle}>X</Text>
-                </Pressable>
-                <Text style={styles.modalText}>{exerciseNameForModal}</Text>
-                <Text style={styles.textStyle}>Edit</Text>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      </View>
-    );
-  };
 
   const ListHeader = () => {
     return (
@@ -268,7 +232,8 @@ const ExercisePage = () => {
             // }}
             />
           </View>
-          <CreateNewExerciseModal createNewExercise={createNewExercise} setCreateNewExercise={setCreateNewExercise} />
+          <CreateNewExerciseModal createNewExercise={createNewExercise} setCreateNewExercise={setCreateNewExercise} completeExerciseList={completeExerciseList} />
+          <ExerciseModal exerciseModal={exerciseModal} setExerciseModal={setExerciseModal} exerciseNameForModal={exerciseNameForModal} setExerciseNameForModal={setExerciseNameForModal} />
         </View>
       </View>
     );
@@ -280,11 +245,10 @@ const ExercisePage = () => {
       style={{ marginTop: 50, borderRadius: 10 }}
       data={filterExerciseList}
       stickyHeaderIndices={[0]}
-      renderItem={({ item }) => <Item name={item.name} />}
+      renderItem={({ item }) => <Item name={item.name} handleItemPress={handleItemPress} />}
       keyExtractor={(item) => item.name}
       ListHeaderComponent={<ListHeader />}
       ListHeaderComponentStyle={{ backgroundColor: "#011638" }}
-      ListFooterComponent={<ModalComponent />}
       ItemSeparatorComponent={<Separator />}
       ListEmptyComponent={() => (
         <View>

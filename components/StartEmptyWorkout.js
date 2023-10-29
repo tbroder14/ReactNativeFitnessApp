@@ -1,14 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
-    Text,
-    View,
-    StyleSheet,
-    TextInput,
-    FlatList,
-    Pressable,
-    TouchableOpacity,
-    Button
-} from "react-native";
+import { Text, View, StyleSheet, TextInput, FlatList, Pressable, TouchableOpacity, Button } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { sortedExerciseList } from "./data.js";
 // import Modal from "react-native-modal";
