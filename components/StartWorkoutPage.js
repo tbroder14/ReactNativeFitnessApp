@@ -25,9 +25,18 @@ import { hookstate, useHookstate } from "@hookstate/core";
 //
 //
 
-const StartWorkoutPage = ({ bottomSheetRef }) => {
+const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime, newTemplateBottomSheetRef }) => {
   // for start empty workout modal
   const [startEmptyWorkoutModal, setStartEmptyWorkoutModal] = useState(false);
+
+  // const date = new Date()
+  // const dateToLocaleString = date.toLocaleString(("en-US"))
+  // console.log('dateToLocalString', dateToLocaleString)
+  const newTemplateBottomSheet = () => {
+    newTemplateBottomSheetRef.current.snapToIndex(0)
+  }
+
+  // onPress={() => { exerciseThreeDotsOptions(item), setExerciseForThreeDotsBS(item.name) }}
 
   const [test, setTest] = useState("press me");
 
@@ -71,6 +80,7 @@ const StartWorkoutPage = ({ bottomSheetRef }) => {
             width: 150,
             borderRadius: 20,
           }}
+          onPress={() => newTemplateBottomSheet()}
         >
           <Text
             style={{
@@ -99,6 +109,9 @@ const StartWorkoutPage = ({ bottomSheetRef }) => {
           }}
           onPress={() => {
             bottomSheetRef.current?.snapToIndex(1);
+            const date = new Date()
+            const dateToLocaleString = date.toLocaleString(("en-US"))
+            setStartOfWorkoutDateAndTime(dateToLocaleString)
           }}
         >
           <Text

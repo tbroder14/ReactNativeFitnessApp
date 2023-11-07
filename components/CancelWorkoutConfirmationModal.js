@@ -12,7 +12,8 @@ const CancelWorkoutConfirmationModal = ({
     setWorkoutData,
     setWorkoutExercises,
     cancelWorkoutConfirmationModal,
-    closeBottomSheet
+    closeBottomSheet,
+    setStartOfWorkoutDateAndTime
 }) => {
 
     return (
@@ -41,6 +42,7 @@ const CancelWorkoutConfirmationModal = ({
                                     setWorkoutExercises([])
                                     setWorkoutData([])
                                     closeBottomSheet()
+                                    setStartOfWorkoutDateAndTime('')
                                     setCancelWorkoutConfirmationModal(false)
                                 }}
                             >

@@ -200,8 +200,8 @@ const CreateNewExerciseModal = ({ setCreateNewExercise, createNewExercise, compl
                         />
                     </View>
                     <View style={{ justifyContent: 'flex-end', alignItems: 'center' }}>
-                        <Pressable style={{ padding: 25, borderRadius: 10, borderWidth: 2, borderColor: 'white', backgroundColor: 'red' }} onPress={deleteData}>
-                            <Text style={{ color: 'white', fontSize: 20, fontWeight: 700 }}>DELETE ALL DATA</Text>
+                        <Pressable style={{ padding: 20, borderRadius: 10, borderWidth: 2, borderColor: 'white', backgroundColor: 'red' }} onPress={deleteData}>
+                            <Text style={{ color: 'white', fontSize: 16, fontWeight: 700 }}>DELETE ALL EXERCISE DATA</Text>
                         </Pressable>
                     </View>
                 </View>

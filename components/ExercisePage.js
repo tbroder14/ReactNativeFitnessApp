@@ -5,7 +5,7 @@ import { baseExerciseList } from "./data.js";
 import Modal from "react-native-modal";
 import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ExerciseModal from "./ExerciseModal.js"
+import ExerciseModalForExercisePage from "./ExerciseModalForExercisePage.js"
 
 //             to do list
 // figure out how to unselect muscle and/or equipment dropdown selections
@@ -170,6 +170,7 @@ const ExercisePage = () => {
               padding: 10,
               backgroundColor: "#D3D3D3",
               fontWeight: "bold",
+              borderRadius: 5
             }}
             onChangeText={(newText) => setSearchBarInput(newText)}
           />
@@ -233,7 +234,7 @@ const ExercisePage = () => {
             />
           </View>
           <CreateNewExerciseModal createNewExercise={createNewExercise} setCreateNewExercise={setCreateNewExercise} completeExerciseList={completeExerciseList} />
-          <ExerciseModal exerciseModal={exerciseModal} setExerciseModal={setExerciseModal} exerciseNameForModal={exerciseNameForModal} setExerciseNameForModal={setExerciseNameForModal} />
+          <ExerciseModalForExercisePage exerciseModal={exerciseModal} setExerciseModal={setExerciseModal} exerciseNameForModal={exerciseNameForModal} setExerciseNameForModal={setExerciseNameForModal} />
         </View>
       </View>
     );

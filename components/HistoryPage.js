@@ -20,7 +20,7 @@ const HistoryPage = () => {
         try {
             const oldData = await AsyncStorage.getItem('history')
             const parsedOldData = JSON.parse(oldData)
-            console.log('parsed old data', parsedOldData)
+            // console.log('parsed old data', parsedOldData)
             setHistoryData(parsedOldData)
         } catch (e) {
             // saving error
@@ -38,47 +38,42 @@ const HistoryPage = () => {
         console.log('All history data has been deleted.')
     }
     const Item = ({ item }) => (
-        <TouchableOpacity style={{ padding: 15 }}>
-            <View style={{ borderRadius: 10, backgroundColor: 'white', padding: 15, borderColor: 'red', borderWidth: 3 }}>
-                <Text>{item[0].workoutName}</Text>
-                <Text>{item[0].date}</Text>
+        <Pressable style={{ padding: 12 }} key={item[0].id}>
+            <View style={{ borderRadius: 10, backgroundColor: '#011638', padding: 15, borderColor: '#61FF7E', borderWidth: 3 }} >
+                <Text style={{ color: 'white' }}>{item[0].workoutName}</Text>
+                <Text style={{ paddingBottom: 10, color: 'white' }}>{item[0].date}</Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: 'white' }}></View>
                 {item[0].workoutData.map((i) => (
-                    <View style={{ paddingBottom: 10 }}>
-                        <Text>{i.name}</Text>
-                        <Text>{i.equipment}</Text>
-                        {i.sets.map((j) => (
-                            <Text>
-                                {j.reps}
-                                {j.weight}
+                    <View style={{ paddingBottom: 5, paddingTop: 10 }} key={i.name}>
+                        <Text style={{ fontWeight: 700, color: 'white' }}>{i.name}</Text>
+                        {i.sets.map((j, index) => (
+                            <Text style={{ color: 'white' }} key={index}>
+                                Set {index + 1}: {j.weight} lbs x {j.reps} reps
                             </Text>
                         ))}
                     </View>
                 ))}
             </View>
-        </TouchableOpacity>
+        </Pressable>
     );
 
 
-    const Separator = () => (
-        <View style={{ height: 1, width: "100%", backgroundColor: "white" }}></View>
-    );
+    // const Separator = () => (
+    //     <View style={{ height: 1, width: "100%", backgroundColor: "white" }}></View>
+    // );
 
-    // const Footer = () => {
-    //     <View style={{ alignItems: 'center' }}>
-    //         <Pressable style={{ padding: 10, borderRadius: 10, borderWidth: 2, borderColor: 'white', backgroundColor: 'red' }} onPress={deleteData}>
-    //             <Text style={{ color: 'white', fontSize: 20, fontWeight: 700 }}>DELETE ALL DATA</Text>
-    //         </Pressable>
-    //     </View>
-    // }
+    const Footer = () => {
+        return (<View style={{ alignItems: 'center', paddingBottom: 25, paddingTop: 15 }}>
+            <Pressable style={{ padding: 10, borderRadius: 10, borderWidth: 2, borderColor: 'white', backgroundColor: 'red' }} onPress={deleteData}>
+                <Text style={{ color: 'white', fontSize: 20, fontWeight: 700 }}>DELETE ALL HISTORY DATA</Text>
+            </Pressable>
+        </View>
+        )
+    }
 
     const ListHeader = () => {
         return (
             <View style={[styles.container]}>
-                <View style={{ alignItems: 'center' }}>
-                    <Pressable style={{ padding: 10, borderRadius: 10, borderWidth: 2, borderColor: 'white', backgroundColor: 'red' }} onPress={deleteData}>
-                        <Text style={{ color: 'white', fontSize: 20, fontWeight: 700 }}>DELETE DATA</Text>
-                    </Pressable>
-                </View>
                 <View style={{}}>
                     <Text
                         style={{
@@ -103,12 +98,12 @@ const HistoryPage = () => {
             style={{ marginTop: 10 }}
             data={historyData}
             stickyHeaderIndices={[0]}
-            renderItem={({ item }) => <Item item={item} />}
-            keyExtractor={(item) => item.workoutName}
+            renderItem={({ item }) => <Item item={item} key={item.id} />}
+            keyExtractor={(item) => item.id}
             ListHeaderComponent={<ListHeader />}
             ListHeaderComponentStyle={{ backgroundColor: "#011638" }}
-            ItemSeparatorComponent={<Separator />}
-        // ListFooterComponent={<Footer />}
+            // ItemSeparatorComponent={<Separator />}
+            ListFooterComponent={<Footer />}
         // ListFooterComponentStyle={{}}
         />
     );

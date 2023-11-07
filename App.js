@@ -19,15 +19,18 @@ import ExercisePage from "./components/ExercisePage";
 import ExerciseThreeDotsBottomSheet from "./components/ExerciseThreeDotsBottomSheet";
 import CancelWorkoutConfirmationModal from "./components/CancelWorkoutConfirmationModal";
 import SaveWorkoutConfirmationModal from "./components/SaveWorkoutConfirmationModal";
+import NotAllSetsCompleteAlertModal from "./components/NotAllSetsCompleteAlertModal"
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import NewTemplate from "./components/NewTemplate";
 import AddExerciseToWorkoutModal from "./components/AddExerciseToWorkoutModal";
 import DraggableFlatList, { ScaleDecorator, } from "react-native-draggable-flatlist";
 import Collapsible from 'react-native-collapsible';
 
 //             to do list
 // figure out how to create a state for workoutExercises and WorkoutData instead of prop drilling (i.e. use hookstate, redux, context, etc.)
-// save completed workouts or templates to local data
+// save templates to local data
 // long press to reorder exercises -> https://github.com/computerjazz/react-native-draggable-flatlist/
+// update exercise list from Start Empty Workout to have utilize async storage and update the create New Exercise functionality 
 // saving new order of collapisble exercises 
 // three button dropdown/bottom sheet to delete exercise -> complete styling  
 // format/style sets/text input parts 
@@ -84,7 +87,7 @@ function PlaceholderScreen() {
   );
 }
 
-function StartWorkoutScreen({ bottomSheetRef }) {
+function StartWorkoutScreen({ bottomSheetRef, startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime, newTemplateBottomSheetRef }) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -97,7 +100,7 @@ function StartWorkoutScreen({ bottomSheetRef }) {
         paddingRight: insets.right,
       }}
     >
-      <StartWorkoutPage bottomSheetRef={bottomSheetRef} />
+      <StartWorkoutPage bottomSheetRef={bottomSheetRef} startOfWorkoutDateAndTime={startOfWorkoutDateAndTime} setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime} newTemplateBottomSheetRef={newTemplateBottomSheetRef} />
     </View>
   );
 }
@@ -199,11 +202,13 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [addExerciseModal, setAddExerciseModal] = useState(false);
   const [saveWorkoutConfirmationModal, setSaveWorkoutConfirmationModal] = useState(false)
+  const [notAllSetsCompleteAlert, setNotAllSetsCompleteAlert] = useState(false)
   const [cancelWorkoutConfirmationModal, setCancelWorkoutConfirmationModal] = useState(false)
   const [workoutExercises, setWorkoutExercises] = useState([]);
   const [workoutData, setWorkoutData] = useState([]);
   const [exerciseForThreeDotsBS, setExerciseForThreeDotsBS] = useState('')
   const [collapseHandler, setCollapseHandler] = useState(false)
+  const [startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime] = useState('')
 
   // workout name useState
   const startOfWorkoutTime = new Date().getHours();
@@ -273,6 +278,8 @@ export default function App() {
   // ref
   const bottomSheetRef = useRef(null);
   const threeDotsBottomSheetRef = useRef(null);
+  const newTemplateBottomSheetRef = useRef(null)
+  console.log(newTemplateBottomSheetRef)
 
   // snap point variables
   const snapPoints = useMemo(() => ["15%", "94%"], []);
@@ -404,7 +411,7 @@ export default function App() {
   }
 
   // this brings up a bottom sheet with options for a specific exercise
-  const exerciseThreeDotsOptions = (item) => {
+  const exerciseThreeDotsOptions = () => {
     threeDotsBottomSheetRef.current.snapToIndex(0)
   }
 
@@ -439,31 +446,22 @@ export default function App() {
   //   );
   // };
 
-  function saveWorkout() {
-    setSaveWorkoutConfirmationModal(true)
-    // do we want a confirmation message to appear?
+  const saveWorkout = () => {
 
-    // const testFinalWorkoutData =
-    //
-    //   date: "5/14/2012",
-    //   workoutName: workoutName,
+    const areAllSetsComplete = workoutData.every(exercise =>
+      exercise.sets.every(set => set.complete === true)
+    );
 
-    //   exerciseName:
-    //   equipment: "",
-    //   set: [
-    //     { weight: "50", reps: "10", distance: "0", seconds: "0", notes: "" },
-    //     { weight: "60", reps: "8", distance: "0", seconds: "0", notes: "" }]
-    // }
+    console.log('areAllSetsComplete', areAllSetsComplete)
 
-    // const finalWorkoutData = {
-    //   date: dateWithoutTime,
-    //   workoutName,
-    //   workoutData
-    // }
+    if (areAllSetsComplete) {
+      console.log('all sets are complete')
+      setSaveWorkoutConfirmationModal(true)
+    } else {
+      console.log('not all sets are complete')
+      setNotAllSetsCompleteAlert(true)
+    }
 
-    // clear workoutdata back to nothing
-    // clear workout exercises 
-    // 
   }
 
   // Flatlist data items structure/functionality and style
@@ -522,6 +520,10 @@ export default function App() {
     //   drag
     //   setCollapseHandler(true)
     // }
+
+    const updateWorkoutDataAfterDragEnd = (workoutData) => {
+      console.log(workoutData)
+    }
 
     return (
       <ScaleDecorator>
@@ -771,7 +773,7 @@ export default function App() {
             <Tab.Screen
               name="Start Workout"
               children={() => (
-                <StartWorkoutScreen bottomSheetRef={bottomSheetRef} />
+                <StartWorkoutScreen bottomSheetRef={bottomSheetRef} startOfWorkoutDateAndTime={startOfWorkoutDateAndTime} setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime} newTemplateBottomSheetRef={newTemplateBottomSheetRef} />
               )}
             />
             <Tab.Screen name="Exercise" component={ExerciseScreen} />
@@ -825,7 +827,7 @@ export default function App() {
             />
             <Pressable
               style={{ borderColor: 'white', borderRadius: 10, borderWidth: 2 }}
-              onPress={saveWorkout}
+              onPress={(workoutData) => saveWorkout(workoutData)}
             >
               <Text style={{ color: 'white', padding: 15 }}>Save</Text>
             </Pressable>
@@ -849,6 +851,7 @@ export default function App() {
           /> */}
           <DraggableFlatList
             data={workoutData}
+            // onDragEnd={updateWorkoutDataAfterDragEnd(workoutData)}
             onDragEnd={() => setCollapseHandler(false)}
             keyExtractor={(item) => item.name}
             renderItem={draggableItem}
@@ -882,6 +885,7 @@ export default function App() {
               setWorkoutExercises={setWorkoutExercises}
               cancelWorkoutConfirmationModal={cancelWorkoutConfirmationModal}
               closeBottomSheet={closeBottomSheet}
+              setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
             />
           }
           {
@@ -896,10 +900,32 @@ export default function App() {
               closeBottomSheet={closeBottomSheet}
               onChangeWorkoutName={onChangeWorkoutName}
               currentWorkoutName={currentWorkoutName}
+              startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
+              setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
             />
           }
+          {
+            < NotAllSetsCompleteAlertModal
+              notAllSetsCompleteAlert={notAllSetsCompleteAlert}
+              setNotAllSetsCompleteAlert={setNotAllSetsCompleteAlert}
+            // setSaveWorkoutConfirmationModal={setSaveWorkoutConfirmationModal}
+            // setWorkoutData={setWorkoutData}
+            // workoutName={workoutName}
+            // dateWithoutTime={dateWithoutTime}
+            // workoutData={workoutData}
+            // setWorkoutExercises={setWorkoutExercises}
+            // saveWorkoutConfirmationModal={saveWorkoutConfirmationModal}
+            // closeBottomSheet={closeBottomSheet}
+            // onChangeWorkoutName={onChangeWorkoutName}
+            // currentWorkoutName={currentWorkoutName}
+            // startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
+            // setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
+            />
+          }
+
         </BottomSheet>
         <ExerciseThreeDotsBottomSheet threeDotsBottomSheetRef={threeDotsBottomSheetRef} deleteExerciseFunction={deleteExerciseFunction} ExerciseName={exerciseForThreeDotsBS} />
+        <NewTemplate newTemplateBottomSheetRef={newTemplateBottomSheetRef} />
       </SafeAreaProvider>
     </GestureHandlerRootView >
   );

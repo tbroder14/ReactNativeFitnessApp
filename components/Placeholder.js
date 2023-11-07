@@ -6,7 +6,7 @@ import {
     BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
 
-const App = () => {
+const Placeholder = () => {
     // // hooks
     // const sheetRef = useRef(null);
 
@@ -80,4 +80,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default App;
+export default Placeholder;

@@ -1,6 +1,9 @@
 import { Text, View, StyleSheet, Pressable } from "react-native";
 import Modal from "react-native-modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
+
 
 //             to do list
 //
@@ -15,11 +18,13 @@ const SaveWorkoutConfirmationModal = ({
     saveWorkoutConfirmationModal,
     closeBottomSheet,
     workoutName,
-    dateWithoutTime,
     workoutData,
     currentWorkoutName,
+    startOfWorkoutDateAndTime,
+    setStartOfWorkoutDateAndTime
 }) => {
 
+    console.log('StartOfWorkoutDateAndTime', startOfWorkoutDateAndTime)
     const startOfWorkoutTime = new Date().getHours();
     const currentDate = new Date();
     // const year = currentDate.getFullYear();
@@ -54,11 +59,12 @@ const SaveWorkoutConfirmationModal = ({
                                 }}
                                 onPress={() => {
                                     // check for all sets to be completed
-
+                                    const workoutUniqueID = uuidv4()
                                     // save workout data
                                     const finalWorkoutData = [
                                         {
-                                            date: currentDate,
+                                            id: workoutUniqueID,
+                                            date: startOfWorkoutDateAndTime,
                                             workoutName,
                                             workoutData,
                                         },
@@ -94,6 +100,7 @@ const SaveWorkoutConfirmationModal = ({
                                             setWorkoutData([]);
                                             closeBottomSheet();
                                             // onChangeWorkoutName(currentWorkoutName)
+                                            setStartOfWorkoutDateAndTime('')
                                             setSaveWorkoutConfirmationModal(false);
                                         } catch (e) {
                                             // saving error
