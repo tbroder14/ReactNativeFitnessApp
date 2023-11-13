@@ -24,7 +24,7 @@ const SaveWorkoutConfirmationModal = ({
     setStartOfWorkoutDateAndTime
 }) => {
 
-    console.log('StartOfWorkoutDateAndTime', startOfWorkoutDateAndTime)
+    // console.log('StartOfWorkoutDateAndTime', startOfWorkoutDateAndTime)
     const startOfWorkoutTime = new Date().getHours();
     const currentDate = new Date();
     // const year = currentDate.getFullYear();

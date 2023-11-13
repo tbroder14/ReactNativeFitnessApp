@@ -1,12 +1,25 @@
 import { useState, useCallback } from "react";
-import { Text, View, StyleSheet, Pressable, } from "react-native";
+import { Text, View, StyleSheet, Pressable } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { TextInput } from "react-native-gesture-handler";
 import Modal from "react-native-modal";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { helperFunctions } from "../functions/helperFunctions.js";
+import { useStore } from "../src/store.js";
 
-const CreateNewExerciseModal = ({ setCreateNewExercise, createNewExercise, completeExerciseList }) => {
+const CreateNewExerciseModal = ({
+    setFilterExerciseList,
+    setAddExerciseToWorkoutModal,
+    createNewExerciseModal,
+    setCreateNewExerciseModal
+}) => {
+
+    // global states
+    const comingFromStartEmptyWorkout = useStore(state => state.comingFromStartEmptyWorkout);
+    const toggleComingFromStartEmptyWorkout = useStore(state => state.toggleComingFromStartEmptyWorkout);
+    const comingFromExercisePage = useStore(state => state.comingFromExercisePage);
+    const toggleComingFromExercisePage = useStore(state => state.toggleComingFromExercisePage);
 
     // for react-native-dropdown-picker
     const [muscleValue, setMuscleValue] = useState(null);
@@ -15,7 +28,7 @@ const CreateNewExerciseModal = ({ setCreateNewExercise, createNewExercise, compl
     const [equipmentOpen, setEquipmentOpen] = useState(false);
 
     // new exercise name
-    const [newExercise, setNewExercise] = useState('')
+    const [newExercise, setNewExercise] = useState("");
 
     const onMuscleOpen = useCallback(() => {
         setEquipmentOpen(false);
@@ -27,115 +40,182 @@ const CreateNewExerciseModal = ({ setCreateNewExercise, createNewExercise, compl
 
     deleteData = async () => {
         try {
-            await AsyncStorage.removeItem('userAddedExerciseList')
+            await AsyncStorage.removeItem("userAddedExerciseList");
         } catch (e) {
             // remove error
         }
 
-        console.log('All history data has been deleted.')
-    }
+        console.log("All history data has been deleted.");
+    };
+
     const muscles = [
-        { label: 'Biceps', value: 'biceps' },
-        { label: 'Triceps', value: 'triceps' },
-        { label: 'Chest', value: 'chest' },
-        { label: 'Shoulders', value: 'shoulders' },
-        { label: 'Hamstrings', value: 'hamstrings' },
-        { label: 'Quadriceps', value: 'quadriceps' },
-        { label: 'Glutes', value: 'glutes' },
-        { label: 'Core', value: 'core' },
-        { label: 'Back', value: 'back' },
-        { label: 'Calves', value: 'calves' },
-        { label: 'Clear', value: 'clear' },
+        { label: "Biceps", value: "biceps" },
+        { label: "Triceps", value: "triceps" },
+        { label: "Chest", value: "chest" },
+        { label: "Shoulders", value: "shoulders" },
+        { label: "Hamstrings", value: "hamstrings" },
+        { label: "Quadriceps", value: "quadriceps" },
+        { label: "Glutes", value: "glutes" },
+        { label: "Core", value: "core" },
+        { label: "Back", value: "back" },
+        { label: "Calves", value: "calves" },
+        { label: "Clear", value: "clear" },
     ];
 
     const equipment = [
-        { label: 'Barbell', value: 'barbell' },
-        { label: 'Dumbbells', value: 'dumbbells' },
-        { label: 'Cable', value: 'cable' },
-        { label: 'Kettlebell', value: 'kettlebell' },
-        { label: 'Bodyweight', value: 'bodyweight' },
-        { label: 'Machine', value: 'machine' },
-        { label: 'Other', value: 'other' },
+        { label: "Barbell", value: "barbell" },
+        { label: "Dumbbells", value: "dumbbells" },
+        { label: "Cable", value: "cable" },
+        { label: "Kettlebell", value: "kettlebell" },
+        { label: "Bodyweight", value: "bodyweight" },
+        { label: "Machine", value: "machine" },
+        { label: "Other", value: "other" },
     ];
+
+    // console.log('Coming From Empty Workout Bottom Sheet in ListOfExercises', comingFromStartEmptyWorkout)
+    // console.log('Coming From Exercise Page in ListOfExercises', comingFromExercisePage)
 
     return (
         <Modal
             animationType="slide"
             transparent={true}
-            isVisible={createNewExercise}
+            isVisible={createNewExerciseModal}
         >
             <View style={styles.modalCenteredView}>
                 <View style={styles.createNewExerciseModalView}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 15 }}>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            paddingBottom: 15,
+                        }}
+                    >
                         <Pressable
                             style={styles.closeExerciseModal}
                             onPress={() => {
-                                setCreateNewExercise(false)
+                                setCreateNewExerciseModal(false)
+                                // toggleCreateNewExerciseModalState(false);
+                                if (comingFromStartEmptyWorkout) {
+                                    setTimeout(() => {
+                                        setAddExerciseToWorkoutModal(true)
+                                        toggleComingFromStartEmptyWorkout(false)
+                                    }, '200')
+                                } else if (comingFromExercisePage) {
+                                    toggleComingFromExercisePage(false)
+                                }
                             }}
                         >
                             <Ionicons name="close-outline" color={"black"} size={35} />
                         </Pressable>
                         <Text>Create New Exercise</Text>
                         <Pressable
-                            style={{ borderColor: 'black', borderWidth: 2, borderRadius: 6, padding: 10 }}
+                            style={{
+                                borderColor: "black",
+                                borderWidth: 2,
+                                borderRadius: 6,
+                                padding: 10,
+                            }}
                             onPress={() => {
                                 // prevents saving new exercise when equipmentValue or muscleValue are not selected or textInput is not entered
-                                if (newExercise === '' || equipmentValue === null || muscleValue === null) {
-                                    console.log('not all information entered --> exercise will not be submitted')
+                                if (
+                                    newExercise === "" ||
+                                    equipmentValue === null ||
+                                    muscleValue === null
+                                ) {
+                                    console.log(
+                                        "not all information entered --> exercise will not be submitted"
+                                    );
                                 } else {
-                                    //formats exercise properly 
-                                    let finalNewExercise = {}
-                                    const newExerciseNameTrimmed = newExercise.trim()
-                                    if (equipmentValue === 'barbell' || equipmentValue === 'dumbbells' || equipmentValue === 'machine' || equipmentValue === 'cable' || equipmentValue === 'kettlebell') {
+                                    //formats exercise properly
+                                    let finalNewExercise = {};
+                                    const newExerciseNameTrimmed = newExercise.trim();
+                                    if (
+                                        equipmentValue === "barbell" ||
+                                        equipmentValue === "dumbbells" ||
+                                        equipmentValue === "machine" ||
+                                        equipmentValue === "cable" ||
+                                        equipmentValue === "kettlebell"
+                                    ) {
                                         finalNewExercise = {
-                                            name: newExerciseNameTrimmed + ' (' + equipmentValue[0].toUpperCase() + equipmentValue.substring(1) + ')',
+                                            name:
+                                                newExerciseNameTrimmed +
+                                                " (" +
+                                                equipmentValue[0].toUpperCase() +
+                                                equipmentValue.substring(1) +
+                                                ")",
                                             muscle: muscleValue,
-                                            equipment: equipmentValue
-                                        }
+                                            equipment: equipmentValue,
+                                        };
                                     } else {
                                         finalNewExercise = {
                                             name: newExerciseNameTrimmed,
                                             muscle: muscleValue,
-                                            equipment: equipmentValue
-                                        }
+                                            equipment: equipmentValue,
+                                        };
                                     }
 
-                                    // check and see if exercise already exists, if yes, throw catch 
-                                    // can I do this within the try/catch? instead of here? 
+                                    // check and see if exercise already exists, if yes, throw catch
+                                    // can I do this within the try/catch? instead of here?
 
                                     // else stores new exercise
                                     const storeData = async (finalNewExercise) => {
                                         try {
-                                            const oldData = await AsyncStorage.getItem('userAddedExerciseList')
-                                            const parsedOldData = JSON.parse(oldData)
-                                            console.log('parsed old data:', parsedOldData)
+                                            const oldData = await AsyncStorage.getItem(
+                                                "userAddedExerciseList"
+                                            );
+                                            const parsedOldData = JSON.parse(oldData);
+                                            console.log("parsed old data:", parsedOldData);
                                             if (oldData === null) {
-                                                await AsyncStorage.setItem('userAddedExerciseList', JSON.stringify([finalNewExercise]));
-
+                                                await AsyncStorage.setItem(
+                                                    "userAddedExerciseList",
+                                                    JSON.stringify([finalNewExercise])
+                                                );
                                             } else {
-                                                parsedOldData.push(finalNewExercise)
-                                                await AsyncStorage.setItem('userAddedExerciseList', JSON.stringify(parsedOldData));
+                                                parsedOldData.push(finalNewExercise);
+                                                await AsyncStorage.setItem(
+                                                    "userAddedExerciseList",
+                                                    JSON.stringify(parsedOldData)
+                                                );
                                             }
-                                            console.log('item saved')
-                                            const currentData = await AsyncStorage.getItem('userAddedExerciseList')
-                                            console.log('current data:', currentData)
-                                            completeExerciseList()
-                                            setCreateNewExercise(false)
+                                            console.log("item saved");
+                                            const currentData = await AsyncStorage.getItem(
+                                                "userAddedExerciseList"
+                                            );
+                                            console.log("current data:", currentData);
+                                            const sortedExerciseList =
+                                                await helperFunctions.completeExerciseList();
+                                            setFilterExerciseList(sortedExerciseList);
+
                                         } catch (e) {
                                             // saving error
-                                            console.log(e)
+                                            console.log(e);
                                         }
                                     };
-                                    storeData(finalNewExercise)
+                                    storeData(finalNewExercise);
+                                    toggleCreateNewExerciseModalState(false);
+                                    if (comingFromStartEmptyWorkout) {
+                                        setTimeout(() => {
+                                            toggleAddExerciseModalState(true)
+                                            // setAddExerciseModal(true)
+                                        }, '200')
+                                    }
                                 }
-                            }}>
+                            }}
+                        >
                             <Text>Save</Text>
                         </Pressable>
                     </View>
                     <View>
                         <Text style={{ paddingBottom: 6 }}>Name</Text>
                         <TextInput
-                            style={{ borderRadius: 10, borderWidth: 2, borderColor: 'black', padding: 10, color: 'black' }}
+                            style={{
+                                borderRadius: 10,
+                                borderWidth: 2,
+                                borderColor: "black",
+                                padding: 10,
+                                color: "black",
+                            }}
                             onChangeText={(text) => setNewExercise(text)}
                             value={newExercise}
                             placeholder="New Exercise Name"
@@ -169,7 +249,7 @@ const CreateNewExerciseModal = ({ setCreateNewExercise, createNewExercise, compl
                         />
                     </View>
 
-                    <View style={{ paddingBottom: 225, zIndex: 5, }}>
+                    <View style={{ paddingBottom: 225, zIndex: 5 }}>
                         <Text style={{ paddingBottom: 6 }}>Equipment</Text>
                         <DropDownPicker
                             style={{
@@ -199,14 +279,25 @@ const CreateNewExerciseModal = ({ setCreateNewExercise, createNewExercise, compl
                             }}
                         />
                     </View>
-                    <View style={{ justifyContent: 'flex-end', alignItems: 'center' }}>
-                        <Pressable style={{ padding: 20, borderRadius: 10, borderWidth: 2, borderColor: 'white', backgroundColor: 'red' }} onPress={deleteData}>
-                            <Text style={{ color: 'white', fontSize: 16, fontWeight: 700 }}>DELETE ALL EXERCISE DATA</Text>
+                    <View style={{ justifyContent: "flex-end", alignItems: "center" }}>
+                        <Pressable
+                            style={{
+                                padding: 20,
+                                borderRadius: 10,
+                                borderWidth: 2,
+                                borderColor: "white",
+                                backgroundColor: "red",
+                            }}
+                            onPress={deleteData}
+                        >
+                            <Text style={{ color: "white", fontSize: 16, fontWeight: 700 }}>
+                                DELETE ALL EXERCISE DATA
+                            </Text>
                         </Pressable>
                     </View>
                 </View>
             </View>
-        </Modal >
+        </Modal>
     );
 };
 
@@ -214,7 +305,7 @@ const styles = StyleSheet.create({
     modalCenteredView: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
     },
     createNewExerciseModalView: {
         backgroundColor: "white",
@@ -230,7 +321,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-        padding: 15
+        padding: 15,
     },
     selectedExerciseOrEquipment: {
         backgroundColor: "#011638",

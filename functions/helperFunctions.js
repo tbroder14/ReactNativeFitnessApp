@@ -1,0 +1,43 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { baseExerciseList } from "../components/data.js";
+
+// Returns the complete list of exercises from users data or default data if user hasn't stored anything yet
+async function completeExerciseList() {
+    try {
+        const oldData = await AsyncStorage.getItem('userAddedExerciseList')
+        const parsedOldData = JSON.parse(oldData)
+        if (oldData === null) {
+            return baseExerciseList
+        } else {
+            const combinedArrays = parsedOldData.concat(baseExerciseList)
+            const sortedCombinedArrays = combinedArrays.sort((a, b) => a.name.localeCompare(b.name))
+            return sortedCombinedArrays
+        }
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+// Sorts the exercise list alphabetically
+async function sortExercises() {
+    try {
+        const oldData = await AsyncStorage.getItem('userAddedExerciseList')
+        const parsedOldData = JSON.parse(oldData)
+        if (oldData === null) {
+            return baseExerciseList
+        } else {
+            const combinedArrays = parsedOldData.concat(baseExerciseList)
+            const sortedCombinedArrays = combinedArrays.sort((a, b) => a.name.localeCompare(b.name))
+            await AsyncStorage.setItem('userAddedExerciseList', JSON.stringify(sortedCombinedArrays));
+
+            // return sortedCombinedArrays
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const helperFunctions = {
+    completeExerciseList,
+    sortExercises
+};

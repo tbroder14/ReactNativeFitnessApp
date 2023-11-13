@@ -1,281 +1,96 @@
-import { useState, useEffect } from "react";
-import { Text, View, StyleSheet, TextInput, FlatList, Pressable, TouchableOpacity } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
-import { baseExerciseList } from "./data.js";
-import Modal from "react-native-modal";
-import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import ExerciseModalForExercisePage from "./ExerciseModalForExercisePage.js"
+import { useEffect, useState } from "react";
+import { Text, View, StyleSheet, Pressable } from "react-native";
+import ExerciseModalForExercisePage from "./ExerciseModalForExercisePage.js";
+import ListOfExercises from "./ListOfExercises.js";
+import { useStore } from "../src/store.js";
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 //             to do list
 // figure out how to unselect muscle and/or equipment dropdown selections
-// button to add new exercise
-// format the exercise modal
 
 //             feature roadmap
 // add body outline with muscles and display exercises for selected muscle group (modal?)
 
-const ExercisePage = () => {
-  // for react-native-dropdown-picker
-  const [muscleValue, setMuscleValue] = useState(null);
-  const [equipmentValue, setEquipmentValue] = useState(null);
-  const [muscleOpen, setMuscleOpen] = useState(false);
-  const [equipmentOpen, setEquipmentOpen] = useState(false);
+const ExercisePage = ({ createNewExerciseModal, setCreateNewExerciseModal, navigation }) => {
 
-  // brings up modal to create new exercise
-  const [createNewExercise, setCreateNewExercise] = useState(false)
+  // global state from store
+  const toggleComingFromExercisePage = useStore(state => state.toggleComingFromExercisePage);
+  const toggleComingFromStartEmptyWorkout = useStore(state => state.toggleComingFromStartEmptyWorkout);
 
-  // displaying sorted list of exercises
-  const [searchBarInput, setSearchBarInput] = useState("");
-  const [muscleSort, setMuscleSort] = useState(null);
-  const [equipmentSort, setEquipmentSort] = useState(null);
-  const [filterExerciseList, setFilterExerciseList] = useState([]);
-  const [masterExerciseList, setMasterExerciseList] = useState([])
+  useEffect(() => {
+    console.log('inside useEffect')
+    if (navigation) {
+      console.log('inside navigation')
+      const updateComingFrom = navigation.addListener('tabPress', (e) => {
+        e.preventDefault();
+        toggleComingFromExercisePage(true);
+        toggleComingFromStartEmptyWorkout(false);
+        console.log(e);
+      });
+      return updateComingFrom;
+    }
+  }, [navigation]);
 
   // for exercise modal
   const [exerciseModal, setExerciseModal] = useState(false);
   const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
 
-  const muscles = [
-    { label: "Biceps", value: "biceps" },
-    { label: "Triceps", value: "triceps" },
-    { label: "Chest", value: "chest" },
-    { label: "Hamstrings", value: "hamstrings" },
-    { label: "Quadriceps", value: "quadriceps" },
-    { label: "Glutes", value: "glutes" },
-    { label: "Core", value: "core" },
-    { label: "Back", value: "back" },
-    { label: "Calves", value: "calves" },
-    { label: "Clear", value: "clear" },
-  ];
-
-  const equipment = [
-    { label: "Barbell", value: "barbell" },
-    { label: "Dumbbells", value: "dumbbells" },
-    { label: "Cable", value: "cable" },
-    { label: "Kettlebell", value: "kettlebell" },
-    { label: "Bodyweight", value: "bodyweight" },
-    { label: "Machine", value: "machine" },
-    { label: "Other", value: "other" },
-  ];
-
-  useEffect(() => {
-    let filteredList = masterExerciseList;
-
-    // this is just for testing
-    if (muscleValue == "clear") {
-      setFilterExerciseList(completeExerciseList);
-      return;
-    }
-    // end testing
-
-    if (equipmentValue) {
-      filteredList = filteredList.filter(
-        (exercise) => exercise.equipment === equipmentValue
-      );
-    }
-
-    if (muscleValue) {
-      filteredList = filteredList.filter(
-        (exercise) => exercise.muscle === muscleValue
-      );
-    }
-
-    if (searchBarInput !== "") {
-      const searchInputLowerCase = searchBarInput.toLowerCase();
-      filteredList = filteredList.filter((exercise) =>
-        exercise.name.toLowerCase().includes(searchInputLowerCase)
-      );
-    }
-
-    setFilterExerciseList(filteredList);
-  }, [equipmentValue, muscleValue, searchBarInput, baseExerciseList]);
-
-  useEffect(() => {
-    completeExerciseList()
-  }, [])
-
-  const completeExerciseList = async () => {
-    try {
-      const oldData = await AsyncStorage.getItem('userAddedExerciseList')
-      const parsedOldData = JSON.parse(oldData)
-      if (oldData === null) {
-        setFilterExerciseList(baseExerciseList)
-
-      } else {
-        // console.log('parsedOldData:', parsedOldData)
-        const combinedArrays = parsedOldData.concat(baseExerciseList)
-        const sortedCombinedArrays = combinedArrays.sort((a, b) => a.name.localeCompare(b.name))
-        setMasterExerciseList(sortedCombinedArrays)
-        setFilterExerciseList(sortedCombinedArrays)
-      }
-    } catch (e) {
-      // saving error
-      console.log(e)
-    }
-  };
-
-  function handleItemPress(itemName) {
-    setExerciseNameForModal(itemName);
-    setExerciseModal(true);
-  };
-
-  const Item = ({ name, handleItemPress }) => (
-    <TouchableOpacity onPress={() => handleItemPress(name)}>
-      <View style={styles.item}>
-        <Text style={styles.title}>{name}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const Separator = () => (
-    <View style={{ height: 1, width: "100%", backgroundColor: "white" }}></View>
-  );
-
-  const ListHeader = () => {
-    return (
-      <View style={[styles.container]}>
-        <View style={{ marginBottom: 15, flexDirection: 'row', gap: 20 }}>
-          <Pressable style={{
+  return (
+    <View style={[styles.container]}>
+      <View style={{ marginBottom: 15, flexDirection: "row", gap: 20 }}>
+        <Pressable
+          style={{
             borderRadius: 10,
             borderWidth: 2,
-            borderColor: 'white',
+            borderColor: "white",
             padding: 10,
-            marginLeft: 20
+            marginLeft: 20,
           }}
-            onPress={() => setCreateNewExercise(true)}>
-            <Text style={{
-              color: "#D3D3D3",
-              fontSize: 14,
-            }}>Add</Text>
-          </Pressable>
+          onPress={() => { setCreateNewExerciseModal(true), toggleComingFromExercisePage(true) }}
+        >
           <Text
             style={{
               color: "#D3D3D3",
-              fontSize: 30,
-              // paddingLeft: 20,
-              // paddingBottom: 10,
-              textAlign: "center",
+              fontSize: 14,
             }}
           >
-            Exercise Page
+            New
           </Text>
-        </View>
-        <View style={{ paddingLeft: 20, paddingRight: 20 }}>
-          <TextInput
-            editable
-            maxLength={50}
-            placeholder={"Search for exercise..."}
-            style={{
-              padding: 10,
-              backgroundColor: "#D3D3D3",
-              fontWeight: "bold",
-              borderRadius: 5
-            }}
-            onChangeText={(newText) => setSearchBarInput(newText)}
-          />
-        </View>
-        <View style={{ padding: 20, flex: 1, flexDirection: "row" }}>
-          <View style={{ width: "50%", paddingRight: 5 }}>
-            <DropDownPicker
-              style={{
-                ...(muscleValue
-                  ? styles.selectedExerciseOrEquipment
-                  : styles.noSelectedExerciseOrEquipment),
-              }}
-              open={muscleOpen}
-              value={muscleValue}
-              items={muscles}
-              setOpen={setMuscleOpen}
-              setValue={setMuscleValue}
-              textStyle={{
-                color: "#61FF7E",
-              }}
-              labelStyle={{
-                fontWeight: "bold",
-              }}
-              dropDownContainerStyle={{
-                backgroundColor: "#011638",
-                maxHeight: 500,
-                borderColor: "white",
-              }}
-            />
-          </View>
-          <View style={{ width: "50%" }}>
-            <DropDownPicker
-              style={{
-                // zIndex: 1000,
-                ...(equipmentValue
-                  ? styles.selectedExerciseOrEquipment
-                  : styles.noSelectedExerciseOrEquipment),
-              }}
-              open={equipmentOpen}
-              value={equipmentValue}
-              items={equipment}
-              setOpen={setEquipmentOpen}
-              setValue={setEquipmentValue}
-              textStyle={{
-                color: "#61FF7E",
-              }}
-              labelStyle={{
-                fontWeight: "bold",
-              }}
-              dropDownContainerStyle={{
-                backgroundColor: "#011638",
-                maxHeight: 500,
-                borderColor: "white",
-              }}
-              selectedItemContainerStyle={{
-                backgroundColor: "black",
-              }}
-            // listItemLabelStyle={{
-            //     color: "red"
-            // }}
-            />
-          </View>
-          <CreateNewExerciseModal createNewExercise={createNewExercise} setCreateNewExercise={setCreateNewExercise} completeExerciseList={completeExerciseList} />
-          <ExerciseModalForExercisePage exerciseModal={exerciseModal} setExerciseModal={setExerciseModal} exerciseNameForModal={exerciseNameForModal} setExerciseNameForModal={setExerciseNameForModal} />
-        </View>
+        </Pressable>
+        <Text
+          style={{
+            color: "#D3D3D3",
+            fontSize: 30,
+            // paddingLeft: 20,
+            // paddingBottom: 10,
+            textAlign: "center",
+          }}
+        >
+          Exercise Page
+        </Text>
       </View>
-    );
-  };
-
-
-  return (
-    <FlatList
-      style={{ marginTop: 50, borderRadius: 10 }}
-      data={filterExerciseList}
-      stickyHeaderIndices={[0]}
-      renderItem={({ item }) => <Item name={item.name} handleItemPress={handleItemPress} />}
-      keyExtractor={(item) => item.name}
-      ListHeaderComponent={<ListHeader />}
-      ListHeaderComponentStyle={{ backgroundColor: "#011638" }}
-      ItemSeparatorComponent={<Separator />}
-      ListEmptyComponent={() => (
-        <View>
-          {filterExerciseList.length === 0 ? (
-            <Text
-              style={{
-                fontSize: 18,
-                color: "#61FF7E",
-                textAlign: "center",
-                marginBottom: 350,
-              }}
-            >
-              No exercise matches your search criteria.
-            </Text>
-          ) : null}
-        </View>
-      )}
-
-    />
+      <ListOfExercises
+        exerciseModal={exerciseModal}
+        setExerciseModal={setExerciseModal}
+        exerciseNameForModal={exerciseNameForModal}
+        setExerciseNameForModal={setExerciseNameForModal}
+      />
+      <ExerciseModalForExercisePage
+        exerciseModal={exerciseModal}
+        setExerciseModal={setExerciseModal}
+        exerciseNameForModal={exerciseNameForModal}
+        setExerciseNameForModal={setExerciseNameForModal}
+      />
+    </View>
   );
-
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 50,
+    borderRadius: 10,
   },
   item: {
     padding: 20,

@@ -4,7 +4,7 @@ import Modal from "react-native-modal";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ExercisePage = ({ exerciseModal, setExerciseModal, exerciseNameForModal, setExerciseNameForModal }) => {
+const ExerciseModalForExercisePage = ({ exerciseModal, setExerciseModal, exerciseNameForModal, setExerciseNameForModal }) => {
     const [exerciseData, setExerciseData] = useState([])
 
     useEffect(() => {
@@ -85,7 +85,7 @@ const ExercisePage = ({ exerciseModal, setExerciseModal, exerciseNameForModal, s
                         <Pressable
                             style={{ borderColor: 'white', borderWidth: 2, borderRadius: 6, padding: 2 }}
                             onPress={() => {
-                                setExerciseModal(false)
+                                setExerciseModal(!exerciseModal)
                                 setExerciseNameForModal(undefined)
                             }}>
                             <Ionicons name="close-outline" color={"white"} size={35} />
@@ -145,4 +145,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ExercisePage;
+export default ExerciseModalForExercisePage;

@@ -3,12 +3,18 @@ import React, { useCallback, useRef, useMemo, useState, useEffect } from "react"
 import { Text, Animated, View, StyleSheet, Pressable, FlatList, TextInput, TouchableOpacity, TextComponent } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { Directions, RectButton } from 'react-native-gesture-handler';
+import { RectButton } from 'react-native-gesture-handler';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { SafeAreaProvider, useSafeAreaInsets, } from "react-native-safe-area-context";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+import DraggableFlatList, { ScaleDecorator, } from "react-native-draggable-flatlist";
+import Collapsible from 'react-native-collapsible';
+
+// state management library 
+import { useStore } from "./src/store";
 
 // five bottom tabs
 import StartWorkoutPage from "./components/StartWorkoutPage";
@@ -16,15 +22,15 @@ import HistoryPage from "./components/HistoryPage";
 import ProgramPage from "./components/ProgramPage";
 import Placeholder from "./components/Placeholder";
 import ExercisePage from "./components/ExercisePage";
+
+// components 
 import ExerciseThreeDotsBottomSheet from "./components/ExerciseThreeDotsBottomSheet";
 import CancelWorkoutConfirmationModal from "./components/CancelWorkoutConfirmationModal";
 import SaveWorkoutConfirmationModal from "./components/SaveWorkoutConfirmationModal";
 import NotAllSetsCompleteAlertModal from "./components/NotAllSetsCompleteAlertModal"
-import BouncyCheckbox from "react-native-bouncy-checkbox";
 import NewTemplate from "./components/NewTemplate";
 import AddExerciseToWorkoutModal from "./components/AddExerciseToWorkoutModal";
-import DraggableFlatList, { ScaleDecorator, } from "react-native-draggable-flatlist";
-import Collapsible from 'react-native-collapsible';
+import CreateNewExerciseModal from "./components/CreateNewExerciseModal";
 
 //             to do list
 // figure out how to create a state for workoutExercises and WorkoutData instead of prop drilling (i.e. use hookstate, redux, context, etc.)
@@ -52,7 +58,7 @@ import Collapsible from 'react-native-collapsible';
 // warmup/dropsets/supersets
 // creating templates 
 
-function ExerciseScreen() {
+function ExerciseScreen({ createNewExerciseModal, setCreateNewExerciseModal }) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -63,7 +69,7 @@ function ExerciseScreen() {
         paddingBottom: 5,
       }}
     >
-      <ExercisePage />
+      <ExercisePage createNewExerciseModal={createNewExerciseModal} setCreateNewExerciseModal={setCreateNewExerciseModal} />
     </View>
   );
 }
@@ -95,6 +101,7 @@ function StartWorkoutScreen({ bottomSheetRef, startOfWorkoutDateAndTime, setStar
       style={{
         flex: 1,
         backgroundColor: "#011638",
+        paddingBottom: insets.bottom,
         paddingTop: insets.top,
         paddingLeft: insets.left,
         paddingRight: insets.right,
@@ -144,12 +151,15 @@ function ProgramScreen() {
 }
 
 function BottomSheetFooterComponents({
-  addExerciseModal,
-  setAddExerciseModal,
   setCancelWorkoutConfirmationModal,
   setWorkoutExercises,
+  workoutExercises,
   workoutData,
-  closeBottomSheet
+  closeBottomSheet,
+  addExerciseToWorkoutModal,
+  setAddExerciseToWorkoutModal,
+  createNewExerciseModal,
+  setCreateNewExerciseModal,
 }) {
 
   const cancelWorkout = () => {
@@ -160,7 +170,6 @@ function BottomSheetFooterComponents({
     }
   };
 
-
   return (
     <View style={{ padding: 20, gap: 25 }}>
       <Pressable
@@ -170,10 +179,9 @@ function BottomSheetFooterComponents({
           padding: 10,
         }}
         onPress={() => {
-          setAddExerciseModal(!addExerciseModal)
+          setAddExerciseToWorkoutModal(true)
           setWorkoutExercises(workoutData)
-        }
-        }
+        }}
       >
         <Text style={{ color: "white", fontSize: 18, textAlign: "center" }}>
           Add Exercise
@@ -193,6 +201,34 @@ function BottomSheetFooterComponents({
           Cancel Workout
         </Text>
       </Pressable>
+      {/* <View>
+        <Pressable style={{
+          padding: 20,
+          backgroundColor: 'green'
+
+        }}
+          onPress={() => toggleCreateNewExerciseModalState(true)}>
+          <Text style={{ color: 'white' }}>Bring up Create Exercise Modal</Text>
+        </Pressable>
+      </View> */}
+      < AddExerciseToWorkoutModal
+        workoutExercises={workoutExercises}
+        setWorkoutExercises={setWorkoutExercises}
+        addExerciseToWorkoutModal={addExerciseToWorkoutModal}
+        setAddExerciseToWorkoutModal={setAddExerciseToWorkoutModal}
+        createNewExerciseModal={createNewExerciseModal}
+        setCreateNewExerciseModal={setCreateNewExerciseModal}
+      // comingFromStartEmptyWorkout={comingFromStartEmptyWorkout}
+      // setComingFromStartEmptyWorkout={setComingFromStartEmptyWorkout}
+      />
+      <CreateNewExerciseModal
+        addExerciseToWorkoutModal={addExerciseToWorkoutModal}
+        setAddExerciseToWorkoutModal={setAddExerciseToWorkoutModal}
+        createNewExerciseModal={createNewExerciseModal}
+        setCreateNewExerciseModal={setCreateNewExerciseModal}
+      // comingFromStartEmptyWorkout={comingFromStartEmptyWorkout}
+      // setComingFromStartEmptyWorkout={setComingFromStartEmptyWorkout}
+      />
     </View>
   );
 }
@@ -200,7 +236,7 @@ function BottomSheetFooterComponents({
 const Tab = createBottomTabNavigator();
 
 export default function App() {
-  const [addExerciseModal, setAddExerciseModal] = useState(false);
+
   const [saveWorkoutConfirmationModal, setSaveWorkoutConfirmationModal] = useState(false)
   const [notAllSetsCompleteAlert, setNotAllSetsCompleteAlert] = useState(false)
   const [cancelWorkoutConfirmationModal, setCancelWorkoutConfirmationModal] = useState(false)
@@ -209,6 +245,18 @@ export default function App() {
   const [exerciseForThreeDotsBS, setExerciseForThreeDotsBS] = useState('')
   const [collapseHandler, setCollapseHandler] = useState(false)
   const [startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime] = useState('')
+  const [addExerciseToWorkoutModal, setAddExerciseToWorkoutModal] = useState(false)
+  const [createNewExerciseModal, setCreateNewExerciseModal] = useState(false)
+
+  // hides bottomSheet 
+  const [bottomSheetBottomInset, setBottomSheetBottomInset] = useState(0)
+
+
+  // global states from store
+  const comingFromStartEmptyWorkout = useStore(state => state.comingFromStartEmptyWorkout);
+  const toggleComingFromStartEmptyWorkout = useStore(state => state.toggleComingFromStartEmptyWorkout);
+  const comingFromExercisePage = useStore(state => state.comingFromExercisePage);
+  const toggleComingFromExercisePage = useStore(state => state.toggleComingFromExercisePage);
 
   // workout name useState
   const startOfWorkoutTime = new Date().getHours();
@@ -240,10 +288,6 @@ export default function App() {
   }
   const [workoutName, onChangeWorkoutName] = useState(currentWorkoutName);
 
-  // function updateName(text) {
-  //   console.log(text)
-  //   setWorkoutName(text)
-  // }
 
   const closeBottomSheet = () => {
     bottomSheetRef.current.close()
@@ -279,13 +323,27 @@ export default function App() {
   const bottomSheetRef = useRef(null);
   const threeDotsBottomSheetRef = useRef(null);
   const newTemplateBottomSheetRef = useRef(null)
-  console.log(newTemplateBottomSheetRef)
 
   // snap point variables
   const snapPoints = useMemo(() => ["15%", "94%"], []);
 
   // callbacks
-  const handleSheetChanges = useCallback((index) => { }, []);
+  const handleSheetChanges = ((index) => {
+    console.log(index)
+    if (index === 0) {
+      // console.log('coming from start empty workout should be false')
+      toggleComingFromStartEmptyWorkout(false)
+      setBottomSheetBottomInset(80)
+    } else if (index === -1) {
+      toggleComingFromStartEmptyWorkout(false)
+      setBottomSheetBottomInset(0)
+    } else {
+      // console.log('coming from start empty workout should be true')
+      toggleComingFromStartEmptyWorkout(true)
+      toggleComingFromExercisePage(false)
+      setBottomSheetBottomInset(0)
+    }
+  });
 
   // adds a new set to an exercise
   const addSet = (exerciseName) => {
@@ -720,8 +778,8 @@ export default function App() {
               <Text style={{ color: "#011638", fontWeight: "bold", }}>Add Set</Text>
             </Pressable>
           </Collapsible>
-        </View >
-      </ScaleDecorator >
+        </View>
+      </ScaleDecorator>
     )
   };
 
@@ -776,7 +834,21 @@ export default function App() {
                 <StartWorkoutScreen bottomSheetRef={bottomSheetRef} startOfWorkoutDateAndTime={startOfWorkoutDateAndTime} setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime} newTemplateBottomSheetRef={newTemplateBottomSheetRef} />
               )}
             />
-            <Tab.Screen name="Exercise" component={ExerciseScreen} />
+            <Tab.Screen name="Exercise"
+              // component={ExerciseScreen}
+              listeners={{
+                tabPress: (e) => {
+                  console.log('inside tab press')
+                  toggleComingFromExercisePage(true)
+                  toggleComingFromStartEmptyWorkout(false)
+                  console.log('comingFromExercisePage inside tabPress', comingFromExercisePage)
+                  console.log('comingFromStartEmptyWorkout inside tabPress', comingFromStartEmptyWorkout)
+                },
+              }}
+              children={() => (
+                <ExerciseScreen createNewExerciseModal={createNewExerciseModal} setCreateNewExerciseModal={setCreateNewExerciseModal} />
+              )}
+            />
             <Tab.Screen name="Placeholder" component={PlaceholderScreen} />
           </Tab.Navigator>
         </NavigationContainer>
@@ -785,7 +857,7 @@ export default function App() {
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
           index={-1}
-          bottomInset={80}
+          bottomInset={bottomSheetBottomInset}
           backgroundStyle={{ backgroundColor: "#011638" }}
           style={{
             elevation: 5,
@@ -832,23 +904,6 @@ export default function App() {
               <Text style={{ color: 'white', padding: 15 }}>Save</Text>
             </Pressable>
           </View>
-          {/* <FlatList
-            data={workoutData}
-            renderItem={({ item }) => <Item item={item} />}
-            keyExtractor={(item) => {
-              item.name;
-            }}
-            ItemSeparatorComponent={<Separator />}
-            ListFooterComponent={
-              <BottomSheetFooterComponents
-                setAddExerciseModal={setAddExerciseModal}
-                addExerciseModal={addExerciseModal}
-                bottomSheetRef={bottomSheetRef}
-                setWorkoutExercises={setWorkoutExercises}
-                workoutExercises={workoutExercises}
-              />
-            }
-          /> */}
           <DraggableFlatList
             data={workoutData}
             // onDragEnd={updateWorkoutDataAfterDragEnd(workoutData)}
@@ -858,8 +913,6 @@ export default function App() {
             ItemSeparatorComponent={<Separator />}
             ListFooterComponent={() =>
               <BottomSheetFooterComponents
-                setAddExerciseModal={setAddExerciseModal}
-                addExerciseModal={addExerciseModal}
                 bottomSheetRef={bottomSheetRef}
                 setWorkoutExercises={setWorkoutExercises}
                 workoutExercises={workoutExercises}
@@ -867,63 +920,57 @@ export default function App() {
                 workoutData={workoutData}
                 setCancelWorkoutConfirmationModal={setCancelWorkoutConfirmationModal}
                 closeBottomSheet={closeBottomSheet}
+                addExerciseToWorkoutModal={addExerciseToWorkoutModal}
+                setAddExerciseToWorkoutModal={setAddExerciseToWorkoutModal}
+                createNewExerciseModal={createNewExerciseModal}
+                setCreateNewExerciseModal={setCreateNewExerciseModal}
               />
             }
           />
-          {
-            < AddExerciseToWorkoutModal
-              addExerciseModal={addExerciseModal}
-              setAddExerciseModal={setAddExerciseModal}
-              workoutExercises={workoutExercises}
-              setWorkoutExercises={setWorkoutExercises}
-            />
-          }
-          {
-            < CancelWorkoutConfirmationModal
-              setCancelWorkoutConfirmationModal={setCancelWorkoutConfirmationModal}
-              setWorkoutData={setWorkoutData}
-              setWorkoutExercises={setWorkoutExercises}
-              cancelWorkoutConfirmationModal={cancelWorkoutConfirmationModal}
-              closeBottomSheet={closeBottomSheet}
-              setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
-            />
-          }
-          {
-            < SaveWorkoutConfirmationModal
-              setSaveWorkoutConfirmationModal={setSaveWorkoutConfirmationModal}
-              setWorkoutData={setWorkoutData}
-              workoutName={workoutName}
-              dateWithoutTime={dateWithoutTime}
-              workoutData={workoutData}
-              setWorkoutExercises={setWorkoutExercises}
-              saveWorkoutConfirmationModal={saveWorkoutConfirmationModal}
-              closeBottomSheet={closeBottomSheet}
-              onChangeWorkoutName={onChangeWorkoutName}
-              currentWorkoutName={currentWorkoutName}
-              startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
-              setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
-            />
-          }
-          {
-            < NotAllSetsCompleteAlertModal
-              notAllSetsCompleteAlert={notAllSetsCompleteAlert}
-              setNotAllSetsCompleteAlert={setNotAllSetsCompleteAlert}
-            // setSaveWorkoutConfirmationModal={setSaveWorkoutConfirmationModal}
-            // setWorkoutData={setWorkoutData}
-            // workoutName={workoutName}
-            // dateWithoutTime={dateWithoutTime}
-            // workoutData={workoutData}
-            // setWorkoutExercises={setWorkoutExercises}
-            // saveWorkoutConfirmationModal={saveWorkoutConfirmationModal}
-            // closeBottomSheet={closeBottomSheet}
-            // onChangeWorkoutName={onChangeWorkoutName}
-            // currentWorkoutName={currentWorkoutName}
-            // startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
-            // setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
-            />
-          }
-
         </BottomSheet>
+        < SaveWorkoutConfirmationModal
+          setSaveWorkoutConfirmationModal={setSaveWorkoutConfirmationModal}
+          setWorkoutData={setWorkoutData}
+          workoutName={workoutName}
+          dateWithoutTime={dateWithoutTime}
+          workoutData={workoutData}
+          setWorkoutExercises={setWorkoutExercises}
+          saveWorkoutConfirmationModal={saveWorkoutConfirmationModal}
+          closeBottomSheet={closeBottomSheet}
+          onChangeWorkoutName={onChangeWorkoutName}
+          currentWorkoutName={currentWorkoutName}
+          startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
+          setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
+        />
+        < CancelWorkoutConfirmationModal
+          setCancelWorkoutConfirmationModal={setCancelWorkoutConfirmationModal}
+          setWorkoutData={setWorkoutData}
+          setWorkoutExercises={setWorkoutExercises}
+          cancelWorkoutConfirmationModal={cancelWorkoutConfirmationModal}
+          closeBottomSheet={closeBottomSheet}
+          setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
+        />
+        < NotAllSetsCompleteAlertModal
+          notAllSetsCompleteAlert={notAllSetsCompleteAlert}
+          setNotAllSetsCompleteAlert={setNotAllSetsCompleteAlert}
+        // setSaveWorkoutConfirmationModal={setSaveWorkoutConfirmationModal}
+        // setWorkoutData={setWorkoutData}
+        // workoutName={workoutName}
+        // dateWithoutTime={dateWithoutTime}
+        // workoutData={workoutData}
+        // setWorkoutExercises={setWorkoutExercises}
+        // saveWorkoutConfirmationModal={saveWorkoutConfirmationModal}
+        // closeBottomSheet={closeBottomSheet}
+        // onChangeWorkoutName={onChangeWorkoutName
+        // currentWorkoutName={currentWorkoutName}
+        // startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
+        // setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
+        />
+        {/* <CreateNewExerciseModal
+            // setFilterExerciseList={setFilterExerciseList}
+            // comingFromStartEmptyWorkout={comingFromStartEmptyWorkout}
+            // setComingFromStartEmptyWorkout={setComingFromStartEmptyWorkout}
+          /> */}
         <ExerciseThreeDotsBottomSheet threeDotsBottomSheetRef={threeDotsBottomSheetRef} deleteExerciseFunction={deleteExerciseFunction} ExerciseName={exerciseForThreeDotsBS} />
         <NewTemplate newTemplateBottomSheetRef={newTemplateBottomSheetRef} />
       </SafeAreaProvider>

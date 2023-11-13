@@ -43,6 +43,15 @@ const ExerciseThreeDotsBottomSheet = ({ threeDotsBottomSheetRef, deleteExerciseF
                         Delete Exercise </Text>
                 </Pressable>
             </View>
+            <View>
+                <Pressable style={{
+                    padding: 25,
+                    borderRadius: 6,
+                    borderWidth: 2,
+                }}>
+                    <Text style={{ color: 'red', fontSize: 20 }}>Replace Exercise</Text>
+                </Pressable>
+            </View>
         </BottomSheet>
     );
 };

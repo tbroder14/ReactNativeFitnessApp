@@ -1,42 +1,27 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   Text,
   View,
   StyleSheet,
-  FlatList,
-  TextInput,
   Pressable,
-  TouchableOpacity,
-  ScrollView,
 } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
-import { sortedExerciseList } from "./data.js";
-import Modal from "react-native-modal";
-import { hookstate, useHookstate } from "@hookstate/core";
+import { useStore } from "../src/store.js";
 
 //             to do list
-// bottom sheet/bottom drawer for start empty workout button
-// add exercise modal from button
-// add new set to exercise
-// dropdown to add note, delete exercise, etc.
-// long hold on exercise title to switch exercise order
+//
 
 //             feature roadmap
 //
-//
 
 const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime, newTemplateBottomSheetRef }) => {
-  // for start empty workout modal
-  const [startEmptyWorkoutModal, setStartEmptyWorkoutModal] = useState(false);
 
-  // const date = new Date()
-  // const dateToLocaleString = date.toLocaleString(("en-US"))
-  // console.log('dateToLocalString', dateToLocaleString)
   const newTemplateBottomSheet = () => {
     newTemplateBottomSheetRef.current.snapToIndex(0)
   }
 
-  // onPress={() => { exerciseThreeDotsOptions(item), setExerciseForThreeDotsBS(item.name) }}
+  // global state from store
+  const toggleComingFromStartEmptyWorkout = useStore((state) => state.toggleComingFromStartEmptyWorkout);
+  const toggleComingFromExercisePage = useStore((state) => state.toggleComingFromExercisePage);
 
   const [test, setTest] = useState("press me");
 
@@ -112,6 +97,8 @@ const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartO
             const date = new Date()
             const dateToLocaleString = date.toLocaleString(("en-US"))
             setStartOfWorkoutDateAndTime(dateToLocaleString)
+            toggleComingFromExercisePage(false)
+            // toggleComingFromStartEmptyWorkout(true)
           }}
         >
           <Text
@@ -127,63 +114,6 @@ const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartO
           </Text>
         </Pressable>
       </View>
-
-      <View style={styles.centeredView}></View>
-
-      {/* <Modal
-                animationType="slide"
-                transparent={true}
-                isVisible={startEmptyWorkoutModal}
-                onRequestClose={() => {
-                    setStartEmptyWorkoutModal(!exerciseModal);
-                }}
-            >
-                <View style={styles.modalCenteredView}>
-                    <View style={styles.modalView}>
-                        <View
-                            style={{
-                                flex: 1,
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                gap: 30,
-                                borderBottomColor: 'red',
-                                borderBottomWidth: 2,
-                            }}
-                        >
-                            <Text style={styles.modalText}>Start Workout Text Here</Text>
-                            <Text style={styles.textStyle}>Edit</Text>
-                        </View>
-
-                        <ScrollView style={{ height: '85%' }}>
-                            <View style={{ flex: 1, flexDirection: 'row' }}>
-                                <Text style={styles.workoutNameLabel}>Workout Name</Text>
-                                <TextInput
-                                    style={styles.workoutNameTextInput}
-                                    onChangeText={setWorkoutName}
-                                    value={workoutName}
-                                />
-                            </View>
-                            <Text style={{ color: 'white', margin: 100, borderColor: 'white', borderWidth: 5 }}>This is where exercises go</Text>
-                            <Pressable
-                                style={[styles.addExerciseButton]}
-                                onPress={() => {
-                                    setAddExerciseModal(!setAddExerciseModal);
-                                }}
-                            >
-                                <Text style={styles.textStyle}>Add Exercise</Text>
-                            </Pressable>
-                            <Pressable
-                                style={[styles.cancelWorkoutButton]}
-                                onPress={() => {
-                                    setStartEmptyWorkoutModal(!startEmptyWorkoutModal);
-                                }}
-                            >
-                                <Text style={styles.textStyle}>Cancel Workout</Text>
-                            </Pressable>
-                        </ScrollView>
-                    </View>
-                </View>
-            </Modal> */}
     </View>
   );
 };
