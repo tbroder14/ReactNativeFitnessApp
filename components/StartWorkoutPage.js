@@ -22,8 +22,7 @@ const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartO
   // global state from store
   const toggleComingFromStartEmptyWorkout = useStore((state) => state.toggleComingFromStartEmptyWorkout);
   const toggleComingFromExercisePage = useStore((state) => state.toggleComingFromExercisePage);
-
-  const [test, setTest] = useState("press me");
+  const openCreateNewExerciseModal = useStore((state) => state.openCreateNewExerciseModal);
 
   return (
     <View style={[styles.container]}>
@@ -43,6 +42,16 @@ const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartO
       </View>
       <View style={{ height: 100, marginLeft: 15 }}>
         <Text style={{ color: "#D3D3D3", fontSize: 25 }}>Templates Here</Text>
+        <View style={{ paddingHorizontal: 15, paddingTop: 10 }}>
+          <Pressable style={{
+            padding: 20,
+            backgroundColor: 'green',
+            borderRadius: 10
+          }}
+            onPress={openCreateNewExerciseModal}>
+            <Text style={{ color: 'white' }}>Bring up Create Exercise Modal</Text>
+          </Pressable>
+        </View>
       </View>
       <View
         style={{
@@ -113,6 +122,7 @@ const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartO
             Start Empty Workout
           </Text>
         </Pressable>
+
       </View>
     </View>
   );

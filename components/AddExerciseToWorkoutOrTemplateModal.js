@@ -1,34 +1,40 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Text, View, StyleSheet, Pressable, FlatList, TextInput, TouchableOpacity } from "react-native";
+import Modal from "react-native-modal";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { useStore } from "../src/store.js";
+import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
 import { baseExerciseList } from "./data.js";
-import DropDownPicker from "react-native-dropdown-picker";
 import { helperFunctions } from "../functions/helperFunctions.js";
+import DropDownPicker from "react-native-dropdown-picker";
 
 //             to do list
-// figure out how to unselect muscle and/or equipment dropdown selections
+//
 
 //             feature roadmap
-// add body outline with muscles and display exercises for selected muscle group (modal?)
+// asdf
 
-const ExercisePage = ({ navigation }) => {
+const AddExerciseToWorkoutOrTemplateModal = ({
+  workoutExercises,
+  setWorkoutExercises,
+  addExerciseModal,
+  setAddExerciseModal,
+  templateExercises,
+  setTemplateExercises,
+  templateData,
+  setTemplateData
+}) => {
+
+  // for tracking of exercise selection between app.js and AddExerciseModal
+
+  const [selectedExercises, setSelectedExercises] = useState(workoutExercises);
+
+  // console.log('setTemplateExercises in AddExercise...Modal', templateExercises)
 
   useEffect(() => {
-    if (navigation) {
-      console.log('inside navigation')
-      const updateComingFrom = navigation.addListener('tabPress', (e) => {
-        e.preventDefault();
-        toggleComingFromExercisePage(true);
-        toggleComingFromStartEmptyWorkout(false);
-        console.log(e);
-      });
-      return updateComingFrom;
-    }
-  }, [navigation]);
-
-  // for exercise modal
-  const [exerciseModal, setExerciseModal] = useState(false);
-  const [exerciseNameForModal, setExerciseNameForModal] = useState(undefined);
+    setSelectedExercises(workoutExercises)
+    // console.log('selected exercises', selectedExercises)
+  }, [workoutExercises])
 
   // for react-native-dropdown-picker
   const [muscleValue, setMuscleValue] = useState(null);
@@ -47,19 +53,19 @@ const ExercisePage = ({ navigation }) => {
   // fix this
   const [masterExerciseList, setMasterExerciseList] = useState([]);
 
-  const toggleCreateNewExerciseModal = useStore((state) => state.toggleCreateNewExerciseModal)
-
   // global states
   const comingFromStartEmptyWorkout = useStore((state) => state.comingFromStartEmptyWorkout);
   const toggleComingFromStartEmptyWorkout = useStore((state) => state.toggleComingFromStartEmptyWorkout);
-  const comingFromExercisePage = useStore((state) => state.comingFromExercisePage);
-  const toggleComingFromExercisePage = useStore((state) => state.toggleComingFromExercisePage);
+
   const comingFromNewTemplate = useStore((state) => state.comingFromNewTemplate);
-  const toggleComingFromNewTemplate = useStore((state) => state.toggleComingFromNewTemplate);
 
-  console.log('comingFromExercisePage in ExercisePage', comingFromExercisePage)
-  console.log('comingFromStartEmptyWorkout in ExercisePage', comingFromStartEmptyWorkout)
+  const comingFromReplaceExercise = useStore((state) => state.comingFromReplaceExercise);
 
+  const comingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise = useStore((state) => state.comingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise);
+  const toggleComingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise = useStore((state) => state.toggleComingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise);
+
+  const toggleCreateNewExerciseModal = useStore((state) => state.toggleCreateNewExerciseModal)
+  const openCreateNewExerciseModal = useStore((state) => state.openCreateNewExerciseModal);
 
   useEffect(() => {
     async function fetchData() {
@@ -129,11 +135,6 @@ const ExercisePage = ({ navigation }) => {
     setFilterExerciseList(filteredList);
   }, [equipmentValue, muscleValue, searchBarInput, baseExerciseList]);
 
-  if (comingFromStartEmptyWorkout) {
-    // useEffect for selectedExercises? 
-    // 
-  }
-
   // this is the logic for adding exercises to start empty workout from the add exercise to workout modal
   // const handleItemPress = (item) => {
   //     const exerciseName = item.name
@@ -172,12 +173,11 @@ const ExercisePage = ({ navigation }) => {
   const handleItemPress = (item) => {
     // console.log('comingFromExercisePage', comingFromExercisePage)
     // console.log('comingFromStartEmptyWorkout', comingFromStartEmptyWorkout)
-    if (comingFromExercisePage) {
-      setExerciseNameForModal(item.name);
-      setExerciseModal(true);
-    } else if (comingFromStartEmptyWorkout) {
+    // console.log('selectedExercise in handleItemPress', selectedExercises)
+    if (comingFromStartEmptyWorkout || comingFromNewTemplate) {
+      console.log(item)
       const exerciseName = item.name;
-      console.log(exerciseName);
+      // console.log(exerciseName);
       if (selectedExercises.some((exercise) => exercise.name === item.name)) {
         const arrayWithoutExercise = selectedExercises.filter((exercise) => {
           return exerciseName !== exercise.name;
@@ -186,6 +186,8 @@ const ExercisePage = ({ navigation }) => {
       } else {
         setSelectedExercises([...selectedExercises, item]);
       }
+    } else if (comingFromReplaceExercise) {
+
     }
   };
 
@@ -195,7 +197,7 @@ const ExercisePage = ({ navigation }) => {
 
   const ListHeader = () => {
     return (
-      <View>
+      <View style={[styles.container]}>
         <View style={styles.searchBarRow}>
           <TextInput
             editable
@@ -269,108 +271,132 @@ const ExercisePage = ({ navigation }) => {
     );
   };
 
-
   return (
-    <View style={[styles.container]}>
-      <View style={{ marginBottom: 15, flexDirection: "row", gap: 20 }}>
-        <Pressable
-          style={{
-            borderRadius: 10,
-            borderWidth: 2,
-            borderColor: "white",
-            padding: 10,
-            marginLeft: 20,
-          }}
-          onPress={() => { toggleCreateNewExerciseModal(true), toggleComingFromExercisePage(true) }}
-        >
-          <Text
-            style={{
-              color: "#D3D3D3",
-              fontSize: 14,
-            }}
-          >
-            New
-          </Text>
-        </Pressable>
-        <Text
-          style={{
-            color: "#D3D3D3",
-            fontSize: 30,
-            // paddingLeft: 20,
-            // paddingBottom: 10,
-            textAlign: "center",
-          }}
-        >
-          Exercise Page
-        </Text>
-      </View>
-      <FlatList
-        style={{ marginTop: 10, borderRadius: 10 }}
-        data={filterExerciseList}
-        stickyHeaderIndices={[0]}
-        renderItem={({ item }) => (
-          <Item
-            item={item}
-            handleItemPress={() => handleItemPress(item)}
-          // isSelected={selectedExercises.some((exercise) => exercise.name === item.name)}
-          />
-        )}
-        keyExtractor={(item) => item.name}
-        ListHeaderComponent={<ListHeader />}
-        ListHeaderComponentStyle={{ backgroundColor: "#011638" }}
-        ItemSeparatorComponent={<Separator />}
-        ListEmptyComponent={() => (
-          <View>
-            {filterExerciseList.length === 0 ? (
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: "#61FF7E",
-                  textAlign: "center",
-                  marginBottom: 350,
+    <Modal
+      animationType="slide"
+      transparent={true}
+      isVisible={addExerciseModal}
+    >
+      <View style={styles.modalCenteredView}>
+        <View style={styles.addExerciseModalView}>
+          <View style={styles.topRow}>
+            <View style={styles.topRowLeftSide}>
+              <Pressable
+                style={styles.closeExerciseModal}
+                onPress={() => {
+                  setAddExerciseModal(false)
                 }}
               >
-                No exercise matches your search criteria.
-              </Text>
-            ) : null}
+                <Ionicons name="close-outline" color={"white"} size={35} />
+              </Pressable>
+              <Pressable
+                style={{
+                  paddingTop: 10,
+                  paddingLeft: 8,
+                }}
+                onPress={() => {
+                  // toggleComingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise(true)
+                  setAddExerciseModal(false)
+                  toggleComingFromStartEmptyWorkout(true)
+                  setTimeout(openCreateNewExerciseModal, '350')
+                }}
+              >
+                <Text style={styles.textStyle}>New</Text>
+              </Pressable>
+            </View>
+            <View style={styles.topRowRightSide}>
+              {/* // add Exercise button */}
+              <Pressable
+                onPress={() => {
+                  if (comingFromStartEmptyWorkout) {
+                    setWorkoutExercises(selectedExercises);
+                  } else if (comingFromNewTemplate) {
+                    console.log('comingFromNewTemplate from Add in AddExercise...Modal')
+                    setTemplateExercises(selectedExercises)
+                  }
+                  setAddExerciseModal(false)
+                }}
+              >
+                <Text style={styles.textStyle}>Add</Text>
+              </Pressable>
+            </View>
           </View>
-        )}
-      />
-      {/* <ListOfExercises
-        exerciseModal={exerciseModal}
-        setExerciseModal={setExerciseModal}
-        exerciseNameForModal={exerciseNameForModal}
-        setExerciseNameForModal={setExerciseNameForModal}
-        workoutExercises={workoutExercises}
-      /> */}
-      {/* <ExerciseModalForExercisePage
-        exerciseModal={exerciseModal}
-        setExerciseModal={setExerciseModal}
-        exerciseNameForModal={exerciseNameForModal}
-        setExerciseNameForModal={setExerciseNameForModal}
-      /> */}
-      {/* <CreateNewExerciseModal
-        createNewExerciseModal={createNewExerciseModal}
-        setCreateNewExerciseModal={setCreateNewExerciseModal}
-      /> */}
-    </View>
+          <FlatList
+            style={{ marginTop: 10, borderRadius: 10 }}
+            data={filterExerciseList}
+            stickyHeaderIndices={[0]}
+            renderItem={({ item }) => (
+              <Item
+                item={item}
+                handleItemPress={() => handleItemPress(item)}
+                isSelected={selectedExercises.some((exercise) => exercise.name === item.name)}
+              />
+            )}
+            keyExtractor={(item) => item.name}
+            ListHeaderComponent={<ListHeader />}
+            ListHeaderComponentStyle={{ backgroundColor: "#011638" }}
+            ItemSeparatorComponent={<Separator />}
+            ListEmptyComponent={() => (
+              <View>
+                {filterExerciseList.length === 0 ? (
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: "#61FF7E",
+                      textAlign: "center",
+                      marginBottom: 350,
+                    }}
+                  >
+                    No exercise matches your search criteria.
+                  </Text>
+                ) : null}
+              </View>
+            )}
+          />
+          {/* <CreateNewExerciseModal
+            addExerciseModal={addExerciseModal}
+            setAddExerciseModal={setAddExerciseModal}
+            createNewExerciseModal={createNewExerciseModal}
+            setCreateNewExerciseModal={setCreateNewExerciseModal}
+          /> */}
+        </View>
+      </View>
+    </Modal >
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  modalCenteredView: {
     flex: 1,
-    marginTop: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addExerciseModalView: {
+    backgroundColor: "#011638",
     borderRadius: 10,
+    borderColor: "#D3D3D3",
+    height: "90%",
+    width: "100%",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    padding: 10,
   },
-  item: {
-    padding: 20,
-    marginVertical: 4,
-    marginHorizontal: 16,
+  topRow: {
+    // flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  title: {
-    fontSize: 16,
-    color: "white",
+  topRowLeftSide: {
+    flexDirection: "row",
+  },
+  topRowRightSide: {
+    margin: 10,
   },
   selectedExerciseOrEquipment: {
     backgroundColor: "#011638",
@@ -413,51 +439,17 @@ const styles = StyleSheet.create({
     marginRight: 8,
     zIndex: 1,
   },
-  modalCenteredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalView: {
-    margin: 50,
-    backgroundColor: "#D3D3D3",
-    borderRadius: 20,
-    borderColor: "#D3D3D3",
-    padding: 25,
-    alignItems: "center",
-    height: "80%",
-    width: "95%",
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    width: 50,
-    height: 50,
-    marginRight: 10,
-    flex: 1,
-  },
-  buttonOpen: {
-    backgroundColor: "#F194FF",
-  },
-  buttonClose: {
-    backgroundColor: "#011638",
-  },
+
+
   textStyle: {
-    color: "#0A8754",
+    color: "white",
     fontWeight: "bold",
-    textAlign: "center",
-    width: 10,
+    fontSize: 16,
+    // textAlign: "center",
+    // width: 10
     // flex: 1,
     // margin: 10
   },
-  modalText: {
-    // marginBottom: 15,
-    // textAlign: 'center',
-    // flex: 1,
-    // alignItems: 'center',
-    // justifyContent: 'center'
-  },
 });
 
-export default ExercisePage;
+export default AddExerciseToWorkoutOrTemplateModal;

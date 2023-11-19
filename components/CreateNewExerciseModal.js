@@ -10,16 +10,30 @@ import { useStore } from "../src/store.js";
 
 const CreateNewExerciseModal = ({
     setFilterExerciseList,
-    setAddExerciseToWorkoutModal,
-    createNewExerciseModal,
-    setCreateNewExerciseModal
+    setAddExerciseModal,
 }) => {
 
     // global states
     const comingFromStartEmptyWorkout = useStore(state => state.comingFromStartEmptyWorkout);
     const toggleComingFromStartEmptyWorkout = useStore(state => state.toggleComingFromStartEmptyWorkout);
+
     const comingFromExercisePage = useStore(state => state.comingFromExercisePage);
     const toggleComingFromExercisePage = useStore(state => state.toggleComingFromExercisePage);
+
+    const comingFromNewTemplate = useStore(state => state.comingFromNewTemplate);
+    const toggleComingFromNewTemplate = useStore(state => state.toggleComingFromNewTemplate);
+
+    const comingFromReplaceExercise = useStore(state => state.comingFromReplaceExercise);
+    const toggleComingFromReplaceExercise = useStore(state => state.toggleComingFromReplaceExercise);
+
+    const comingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise = useStore(state => state.comingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise)
+    const toggleComingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise = useStore((state) => state.toggleComingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise);
+
+    const createNewExerciseModal = useStore(state => state.createNewExerciseModal);
+    const toggleCreateNewExerciseModal = useStore(state => state.toggleCreateNewExerciseModal);
+    const closeCreateNewExerciseModal = useStore((state) => state.closeCreateNewExerciseModal);
+
+    // console.log('createNewExerciseModal useStore', createNewExerciseModal)
 
     // for react-native-dropdown-picker
     const [muscleValue, setMuscleValue] = useState(null);
@@ -37,6 +51,9 @@ const CreateNewExerciseModal = ({
     const onEquipmentOpen = useCallback(() => {
         setMuscleOpen(false);
     }, []);
+
+    // console.log('comingFromStartEmptyWorkout in CreateNewExerciseModal', comingFromStartEmptyWorkout)
+    // console.log('comingFromExercisePage in CreateNewExerciseModal', comingFromExercisePage)
 
     deleteData = async () => {
         try {
@@ -72,9 +89,6 @@ const CreateNewExerciseModal = ({
         { label: "Other", value: "other" },
     ];
 
-    // console.log('Coming From Empty Workout Bottom Sheet in ListOfExercises', comingFromStartEmptyWorkout)
-    // console.log('Coming From Exercise Page in ListOfExercises', comingFromExercisePage)
-
     return (
         <Modal
             animationType="slide"
@@ -94,13 +108,15 @@ const CreateNewExerciseModal = ({
                         <Pressable
                             style={styles.closeExerciseModal}
                             onPress={() => {
-                                setCreateNewExerciseModal(false)
-                                // toggleCreateNewExerciseModalState(false);
+                                console.log('comingFromStartEmptyWorkout', comingFromStartEmptyWorkout)
+                                console.log('comingFromExercisePage', comingFromExercisePage)
+                                closeCreateNewExerciseModal
+                                toggleCreateNewExerciseModal(false);
                                 if (comingFromStartEmptyWorkout) {
                                     setTimeout(() => {
-                                        setAddExerciseToWorkoutModal(true)
+                                        setAddExerciseModal(true)
                                         toggleComingFromStartEmptyWorkout(false)
-                                    }, '200')
+                                    }, '350')
                                 } else if (comingFromExercisePage) {
                                     toggleComingFromExercisePage(false)
                                 }
@@ -193,12 +209,9 @@ const CreateNewExerciseModal = ({
                                         }
                                     };
                                     storeData(finalNewExercise);
-                                    toggleCreateNewExerciseModalState(false);
+                                    toggleCreateNewExerciseModal(false);
                                     if (comingFromStartEmptyWorkout) {
-                                        setTimeout(() => {
-                                            toggleAddExerciseModalState(true)
-                                            // setAddExerciseModal(true)
-                                        }, '200')
+                                        setTimeout(setAddExerciseModal(true), '200')
                                     }
                                 }
                             }}

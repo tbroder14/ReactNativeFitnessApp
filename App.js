@@ -1,19 +1,40 @@
 import "react-native-gesture-handler";
-import React, { useCallback, useRef, useMemo, useState, useEffect } from "react";
-import { Text, Animated, View, StyleSheet, Pressable, FlatList, TextInput, TouchableOpacity, TextComponent } from "react-native";
+import React, {
+  useCallback,
+  useRef,
+  useMemo,
+  useState,
+  useEffect,
+} from "react";
+import {
+  Text,
+  Animated,
+  View,
+  StyleSheet,
+  Pressable,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  TextComponent,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { RectButton } from 'react-native-gesture-handler';
+import Swipeable from "react-native-gesture-handler/Swipeable";
+import { RectButton } from "react-native-gesture-handler";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { SafeAreaProvider, useSafeAreaInsets, } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
-import DraggableFlatList, { ScaleDecorator, } from "react-native-draggable-flatlist";
-import Collapsible from 'react-native-collapsible';
+import DraggableFlatList, {
+  ScaleDecorator,
+} from "react-native-draggable-flatlist";
+import Collapsible from "react-native-collapsible";
 
-// state management library 
+// state management library
 import { useStore } from "./src/store";
 
 // five bottom tabs
@@ -23,42 +44,42 @@ import ProgramPage from "./components/ProgramPage";
 import Placeholder from "./components/Placeholder";
 import ExercisePage from "./components/ExercisePage";
 
-// components 
+// components
 import ExerciseThreeDotsBottomSheet from "./components/ExerciseThreeDotsBottomSheet";
 import CancelWorkoutConfirmationModal from "./components/CancelWorkoutConfirmationModal";
 import SaveWorkoutConfirmationModal from "./components/SaveWorkoutConfirmationModal";
-import NotAllSetsCompleteAlertModal from "./components/NotAllSetsCompleteAlertModal"
+import NotAllSetsCompleteAlertModal from "./components/NotAllSetsCompleteAlertModal";
 import NewTemplate from "./components/NewTemplate";
-import AddExerciseToWorkoutModal from "./components/AddExerciseToWorkoutModal";
+import AddExerciseToWorkoutOrTemplateModal from "./components/AddExerciseToWorkoutOrTemplateModal";
 import CreateNewExerciseModal from "./components/CreateNewExerciseModal";
 
 //             to do list
 // figure out how to create a state for workoutExercises and WorkoutData instead of prop drilling (i.e. use hookstate, redux, context, etc.)
 // save templates to local data
 // long press to reorder exercises -> https://github.com/computerjazz/react-native-draggable-flatlist/
-// update exercise list from Start Empty Workout to have utilize async storage and update the create New Exercise functionality 
-// saving new order of collapisble exercises 
-// three button dropdown/bottom sheet to delete exercise -> complete styling  
-// format/style sets/text input parts 
+// update exercise list from Start Empty Workout to have utilize async storage and update the create New Exercise functionality
+// saving new order of collapisble exercises
+// three button dropdown/bottom sheet to delete exercise -> complete styling
+// format/style sets/text input parts
 // create logic in SaveWorkoutConfirmationModal that checks if all sets are completed when hitting the "Save" button
 // remove bottom unused styles and collapse/clean-up inline styles
-// refactor code to simplify app.js; possibly move things to single component files 
-// on Strong app, when you select "Add Exercises", none are selected -> meaning, you could have two more or more of the same exercise in the same workout 
+// refactor code to simplify app.js; possibly move things to single component files
+// on Strong app, when you select "Add Exercises", none are selected -> meaning, you could have two more or more of the same exercise in the same workout
 
 //             bugs
 // clicking "X" in AddExerciseModal should return exercises to originals and remove changes
-// if there are three sets and I delete the second one, the delete slider remains open on the (newly) second set 
+// if there are three sets and I delete the second one, the delete slider remains open on the (newly) second set
 // when changing workoutName, keyboard stays up
-// workoutName edits remain between saving of multiple workouts 
+// workoutName edits remain between saving of multiple workouts
 
 //             feature roadmap
 // save workoutdata to local storage
-// display saved workoutdata on history page 
+// display saved workoutdata on history page
 // rest timer
 // warmup/dropsets/supersets
-// creating templates 
+// creating templates
 
-function ExerciseScreen({ createNewExerciseModal, setCreateNewExerciseModal }) {
+function ExerciseScreen() {
   const insets = useSafeAreaInsets();
 
   return (
@@ -69,7 +90,7 @@ function ExerciseScreen({ createNewExerciseModal, setCreateNewExerciseModal }) {
         paddingBottom: 5,
       }}
     >
-      <ExercisePage createNewExerciseModal={createNewExerciseModal} setCreateNewExerciseModal={setCreateNewExerciseModal} />
+      <ExercisePage />
     </View>
   );
 }
@@ -93,7 +114,12 @@ function PlaceholderScreen() {
   );
 }
 
-function StartWorkoutScreen({ bottomSheetRef, startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime, newTemplateBottomSheetRef }) {
+function StartWorkoutScreen({
+  bottomSheetRef,
+  startOfWorkoutDateAndTime,
+  setStartOfWorkoutDateAndTime,
+  newTemplateBottomSheetRef,
+}) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -107,7 +133,12 @@ function StartWorkoutScreen({ bottomSheetRef, startOfWorkoutDateAndTime, setStar
         paddingRight: insets.right,
       }}
     >
-      <StartWorkoutPage bottomSheetRef={bottomSheetRef} startOfWorkoutDateAndTime={startOfWorkoutDateAndTime} setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime} newTemplateBottomSheetRef={newTemplateBottomSheetRef} />
+      <StartWorkoutPage
+        bottomSheetRef={bottomSheetRef}
+        startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
+        setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
+        newTemplateBottomSheetRef={newTemplateBottomSheetRef}
+      />
     </View>
   );
 }
@@ -156,19 +187,23 @@ function BottomSheetFooterComponents({
   workoutExercises,
   workoutData,
   closeBottomSheet,
-  addExerciseToWorkoutModal,
-  setAddExerciseToWorkoutModal,
-  createNewExerciseModal,
-  setCreateNewExerciseModal,
+  addExerciseModal,
+  setAddExerciseModal,
+  templateExercises,
+  setTemplateExercises,
+  templateData,
+  setTemplateData
 }) {
-
   const cancelWorkout = () => {
     if (workoutData.length === 0) {
-      closeBottomSheet()
+      closeBottomSheet();
     } else {
-      setCancelWorkoutConfirmationModal(true)
+      setCancelWorkoutConfirmationModal(true);
     }
   };
+
+  // console.log('workoutExercises in BottomSheet', workoutExercises)
+  // console.log('workoutData in BottomSheet', workoutData)
 
   return (
     <View style={{ padding: 20, gap: 25 }}>
@@ -179,8 +214,8 @@ function BottomSheetFooterComponents({
           padding: 10,
         }}
         onPress={() => {
-          setAddExerciseToWorkoutModal(true)
-          setWorkoutExercises(workoutData)
+          setAddExerciseModal(true);
+          setWorkoutExercises(workoutData);
         }}
       >
         <Text style={{ color: "white", fontSize: 18, textAlign: "center" }}>
@@ -193,7 +228,7 @@ function BottomSheetFooterComponents({
           borderRadius: 8,
           backgroundColor: "red",
           padding: 10,
-          marginBottom: 100
+          marginBottom: 100,
         }}
         onPress={() => cancelWorkout()}
       >
@@ -201,33 +236,15 @@ function BottomSheetFooterComponents({
           Cancel Workout
         </Text>
       </Pressable>
-      {/* <View>
-        <Pressable style={{
-          padding: 20,
-          backgroundColor: 'green'
-
-        }}
-          onPress={() => toggleCreateNewExerciseModalState(true)}>
-          <Text style={{ color: 'white' }}>Bring up Create Exercise Modal</Text>
-        </Pressable>
-      </View> */}
-      < AddExerciseToWorkoutModal
+      <AddExerciseToWorkoutOrTemplateModal
         workoutExercises={workoutExercises}
         setWorkoutExercises={setWorkoutExercises}
-        addExerciseToWorkoutModal={addExerciseToWorkoutModal}
-        setAddExerciseToWorkoutModal={setAddExerciseToWorkoutModal}
-        createNewExerciseModal={createNewExerciseModal}
-        setCreateNewExerciseModal={setCreateNewExerciseModal}
-      // comingFromStartEmptyWorkout={comingFromStartEmptyWorkout}
-      // setComingFromStartEmptyWorkout={setComingFromStartEmptyWorkout}
-      />
-      <CreateNewExerciseModal
-        addExerciseToWorkoutModal={addExerciseToWorkoutModal}
-        setAddExerciseToWorkoutModal={setAddExerciseToWorkoutModal}
-        createNewExerciseModal={createNewExerciseModal}
-        setCreateNewExerciseModal={setCreateNewExerciseModal}
-      // comingFromStartEmptyWorkout={comingFromStartEmptyWorkout}
-      // setComingFromStartEmptyWorkout={setComingFromStartEmptyWorkout}
+        addExerciseModal={addExerciseModal}
+        setAddExerciseModal={setAddExerciseModal}
+        templateExercises={templateExercises}
+        setTemplateExercises={setTemplateExercises}
+        templateData={templateData}
+        setTemplateData={setTemplateData}
       />
     </View>
   );
@@ -236,27 +253,34 @@ function BottomSheetFooterComponents({
 const Tab = createBottomTabNavigator();
 
 export default function App() {
-
-  const [saveWorkoutConfirmationModal, setSaveWorkoutConfirmationModal] = useState(false)
-  const [notAllSetsCompleteAlert, setNotAllSetsCompleteAlert] = useState(false)
-  const [cancelWorkoutConfirmationModal, setCancelWorkoutConfirmationModal] = useState(false)
+  const [saveWorkoutConfirmationModal, setSaveWorkoutConfirmationModal] = useState(false);
+  const [notAllSetsCompleteAlert, setNotAllSetsCompleteAlert] = useState(false);
+  const [cancelWorkoutConfirmationModal, setCancelWorkoutConfirmationModal] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState([]);
   const [workoutData, setWorkoutData] = useState([]);
-  const [exerciseForThreeDotsBS, setExerciseForThreeDotsBS] = useState('')
-  const [collapseHandler, setCollapseHandler] = useState(false)
-  const [startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime] = useState('')
-  const [addExerciseToWorkoutModal, setAddExerciseToWorkoutModal] = useState(false)
-  const [createNewExerciseModal, setCreateNewExerciseModal] = useState(false)
+  const [exerciseForThreeDotsBS, setExerciseForThreeDotsBS] = useState("");
+  const [collapseHandler, setCollapseHandler] = useState(false);
+  const [startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime] = useState("");
+  const [addExerciseModal, setAddExerciseModal] = useState(false);
+  const [templateExercises, setTemplateExercises] = useState([]);
+  const [templateData, setTemplateData] = useState([]);
 
-  // hides bottomSheet 
-  const [bottomSheetBottomInset, setBottomSheetBottomInset] = useState(0)
-
+  // hides bottomSheet
+  const [bottomSheetBottomInset, setBottomSheetBottomInset] = useState(0);
 
   // global states from store
-  const comingFromStartEmptyWorkout = useStore(state => state.comingFromStartEmptyWorkout);
-  const toggleComingFromStartEmptyWorkout = useStore(state => state.toggleComingFromStartEmptyWorkout);
-  const comingFromExercisePage = useStore(state => state.comingFromExercisePage);
-  const toggleComingFromExercisePage = useStore(state => state.toggleComingFromExercisePage);
+  const comingFromStartEmptyWorkout = useStore(
+    (state) => state.comingFromStartEmptyWorkout
+  );
+  const toggleComingFromStartEmptyWorkout = useStore(
+    (state) => state.toggleComingFromStartEmptyWorkout
+  );
+  const comingFromExercisePage = useStore(
+    (state) => state.comingFromExercisePage
+  );
+  const toggleComingFromExercisePage = useStore(
+    (state) => state.toggleComingFromExercisePage
+  );
 
   // workout name useState
   const startOfWorkoutTime = new Date().getHours();
@@ -288,17 +312,18 @@ export default function App() {
   }
   const [workoutName, onChangeWorkoutName] = useState(currentWorkoutName);
 
-
   const closeBottomSheet = () => {
-    bottomSheetRef.current.close()
-  }
+    bottomSheetRef.current.close();
+  };
 
   useEffect(() => {
+    // determines if any exercises in workoutExercise aren't formatted properly
+    let newExercise = workoutExercises.filter(
+      (exercise) =>
+        !workoutData.some((exercise2) => exercise2.name === exercise.name)
+    );
 
-    // determines if any exercises in workoutExercise aren't formatted properly 
-    let newExercise = workoutExercises.filter((exercise) => !workoutData.some((exercise2) => exercise2.name === exercise.name))
-
-    // formats new exercises to proper format with sets 
+    // formats new exercises to proper format with sets
     newExercise.forEach((i) => {
       i.sets = [
         {
@@ -310,44 +335,47 @@ export default function App() {
           complete: false,
         },
       ];
-    })
+    });
 
-    const exerciseToBeRemoved = workoutData.filter((exercise) => !workoutExercises.some((exercise2) => exercise2.name === exercise.name))
-    const filteredWorkoutData = workoutData.filter((exercise) => !exerciseToBeRemoved.some((exercise2) => exercise2.name === exercise.name));
-    const updatedWorkoutData = [...filteredWorkoutData, ...newExercise]
-    setWorkoutData(updatedWorkoutData)
-
+    const exerciseToBeRemoved = workoutData.filter(
+      (exercise) =>
+        !workoutExercises.some((exercise2) => exercise2.name === exercise.name)
+    );
+    const filteredWorkoutData = workoutData.filter(
+      (exercise) =>
+        !exerciseToBeRemoved.some(
+          (exercise2) => exercise2.name === exercise.name
+        )
+    );
+    const updatedWorkoutData = [...filteredWorkoutData, ...newExercise];
+    setWorkoutData(updatedWorkoutData);
   }, [workoutExercises]);
 
   // ref
   const bottomSheetRef = useRef(null);
   const threeDotsBottomSheetRef = useRef(null);
-  const newTemplateBottomSheetRef = useRef(null)
+  const newTemplateBottomSheetRef = useRef(null);
 
   // snap point variables
   const snapPoints = useMemo(() => ["15%", "94%"], []);
 
   // callbacks
-  const handleSheetChanges = ((index) => {
-    console.log(index)
+  const handleSheetChanges = (index) => {
+    console.log(index);
     if (index === 0) {
-      // console.log('coming from start empty workout should be false')
-      toggleComingFromStartEmptyWorkout(false)
-      setBottomSheetBottomInset(80)
+      setBottomSheetBottomInset(80);
     } else if (index === -1) {
-      toggleComingFromStartEmptyWorkout(false)
-      setBottomSheetBottomInset(0)
+      setBottomSheetBottomInset(0);
+      toggleComingFromStartEmptyWorkout(false);
     } else {
-      // console.log('coming from start empty workout should be true')
-      toggleComingFromStartEmptyWorkout(true)
-      toggleComingFromExercisePage(false)
-      setBottomSheetBottomInset(0)
+      toggleComingFromStartEmptyWorkout(true);
+      toggleComingFromExercisePage(false);
+      setBottomSheetBottomInset(0);
     }
-  });
+  };
 
   // adds a new set to an exercise
   const addSet = (exerciseName) => {
-
     copyOfWorkoutData = workoutData.map((i) => {
       if (exerciseName === i.name) {
         const newSet = {
@@ -357,51 +385,46 @@ export default function App() {
           seconds: "0",
           notes: "",
           complete: false,
-        }
+        };
 
         const newObj = {
           equipment: i.equipment,
           muscle: i.muscle,
           name: i.name,
-          sets: [
-            ...i.sets,
-            newSet
-          ]
-        }
-        return newObj
-
+          sets: [...i.sets, newSet],
+        };
+        return newObj;
       } else {
-        return i
+        return i;
       }
-    })
+    });
 
-    setWorkoutData(copyOfWorkoutData)
-  }
+    setWorkoutData(copyOfWorkoutData);
+  };
 
   const handleCheckboxChange = (exercise, index) => {
-    const exerciseName = exercise.name
-    const setIndex = index
-    const copyOfWorkoutData = [...workoutData]
+    const exerciseName = exercise.name;
+    const setIndex = index;
+    const copyOfWorkoutData = [...workoutData];
 
     const updatedData = copyOfWorkoutData.map((e) => {
       if (exerciseName === e.name) {
         const updatedSets = e.sets.map((set, index) => {
           if (index === setIndex) {
-            return { ...set, complete: !e.sets[setIndex].complete }
+            return { ...set, complete: !e.sets[setIndex].complete };
           }
-          return set
-        })
+          return set;
+        });
         return {
           ...e,
-          sets: updatedSets
-        }
+          sets: updatedSets,
+        };
       }
-      return e
-    })
-    // is possibly delayed by one checkmark? 
-    setWorkoutData(updatedData)
-
-  }
+      return e;
+    });
+    // is possibly delayed by one checkmark?
+    setWorkoutData(updatedData);
+  };
 
   const Separator = () => (
     <View style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 10 }}>
@@ -422,25 +445,27 @@ export default function App() {
       outputRange: [1, 0],
     });
 
-    const pressHandler = () => {
-
-    };
+    const pressHandler = () => { };
 
     return (
       <Animated.View style={{ flex: 1, transform: [{ translateX: trans }] }}>
-        <RectButton style={{
-          alignItems: 'center',
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'flex-end',
-          backgroundColor: 'red'
-        }}>
-          <Text style={{
-            color: 'white',
-            fontSize: 16,
-            backgroundColor: 'transparent',
-            padding: 10,
-          }}>
+        <RectButton
+          style={{
+            alignItems: "center",
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "flex-end",
+            backgroundColor: "red",
+          }}
+        >
+          <Text
+            style={{
+              color: "white",
+              fontSize: 16,
+              backgroundColor: "transparent",
+              padding: 10,
+            }}
+          >
             Delete
           </Text>
         </RectButton>
@@ -448,46 +473,44 @@ export default function App() {
     );
   };
 
-  // this will delete a set after a swipeable action 
+  // this will delete a set after a swipeable action
   const removeThis = (item, sets, index) => {
-    const setIndex = index
-    const exerciseName = item.name
-    const copyOfWorkoutData = [...workoutData]
+    const setIndex = index;
+    const exerciseName = item.name;
+    const copyOfWorkoutData = [...workoutData];
 
     copyOfWorkoutData.forEach((i) => {
       if (i.name === exerciseName) {
         i.sets.forEach((j, index) => {
           if (index === setIndex) {
-            i.sets.splice(setIndex, 1)
+            i.sets.splice(setIndex, 1);
           }
-        })
+        });
       }
-    })
+    });
 
-    setWorkoutData(copyOfWorkoutData)
-
-  }
+    setWorkoutData(copyOfWorkoutData);
+  };
 
   // this brings up a bottom sheet with options for a specific exercise
   const exerciseThreeDotsOptions = () => {
-    threeDotsBottomSheetRef.current.snapToIndex(0)
-  }
+    threeDotsBottomSheetRef.current.snapToIndex(0);
+  };
 
   // this deletes an exercise from workoutData from ExerciseThreeDotsBottomSheet
   function deleteExerciseFunction(exerciseName) {
-
     const newArrayWithoutExercise = workoutData.filter(function (i) {
-      return i.name !== exerciseName
-    })
+      return i.name !== exerciseName;
+    });
 
-    setWorkoutData(newArrayWithoutExercise)
-    setWorkoutExercises(newArrayWithoutExercise)
-    setExerciseForThreeDotsBS('')
-    threeDotsBottomSheetRef.current.forceClose()
+    setWorkoutData(newArrayWithoutExercise);
+    setWorkoutExercises(newArrayWithoutExercise);
+    setExerciseForThreeDotsBS("");
+    threeDotsBottomSheetRef.current.forceClose();
   }
 
   function makeMovable() {
-    console.log('long press registered')
+    console.log("long press registered");
   }
 
   // const renderDraggableItem = ({ item, drag, isActive }) => {
@@ -505,73 +528,69 @@ export default function App() {
   // };
 
   const saveWorkout = () => {
-
-    const areAllSetsComplete = workoutData.every(exercise =>
-      exercise.sets.every(set => set.complete === true)
+    const areAllSetsComplete = workoutData.every((exercise) =>
+      exercise.sets.every((set) => set.complete === true)
     );
 
-    console.log('areAllSetsComplete', areAllSetsComplete)
+    console.log("areAllSetsComplete", areAllSetsComplete);
 
     if (areAllSetsComplete) {
-      console.log('all sets are complete')
-      setSaveWorkoutConfirmationModal(true)
+      console.log("all sets are complete");
+      setSaveWorkoutConfirmationModal(true);
     } else {
-      console.log('not all sets are complete')
-      setNotAllSetsCompleteAlert(true)
+      console.log("not all sets are complete");
+      setNotAllSetsCompleteAlert(true);
     }
-
-  }
+  };
 
   // Flatlist data items structure/functionality and style
   const draggableItem = ({ item, drag, isActive }) => {
-
     function onChangeWeight(weight, index, item) {
-      const exerciseName = item.name
-      const setIndex = index
-      const copyOfWorkoutData = [...workoutData]
+      const exerciseName = item.name;
+      const setIndex = index;
+      const copyOfWorkoutData = [...workoutData];
 
       const updatedData = copyOfWorkoutData.map((i) => {
         if (exerciseName === i.name) {
           const updatedSets = i.sets.map((set, index) => {
             if (index === setIndex) {
-              return { ...set, weight: weight }
+              return { ...set, weight: weight };
             }
-            return set
-          })
+            return set;
+          });
           return {
             ...i,
-            sets: updatedSets
-          }
+            sets: updatedSets,
+          };
         }
-        return i
-      })
+        return i;
+      });
 
-      setWorkoutData(updatedData)
-
+      setWorkoutData(updatedData);
     }
 
     function onChangeReps(reps, index, item) {
-      const exerciseName = item.name
-      const setIndex = index
-      const copyOfWorkoutData = [...workoutData]
+      const exerciseName = item.name;
+      const setIndex = index;
+      const copyOfWorkoutData = [...workoutData];
 
       const updatedData = copyOfWorkoutData.map((i) => {
         if (exerciseName === i.name) {
           const updatedSets = i.sets.map((set, index) => {
             if (index === setIndex) {
-              return { ...set, reps: reps }
+              return { ...set, reps: reps };
             }
-            return set
-          })
+            return set;
+          });
           return {
             ...i,
-            sets: updatedSets
-          }
+            sets: updatedSets,
+          };
         }
-        return i
-      })
+        return i;
+      });
 
-      setWorkoutData(updatedData)
+      setWorkoutData(updatedData);
     }
 
     // const collapseHandlerFunction = () => {
@@ -580,39 +599,48 @@ export default function App() {
     // }
 
     const updateWorkoutDataAfterDragEnd = (workoutData) => {
-      console.log(workoutData)
-    }
+      console.log(workoutData);
+    };
 
     return (
       <ScaleDecorator>
-        <View style={{ paddingBottom: 20, backgroundColor: '#011638' }}>
+        <View style={{ paddingBottom: 20, backgroundColor: "#011638" }}>
           <View
             style={{
               paddingRight: 20,
               paddingLeft: 20,
               marginBottom: 20,
               flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <TouchableOpacity
               onLongPress={() => {
-                setCollapseHandler(true)
+                setCollapseHandler(true);
                 setTimeout(() => {
-                  drag()
+                  drag();
                 }, 300);
               }}
               disabled={isActive}
             >
               <Text style={styles.exerciseTitle}>{item.name}</Text>
             </TouchableOpacity>
-            <Pressable onPress={() => { exerciseThreeDotsOptions(item), setExerciseForThreeDotsBS(item.name) }}>
-              <Ionicons name="ellipsis-horizontal-outline" size={30} color={'white'} />
+            <Pressable
+              onPress={() => {
+                exerciseThreeDotsOptions(item),
+                  setExerciseForThreeDotsBS(item.name);
+              }}
+            >
+              <Ionicons
+                name="ellipsis-horizontal-outline"
+                size={30}
+                color={"white"}
+              />
             </Pressable>
           </View>
-          <Collapsible collapsed={collapseHandler} >
+          <Collapsible collapsed={collapseHandler}>
             <View
               style={{
                 flexDirection: "row",
@@ -622,13 +650,15 @@ export default function App() {
                 marginBottom: 10,
               }}
             >
-              <Text style={{
-                color: "white",
-                fontWeight: "bold",
-                width: "10%",
-                textAlign: 'center',
-                fontSize: 16,
-              }}>
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  width: "10%",
+                  textAlign: "center",
+                  fontSize: 16,
+                }}
+              >
                 Set
               </Text>
               <Text
@@ -670,7 +700,7 @@ export default function App() {
                   fontWeight: "bold",
                   width: "10%",
                   fontSize: 16,
-                  textAlign: 'right'
+                  textAlign: "right",
                 }}
               >
                 CM
@@ -682,8 +712,7 @@ export default function App() {
                 onSwipeableWillOpen={() => removeThis(item, sets, index)}
                 rightThreshold={250}
                 style={{
-                  backgroundColor: '#011638'
-
+                  backgroundColor: "#011638",
                 }}
               >
                 <View
@@ -692,7 +721,7 @@ export default function App() {
                     width: "100%",
                     paddingLeft: 20,
                     paddingRight: 20,
-                    backgroundColor: sets.complete ? 'green' : "#011638",
+                    backgroundColor: sets.complete ? "green" : "#011638",
                     paddingTop: 8,
                     paddingBottom: 8,
                     alignItems: "center",
@@ -701,7 +730,9 @@ export default function App() {
                   <Text
                     style={[
                       styles.setColumn,
-                      sets.complete ? { color: 'white' } : styles.setColumnSetNotComplete
+                      sets.complete
+                        ? { color: "white" }
+                        : styles.setColumnSetNotComplete,
                     ]}
                   >
                     {index + 1}
@@ -719,9 +750,13 @@ export default function App() {
                   <TextInput
                     style={[
                       styles.weightColumn,
-                      sets.complete ? { color: 'white' } : styles.weightColumnSetNotComplete
+                      sets.complete
+                        ? { color: "white" }
+                        : styles.weightColumnSetNotComplete,
                     ]}
-                    onChangeText={(weight) => onChangeWeight(weight, index, item)}
+                    onChangeText={(weight) =>
+                      onChangeWeight(weight, index, item)
+                    }
                     value={sets.weight}
                     placeholder={sets.weight}
                     keyboardType="numeric"
@@ -730,7 +765,9 @@ export default function App() {
                   <TextInput
                     style={[
                       styles.repsColumn,
-                      sets.complete ? { color: 'white' } : styles.repsColumnSetNotComplete
+                      sets.complete
+                        ? { color: "white" }
+                        : styles.repsColumnSetNotComplete,
                     ]}
                     onChangeText={(reps) => onChangeReps(reps, index, item)}
                     value={sets.reps}
@@ -751,7 +788,6 @@ export default function App() {
                     }}
                     unfillColor="white"
                     fillColor="#61FF7E"
-
 
                   // text="Custom Checkbox"
                   // iconStyle={{ borderColor: "red" }}
@@ -775,12 +811,14 @@ export default function App() {
               }}
               onPress={() => addSet(item.name)}
             >
-              <Text style={{ color: "#011638", fontWeight: "bold", }}>Add Set</Text>
+              <Text style={{ color: "#011638", fontWeight: "bold" }}>
+                Add Set
+              </Text>
             </Pressable>
           </Collapsible>
         </View>
       </ScaleDecorator>
-    )
+    );
   };
 
   return (
@@ -831,23 +869,25 @@ export default function App() {
             <Tab.Screen
               name="Start Workout"
               children={() => (
-                <StartWorkoutScreen bottomSheetRef={bottomSheetRef} startOfWorkoutDateAndTime={startOfWorkoutDateAndTime} setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime} newTemplateBottomSheetRef={newTemplateBottomSheetRef} />
+                <StartWorkoutScreen
+                  bottomSheetRef={bottomSheetRef}
+                  startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
+                  setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
+                  newTemplateBottomSheetRef={newTemplateBottomSheetRef}
+                />
               )}
             />
-            <Tab.Screen name="Exercise"
+            <Tab.Screen
+              name="Exercise"
               // component={ExerciseScreen}
               listeners={{
                 tabPress: (e) => {
-                  console.log('inside tab press')
-                  toggleComingFromExercisePage(true)
-                  toggleComingFromStartEmptyWorkout(false)
-                  console.log('comingFromExercisePage inside tabPress', comingFromExercisePage)
-                  console.log('comingFromStartEmptyWorkout inside tabPress', comingFromStartEmptyWorkout)
+                  console.log("inside tab press");
+                  toggleComingFromExercisePage(true);
+                  toggleComingFromStartEmptyWorkout(false);
                 },
               }}
-              children={() => (
-                <ExerciseScreen createNewExerciseModal={createNewExerciseModal} setCreateNewExerciseModal={setCreateNewExerciseModal} />
-              )}
+              children={() => <ExerciseScreen />}
             />
             <Tab.Screen name="Placeholder" component={PlaceholderScreen} />
           </Tab.Navigator>
@@ -891,17 +931,17 @@ export default function App() {
                 paddingRight: 15,
                 paddingLeft: 15,
                 flex: 1,
-                textAlign: 'center'
+                textAlign: "center",
               }}
               value={workoutName}
               onChange={onChangeWorkoutName}
               placeholder={currentWorkoutName}
             />
             <Pressable
-              style={{ borderColor: 'white', borderRadius: 10, borderWidth: 2 }}
+              style={{ borderColor: "white", borderRadius: 10, borderWidth: 2 }}
               onPress={(workoutData) => saveWorkout(workoutData)}
             >
-              <Text style={{ color: 'white', padding: 15 }}>Save</Text>
+              <Text style={{ color: "white", padding: 15 }}>Save</Text>
             </Pressable>
           </View>
           <DraggableFlatList
@@ -911,24 +951,28 @@ export default function App() {
             keyExtractor={(item) => item.name}
             renderItem={draggableItem}
             ItemSeparatorComponent={<Separator />}
-            ListFooterComponent={() =>
+            ListFooterComponent={() => (
               <BottomSheetFooterComponents
                 bottomSheetRef={bottomSheetRef}
                 setWorkoutExercises={setWorkoutExercises}
                 workoutExercises={workoutExercises}
                 setWorkoutData={setWorkoutData}
                 workoutData={workoutData}
-                setCancelWorkoutConfirmationModal={setCancelWorkoutConfirmationModal}
+                setCancelWorkoutConfirmationModal={
+                  setCancelWorkoutConfirmationModal
+                }
                 closeBottomSheet={closeBottomSheet}
-                addExerciseToWorkoutModal={addExerciseToWorkoutModal}
-                setAddExerciseToWorkoutModal={setAddExerciseToWorkoutModal}
-                createNewExerciseModal={createNewExerciseModal}
-                setCreateNewExerciseModal={setCreateNewExerciseModal}
+                addExerciseModal={addExerciseModal}
+                setAddExerciseModal={setAddExerciseModal}
+                templateExercises={templateExercises}
+                setTemplateExercises={setTemplateExercises}
+                templateData={templateData}
+                setTemplateData={setTemplateData}
               />
-            }
+            )}
           />
         </BottomSheet>
-        < SaveWorkoutConfirmationModal
+        <SaveWorkoutConfirmationModal
           setSaveWorkoutConfirmationModal={setSaveWorkoutConfirmationModal}
           setWorkoutData={setWorkoutData}
           workoutName={workoutName}
@@ -942,7 +986,7 @@ export default function App() {
           startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
           setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
         />
-        < CancelWorkoutConfirmationModal
+        <CancelWorkoutConfirmationModal
           setCancelWorkoutConfirmationModal={setCancelWorkoutConfirmationModal}
           setWorkoutData={setWorkoutData}
           setWorkoutExercises={setWorkoutExercises}
@@ -950,7 +994,7 @@ export default function App() {
           closeBottomSheet={closeBottomSheet}
           setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
         />
-        < NotAllSetsCompleteAlertModal
+        <NotAllSetsCompleteAlertModal
           notAllSetsCompleteAlert={notAllSetsCompleteAlert}
           setNotAllSetsCompleteAlert={setNotAllSetsCompleteAlert}
         // setSaveWorkoutConfirmationModal={setSaveWorkoutConfirmationModal}
@@ -966,15 +1010,28 @@ export default function App() {
         // startOfWorkoutDateAndTime={startOfWorkoutDateAndTime}
         // setStartOfWorkoutDateAndTime={setStartOfWorkoutDateAndTime}
         />
-        {/* <CreateNewExerciseModal
-            // setFilterExerciseList={setFilterExerciseList}
-            // comingFromStartEmptyWorkout={comingFromStartEmptyWorkout}
-            // setComingFromStartEmptyWorkout={setComingFromStartEmptyWorkout}
-          /> */}
-        <ExerciseThreeDotsBottomSheet threeDotsBottomSheetRef={threeDotsBottomSheetRef} deleteExerciseFunction={deleteExerciseFunction} ExerciseName={exerciseForThreeDotsBS} />
-        <NewTemplate newTemplateBottomSheetRef={newTemplateBottomSheetRef} />
+        <ExerciseThreeDotsBottomSheet
+          threeDotsBottomSheetRef={threeDotsBottomSheetRef}
+          deleteExerciseFunction={deleteExerciseFunction}
+          ExerciseName={exerciseForThreeDotsBS}
+        />
+        <NewTemplate
+          newTemplateBottomSheetRef={newTemplateBottomSheetRef}
+          addExerciseModal={addExerciseModal}
+          setAddExerciseModal={setAddExerciseModal}
+          workoutExercises={workoutExercises}
+          setWorkoutExercises={setWorkoutExercises}
+          templateExercises={templateExercises}
+          setTemplateExercises={setTemplateExercises}
+          templateData={templateData}
+          setTemplateData={setTemplateData}
+        />
+        <CreateNewExerciseModal
+          addExerciseModal={addExerciseModal}
+          setAddExerciseModal={setAddExerciseModal}
+        />
       </SafeAreaProvider>
-    </GestureHandlerRootView >
+    </GestureHandlerRootView>
   );
 }
 
@@ -1053,13 +1110,13 @@ const styles = StyleSheet.create({
     width: "10%",
     paddingLeft: 8,
     fontSize: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
     padding: 6,
     marginRight: 5,
-    textAlign: 'center'
+    textAlign: "center",
   },
   setColumnSetNotComplete: {
-    backgroundColor: '#61FF7E',
+    backgroundColor: "#61FF7E",
     borderWidth: 0,
     borderRadius: 6,
   },
@@ -1070,11 +1127,11 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 6,
     marginRight: 5,
-    color: '#011638'
+    color: "#011638",
   },
   weightColumnSetNotComplete: {
-    backgroundColor: '#61FF7E',
-    borderColor: 'red',
+    backgroundColor: "#61FF7E",
+    borderColor: "red",
     borderRadius: 8,
   },
   repsColumn: {
@@ -1085,19 +1142,19 @@ const styles = StyleSheet.create({
     // padding: 6,
     paddingTop: 6,
     paddingBottom: 6,
-    marginRight: 5
+    marginRight: 5,
   },
   repsColumnSetNotComplete: {
-    backgroundColor: '#61FF7E',
-    borderColor: 'red',
+    backgroundColor: "#61FF7E",
+    borderColor: "red",
     borderRadius: 8,
   },
   bouncyCheckmark: {
     fontWeight: "bold",
     width: "10%",
     fontSize: 16,
-    textAlign: 'right',
+    textAlign: "right",
     padding: 10,
-    borderRadius: 6
-  }
+    borderRadius: 6,
+  },
 });

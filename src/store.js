@@ -11,17 +11,27 @@ const storeStates = create((set) => (
 
         comingFromExercisePage: false,
         toggleComingFromExercisePage: (comingFromExercisePage) => set(() => ({ comingFromExercisePage: comingFromExercisePage })),
+
+        comingFromNewTemplate: false,
+        toggleComingFromNewTemplate: (comingFromNewTemplate) => set(() => ({ comingFromNewTemplate: comingFromNewTemplate })),
+
+        comingFromReplaceExercise: false,
+        toggleComingFromReplaceExercise: (comingFromReplaceExercise) => set(() => ({ comingFromReplaceExercise: comingFromReplaceExercise })),
+
+        comingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise: false,
+        toggleComingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise: (comingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise) => set(() => ({ comingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise: comingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise })),
+
+        createNewExerciseModal: false,
+        closeCreateNewExerciseModal: () => set({ createNewExerciseModal: false }),
+        openCreateNewExerciseModal: () => set({ createNewExerciseModal: true }),
+        toggleCreateNewExerciseModal: (createNewExerciseModal) => set(() => ({ createNewExerciseModal: createNewExerciseModal })),
+
     }
 ))
 
-// const [saveWorkoutConfirmationModal, setSaveWorkoutConfirmationModal] = useState(false)
-// const [notAllSetsCompleteAlert, setNotAllSetsCompleteAlert] = useState(false)
-// const [cancelWorkoutConfirmationModal, setCancelWorkoutConfirmationModal] = useState(false)
-// const [workoutExercises, setWorkoutExercises] = useState([]);
-// const [workoutData, setWorkoutData] = useState([]);
-// const [exerciseForThreeDotsBS, setExerciseForThreeDotsBS] = useState('')
-// const [collapseHandler, setCollapseHandler] = useState(false)
-// const [startOfWorkoutDateAndTime, setStartOfWorkoutDateAndTime] = useState('')
+// workoutData = comes from App.js
+// workoutExercises = comes from App.js
+// selectedExercises = can be useState
 
 export const useStore = storeStates;
 
