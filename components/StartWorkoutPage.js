@@ -40,7 +40,7 @@ const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartO
           Start Workout
         </Text>
       </View>
-      <View style={{ height: 100, marginLeft: 15 }}>
+      {/* <View style={{ height: 100, marginLeft: 15 }}>
         <Text style={{ color: "#D3D3D3", fontSize: 25 }}>Templates Here</Text>
         <View style={{ paddingHorizontal: 15, paddingTop: 10 }}>
           <Pressable style={{
@@ -52,7 +52,7 @@ const StartWorkoutPage = ({ bottomSheetRef, startOfWorkoutDateAndTime, setStartO
             <Text style={{ color: 'white' }}>Bring up Create Exercise Modal</Text>
           </Pressable>
         </View>
-      </View>
+      </View> */}
       <View
         style={{
           flex: 1,

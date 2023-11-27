@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Text, View, StyleSheet, Pressable, FlatList, TextInput, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useStore } from "../src/store.js";
-import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
 import { baseExerciseList } from "./data.js";
 import { helperFunctions } from "../functions/helperFunctions.js";
 import DropDownPicker from "react-native-dropdown-picker";
+import { useShallow } from 'zustand/react/shallow'
+
 
 //             to do list
 //
@@ -27,14 +28,46 @@ const AddExerciseToWorkoutOrTemplateModal = ({
 
   // for tracking of exercise selection between app.js and AddExerciseModal
 
-  const [selectedExercises, setSelectedExercises] = useState(workoutExercises);
+  const [selectedExercises, setSelectedExercises] = useState([]);
 
-  // console.log('setTemplateExercises in AddExercise...Modal', templateExercises)
 
+
+  // user presses Add Exercise --> brings up AddExerciseModal and assigns workoutData to workoutExercises
   useEffect(() => {
-    setSelectedExercises(workoutExercises)
-    // console.log('selected exercises', selectedExercises)
-  }, [workoutExercises])
+    console.log('template Exercises: ', templateExercises)
+    console.log('template Data: ', templateData)
+    if (comingFromStartEmptyWorkout) {
+      setSelectedExercises(workoutExercises)
+    } else if (comingFromNewTemplate) {
+      setSelectedExercises(templateExercises)
+    }
+  }, [])
+  // change this useState? Do I need to set it immediately? Yes, I think so? well, I could do a useEffect with empty square brackets
+  // and then assign selectedExercises to either workoutExercises or templateExercises in the useEffect depending on global state 
+  // so, useEffect would run on start and then run on workout/templateExercises updates 
+  // then   
+
+  // useEffect(() => {
+  //   // if selectedExercises is zero, then make selectedExercises equal to workoutExercises
+  //   // this has to also include templateExercises 
+  //   // if selectedExercises is not zero (meaning exercises have been previously added, assign new selected exercises to temporary array?
+  //   // combine array 
+  //   if (comingFromStartEmptyWorkout || selectedExercises.length === 0) {
+  //     setSelectedExercises(workoutExercises)
+  //   } else if (comingFromNewTemplate) {
+  //     setSelectedExercises(templateExercises)
+  //   } else if (comingFromNewTemplate) {
+  //     setSelectedExercises(templateExercises)
+  //   }
+  //   // else if selected Exercises already has data (from previously selectedExercises or going from AddExerciseModal (with selectedExercises) to CreateNewExercisemodal back to AddExerciseModal)
+  //   // then do something else 
+  //   // what other situations could occur? 
+
+  // }, [workoutExercises, templateExercises])
+
+  // why do I need workoutExercises here? to ensure 
+  // to ensure most up-to-date list of exercises for when an exercise is deleted/
+  // workoutData is commonly updated, so workoutExercises 
 
   // for react-native-dropdown-picker
   const [muscleValue, setMuscleValue] = useState(null);
@@ -48,10 +81,9 @@ const AddExerciseToWorkoutOrTemplateModal = ({
   const [equipmentSort, setEquipmentSort] = useState(null);
 
   const [filterExerciseList, setFilterExerciseList] = useState([]);
-  // const [masterExerciseList, setMasterExerciseList] = useState([])
 
   // fix this
-  const [masterExerciseList, setMasterExerciseList] = useState([]);
+  // const [masterExerciseList, setMasterExerciseList] = useState([]);
 
   // global states
   const comingFromStartEmptyWorkout = useStore((state) => state.comingFromStartEmptyWorkout);
@@ -67,6 +99,25 @@ const AddExerciseToWorkoutOrTemplateModal = ({
   const toggleCreateNewExerciseModal = useStore((state) => state.toggleCreateNewExerciseModal)
   const openCreateNewExerciseModal = useStore((state) => state.openCreateNewExerciseModal);
 
+  const masterExerciseList = useStore(useShallow((state) => state.masterExerciseList));
+  const memoizedExerciseList = useMemo(() => masterExerciseList, [masterExerciseList]);
+
+  const initializeMasterExerciseList = useStore(useShallow((state) => state.initializeMasterExerciseList));
+
+
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     await initializeMasterExerciseList();
+  //   }
+  //   fetchData();
+  // }, []);
+
+
+  // useEffect(() => {
+  //   setFilterExerciseList(memoizedExerciseList);
+  //   console.log('memoizedExerciseList from AddExercise...Modal: ', memoizedExerciseList)
+
+  // }, [memoizedExerciseList]);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -104,7 +155,7 @@ const AddExerciseToWorkoutOrTemplateModal = ({
   ];
 
   useEffect(() => {
-    let filteredList = masterExerciseList;
+    let filteredList = [];
 
     // this is just for testing
     if (muscleValue == "clear") {
@@ -175,7 +226,6 @@ const AddExerciseToWorkoutOrTemplateModal = ({
     // console.log('comingFromStartEmptyWorkout', comingFromStartEmptyWorkout)
     // console.log('selectedExercise in handleItemPress', selectedExercises)
     if (comingFromStartEmptyWorkout || comingFromNewTemplate) {
-      console.log(item)
       const exerciseName = item.name;
       // console.log(exerciseName);
       if (selectedExercises.some((exercise) => exercise.name === item.name)) {
@@ -295,17 +345,24 @@ const AddExerciseToWorkoutOrTemplateModal = ({
                   paddingLeft: 8,
                 }}
                 onPress={() => {
+                  // if someone has already selected exercises and tries to create a new exercise, those previously selected exercises are lost 
+                  console.log(selectedExercises)
+
+                  if (comingFromStartEmptyWorkout) {
+
+                  } else if (comingFromNewTemplate) {
+                    // setTemplateExercises(selectedExercises)
+                  }
                   // toggleComingFromStartEmptyWorkoutOrNewTemplateOrReplaceExercise(true)
                   setAddExerciseModal(false)
                   toggleComingFromStartEmptyWorkout(true)
-                  setTimeout(openCreateNewExerciseModal, '350')
+                  setTimeout(openCreateNewExerciseModal, '500')
                 }}
               >
                 <Text style={styles.textStyle}>New</Text>
               </Pressable>
             </View>
             <View style={styles.topRowRightSide}>
-              {/* // add Exercise button */}
               <Pressable
                 onPress={() => {
                   if (comingFromStartEmptyWorkout) {

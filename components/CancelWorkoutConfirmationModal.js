@@ -39,11 +39,11 @@ const CancelWorkoutConfirmationModal = ({
                                     backgroundColor: 'red'
                                 }}
                                 onPress={() => {
-                                    setWorkoutExercises([])
-                                    setWorkoutData([])
-                                    closeBottomSheet()
-                                    setStartOfWorkoutDateAndTime('')
-                                    setCancelWorkoutConfirmationModal(false)
+                                    closeBottomSheet();
+                                    setWorkoutExercises([]);
+                                    setWorkoutData([]);
+                                    setStartOfWorkoutDateAndTime('');
+                                    setCancelWorkoutConfirmationModal(false);
                                 }}
                             >
                                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 24 }}>Cancel Workout</Text>

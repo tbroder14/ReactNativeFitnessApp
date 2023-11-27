@@ -4,12 +4,12 @@ import { baseExerciseList } from "../components/data.js";
 // Returns the complete list of exercises from users data or default data if user hasn't stored anything yet
 async function completeExerciseList() {
     try {
-        const oldData = await AsyncStorage.getItem('userAddedExerciseList')
-        const parsedOldData = JSON.parse(oldData)
-        if (oldData === null) {
+        const userAddedExerciseList = await AsyncStorage.getItem('userAddedExerciseList')
+        const parsedUserAddedExerciseList = JSON.parse(userAddedExerciseList)
+        if (userAddedExerciseList === null) {
             return baseExerciseList
         } else {
-            const combinedArrays = parsedOldData.concat(baseExerciseList)
+            const combinedArrays = parsedUserAddedExerciseList.concat(baseExerciseList)
             const sortedCombinedArrays = combinedArrays.sort((a, b) => a.name.localeCompare(b.name))
             return sortedCombinedArrays
         }
@@ -21,12 +21,12 @@ async function completeExerciseList() {
 // Sorts the exercise list alphabetically
 async function sortExercises() {
     try {
-        const oldData = await AsyncStorage.getItem('userAddedExerciseList')
-        const parsedOldData = JSON.parse(oldData)
-        if (oldData === null) {
+        const userAddedExerciseList = await AsyncStorage.getItem('userAddedExerciseList')
+        const parsedUserAddedExerciseList = JSON.parse(userAddedExerciseList)
+        if (userAddedExerciseList === null) {
             return baseExerciseList
         } else {
-            const combinedArrays = parsedOldData.concat(baseExerciseList)
+            const combinedArrays = parsedUserAddedExerciseList.concat(baseExerciseList)
             const sortedCombinedArrays = combinedArrays.sort((a, b) => a.name.localeCompare(b.name))
             await AsyncStorage.setItem('userAddedExerciseList', JSON.stringify(sortedCombinedArrays));
 

@@ -7,6 +7,7 @@ import { Text, View, StyleSheet } from "react-native";
 
 const ProgramPage = () => {
 
+    console.log(navigation)
     return (
         <View style={[styles.container]}>
             <View style={{ height: 20 }}></View>

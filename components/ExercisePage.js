@@ -1,9 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useIsFocused } from "react";
 import { Text, View, StyleSheet, Pressable, FlatList, TextInput, TouchableOpacity } from "react-native";
 import { useStore } from "../src/store.js";
 import { baseExerciseList } from "./data.js";
 import DropDownPicker from "react-native-dropdown-picker";
 import { helperFunctions } from "../functions/helperFunctions.js";
+import ExerciseModalForExercisePage from "./ExerciseModalForExercisePage.js";
+import CreateNewExerciseModal from "./CreateNewExerciseModal.js";
+import { useShallow } from 'zustand/react/shallow'
+import { constSelector } from "recoil";
+import { useNavigation } from '@react-navigation/native';
+
 
 //             to do list
 // figure out how to unselect muscle and/or equipment dropdown selections
@@ -11,20 +17,23 @@ import { helperFunctions } from "../functions/helperFunctions.js";
 //             feature roadmap
 // add body outline with muscles and display exercises for selected muscle group (modal?)
 
-const ExercisePage = ({ navigation }) => {
+const ExercisePage = () => {
 
-  useEffect(() => {
-    if (navigation) {
-      console.log('inside navigation')
-      const updateComingFrom = navigation.addListener('tabPress', (e) => {
-        e.preventDefault();
-        toggleComingFromExercisePage(true);
-        toggleComingFromStartEmptyWorkout(false);
-        console.log(e);
-      });
-      return updateComingFrom;
-    }
-  }, [navigation]);
+  // // console.log(navigation)
+
+  // useEffect(() => {
+  //   if (navigation) {
+  //     console.log('inside navigation')
+  //     const updateComingFrom = navigation.addListener('tabPress', (e) => {
+  //       e.preventDefault();
+  //       toggleComingFromExercisePage(true);
+  //       toggleComingFromStartEmptyWorkout(false);
+  //       console.log(e);
+  //     });
+  //     console.log('updateComingFrom: ', updateComingFrom)
+  //     return updateComingFrom;
+  //   }
+  // }, [navigation]);
 
   // for exercise modal
   const [exerciseModal, setExerciseModal] = useState(false);
@@ -42,12 +51,10 @@ const ExercisePage = ({ navigation }) => {
   const [equipmentSort, setEquipmentSort] = useState(null);
 
   const [filterExerciseList, setFilterExerciseList] = useState([]);
-  // const [masterExerciseList, setMasterExerciseList] = useState([])
 
   // fix this
-  const [masterExerciseList, setMasterExerciseList] = useState([]);
+  // const [masterExerciseList, setMasterExerciseList] = useState([]);
 
-  const toggleCreateNewExerciseModal = useStore((state) => state.toggleCreateNewExerciseModal)
 
   // global states
   const comingFromStartEmptyWorkout = useStore((state) => state.comingFromStartEmptyWorkout);
@@ -56,10 +63,14 @@ const ExercisePage = ({ navigation }) => {
   const toggleComingFromExercisePage = useStore((state) => state.toggleComingFromExercisePage);
   const comingFromNewTemplate = useStore((state) => state.comingFromNewTemplate);
   const toggleComingFromNewTemplate = useStore((state) => state.toggleComingFromNewTemplate);
+  const toggleCreateNewExerciseModal = useStore((state) => state.toggleCreateNewExerciseModal)
+  const openCreateNewExerciseModal = useStore((state) => state.openCreateNewExerciseModal);
 
-  console.log('comingFromExercisePage in ExercisePage', comingFromExercisePage)
-  console.log('comingFromStartEmptyWorkout in ExercisePage', comingFromStartEmptyWorkout)
+  const masterExerciseList = useStore((state) => state.masterExerciseList);
+  const memoizedExerciseList = useMemo(() => masterExerciseList, [masterExerciseList]);
 
+
+  const initializeMasterExerciseList = useStore(useShallow((state) => state.initializeMasterExerciseList));
 
   useEffect(() => {
     async function fetchData() {
@@ -73,6 +84,60 @@ const ExercisePage = ({ navigation }) => {
     }
     fetchData();
   }, []);
+
+
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     await initializeMasterExerciseList();
+  //   }
+  //   fetchData();
+  // }, []);
+
+
+  // useEffect(() => {
+  //   setFilterExerciseList(memoizedExerciseList);
+  //   console.log('memoizedExerciseList from ExercisePage', memoizedExerciseList)
+
+  // }, [memoizedExerciseList]);
+
+  // const { masterExerciseList } = useStore(); // Access the masterExerciseList from the store
+
+  // useEffect(() => {
+  //   async function fetchMasterExerciseList() {
+  //     // initializeMasterExerciseList()
+  //     const list = masterExerciseList;
+  //     console.log(list)
+  //     setFilterExerciseList(list);
+  //   }
+  //   fetchMasterExerciseList();
+  // }, [initializeMasterExerciseList]);
+
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     await initializeMasterExerciseList()
+  //     setFilterExerciseList(masterExerciseList)
+  //   }
+  //   fetchData()
+  // }, []);
+
+  // console.log('masterExerciseList in ExercisePage: ', masterExerciseList)
+
+  // useEffect(() => {
+  //   // Fetch and set the masterExerciseList on component mount
+  //   async function fetchMasterExerciseList() {
+  //     const list = await masterExerciseList
+  //     // const list = await initializeMasterExerciseList();
+  //     console.log('list: ', list)
+  //     setFilterExerciseList(list);
+  //   }
+  //   fetchMasterExerciseList();
+  // }, [initializeMasterExerciseList]);
+
+  // useEffect(() => {
+  //   console.log(masterExerciseList)
+  //   // setFilterExerciseList(masterExerciseList)
+  //   // await masterExerciseList
+  // }, [masterExerciseList]);
 
   const muscles = [
     { label: "Biceps", value: "biceps" },
@@ -98,7 +163,7 @@ const ExercisePage = ({ navigation }) => {
   ];
 
   useEffect(() => {
-    let filteredList = masterExerciseList;
+    let filteredList = [...memoizedExerciseList];
 
     // this is just for testing
     if (muscleValue == "clear") {
@@ -157,12 +222,10 @@ const ExercisePage = ({ navigation }) => {
   //     </TouchableOpacity>
   // );
 
-  const Item = ({ item, handleItemPress, isSelected }) => (
+  const Item = ({ item, handleItemPress }) => (
     <TouchableOpacity onPress={() => handleItemPress(item)}>
       <View
-        style={
-          isSelected ? styles.exerciseIsSelected : styles.exerciseIsNotSelected
-        }
+        style={styles.exerciseIsNotSelected}
       >
         <Text style={styles.exerciseTitle}>{item.name}</Text>
       </View>
@@ -281,7 +344,7 @@ const ExercisePage = ({ navigation }) => {
             padding: 10,
             marginLeft: 20,
           }}
-          onPress={() => { toggleCreateNewExerciseModal(true), toggleComingFromExercisePage(true) }}
+          onPress={() => { openCreateNewExerciseModal(), toggleComingFromExercisePage(true) }}
         >
           <Text
             style={{
@@ -312,7 +375,6 @@ const ExercisePage = ({ navigation }) => {
           <Item
             item={item}
             handleItemPress={() => handleItemPress(item)}
-          // isSelected={selectedExercises.some((exercise) => exercise.name === item.name)}
           />
         )}
         keyExtractor={(item) => item.name}
@@ -327,7 +389,7 @@ const ExercisePage = ({ navigation }) => {
                   fontSize: 18,
                   color: "#61FF7E",
                   textAlign: "center",
-                  marginBottom: 350,
+                  paddingTop: 15
                 }}
               >
                 No exercise matches your search criteria.
@@ -343,16 +405,14 @@ const ExercisePage = ({ navigation }) => {
         setExerciseNameForModal={setExerciseNameForModal}
         workoutExercises={workoutExercises}
       /> */}
-      {/* <ExerciseModalForExercisePage
+      <ExerciseModalForExercisePage
         exerciseModal={exerciseModal}
         setExerciseModal={setExerciseModal}
         exerciseNameForModal={exerciseNameForModal}
         setExerciseNameForModal={setExerciseNameForModal}
-      /> */}
-      {/* <CreateNewExerciseModal
-        createNewExerciseModal={createNewExerciseModal}
-        setCreateNewExerciseModal={setCreateNewExerciseModal}
-      /> */}
+      />
+      <CreateNewExerciseModal
+      />
     </View>
   );
 };

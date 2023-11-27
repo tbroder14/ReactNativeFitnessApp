@@ -54,6 +54,9 @@ const NewTemplate = ({
     };
     // renders
 
+
+
+
     useEffect(() => {
         // determines if any exercises in workoutExercise aren't formatted properly
         let newExercise = templateExercises.filter(
@@ -175,11 +178,11 @@ const NewTemplate = ({
         setWorkoutExercises,
         workoutExercises,
         addExerciseModal,
-        setAddExerciseModal,
         templateExercises,
+        setAddExerciseModal,
         setTemplateExercises,
         templateData,
-        setTemplateData,
+        setTemplateData
     }) {
         // const cancelWorkout = () => {
         //     if (workoutData.length === 0) {
@@ -196,6 +199,7 @@ const NewTemplate = ({
                         borderRadius: 8,
                         backgroundColor: "blue",
                         padding: 10,
+                        marginBottom: 225
                     }}
                     onPress={() => {
                         setAddExerciseModal(true);
@@ -221,7 +225,7 @@ const NewTemplate = ({
                         Cancel Workout
                     </Text>
                 </Pressable> */}
-                <AddExerciseToWorkoutOrTemplateModal
+                {/* <AddExerciseToWorkoutOrTemplateModal
                     addExerciseModal={addExerciseModal}
                     setAddExerciseModal={setAddExerciseModal}
                     workoutExercises={workoutExercises}
@@ -230,8 +234,9 @@ const NewTemplate = ({
                     setTemplateExercises={setTemplateExercises}
                     templateData={templateData}
                     setTemplateData={setTemplateData}
-                />
+                /> */}
             </View>
+
         );
     }
 
@@ -296,7 +301,7 @@ const NewTemplate = ({
 
         return (
             <ScaleDecorator>
-                <View style={{ paddingBottom: 20, backgroundColor: "#011638" }}>
+                <View style={{ paddingBottom: 10, backgroundColor: "#011638" }}>
                     <View
                         style={{
                             paddingRight: 20,
@@ -323,8 +328,8 @@ const NewTemplate = ({
                             onPress={() => {
                                 exerciseThreeDotsOptions(item);
                                 setExerciseForThreeDotsBS(item.name);
-                                setTemplateData([]);
-                                setTemplateExercises([]);
+                                // setTemplateData([]);
+                                // setTemplateExercises([]);
                             }}
                         >
                             <Ionicons
@@ -564,7 +569,13 @@ const NewTemplate = ({
                                 backgroundColor: "#61FF7E",
                                 padding: 10,
                             }}
-                            onPress={closeBottomSheet}
+                            onPress={() => {
+                                closeBottomSheet()
+                                setTemplateData([])
+                                setTemplateExercises([])
+                                toggleComingFromNewTemplate(false)
+                            }
+                            }
                         >
                             <Ionicons name="close-outline" color={"#011638"} size={25} />
                         </Pressable>
@@ -615,29 +626,38 @@ const NewTemplate = ({
                         // placeholder={currentWorkoutName}
                         />
                     </View>
-                    <DraggableFlatList
-                        data={templateData}
-                        // onDragEnd={updateTemplateDataAfterDragEnd(templateData)}
-                        onDragEnd={() => setCollapseHandler(false)}
-                        keyExtractor={(item) => item.name}
-                        renderItem={draggableItem}
-                        // ItemSeparatorComponent={<Separator />}
-                        ListFooterComponent={() => (
-                            <BottomSheetFooterComponents
-                                addExerciseModal={addExerciseModal}
-                                setAddExerciseModal={setAddExerciseModal}
-                                workoutExercises={workoutExercises}
-                                setWorkoutExercises={setWorkoutExercises}
-                                templateExercises={templateExercises}
-                                setTemplateExercises={setTemplateExercises}
-                                templateData={templateData}
-                                setTemplateData={setTemplateData}
-                            />
-                        )}
-                    />
                 </View>
             </View>
+            <DraggableFlatList
+                data={templateData}
+                // onDragEnd={updateTemplateDataAfterDragEnd(templateData)}
+                onDragEnd={() => setCollapseHandler(false)}
+                keyExtractor={(item) => item.name}
+                renderItem={draggableItem}
+                // ItemSeparatorComponent={<Separator />}
+                ListFooterComponent={() => (
+                    <BottomSheetFooterComponents
+                        addExerciseModal={addExerciseModal}
+                        setAddExerciseModal={setAddExerciseModal}
+                        workoutExercises={workoutExercises}
+                        setWorkoutExercises={setWorkoutExercises}
+                        templateExercises={templateExercises}
+                        setTemplateExercises={setTemplateExercises}
+                    />
+                )}
+            />
+            {/* <AddExerciseToWorkoutOrTemplateModal
+                addExerciseModal={addExerciseModal}
+                setAddExerciseModal={setAddExerciseModal}
+                workoutExercises={workoutExercises}
+                setWorkoutExercises={setWorkoutExercises}
+                templateExercises={templateExercises}
+                setTemplateExercises={setTemplateExercises}
+                templateData={templateData}
+                setTemplateData={setTemplateData}
+            /> */}
         </BottomSheet>
+
     );
 };
 
@@ -647,7 +667,6 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         alignItems: "center",
-        flex: 1,
     },
     exerciseItem: {
         padding: 16,

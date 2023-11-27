@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Text, View, StyleSheet, Pressable } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { TextInput } from "react-native-gesture-handler";
@@ -7,13 +7,36 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { helperFunctions } from "../functions/helperFunctions.js";
 import { useStore } from "../src/store.js";
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigationState } from '@react-navigation/native';
+
+
 
 const CreateNewExerciseModal = ({
     setFilterExerciseList,
     setAddExerciseModal,
 }) => {
 
+    // const navigation = useNavigation()
+    // console.log('navigation within CreateNewExerciseModal: ', navigation)
+
+    // const { route } = useRoute()
+    // const { previousScreen } = route.params;
+    // console.log(previousScreen)
     // global states
+
+
+    const navigation = useNavigation()
+    // const routes = navigation.getState()?.routes;
+    // const prevRoute = routes[routes.length - 2];
+    // console.log(prevRoute)
+
+    const state = useNavigationState(state => state);
+
+    // const { index, routes } = this.props.navigation.dangerouslyGetState();
+    // const currentRoute = routes[index].name;
+    // console.log('current screen', currentRoute);
+
     const comingFromStartEmptyWorkout = useStore(state => state.comingFromStartEmptyWorkout);
     const toggleComingFromStartEmptyWorkout = useStore(state => state.toggleComingFromStartEmptyWorkout);
 
@@ -33,7 +56,14 @@ const CreateNewExerciseModal = ({
     const toggleCreateNewExerciseModal = useStore(state => state.toggleCreateNewExerciseModal);
     const closeCreateNewExerciseModal = useStore((state) => state.closeCreateNewExerciseModal);
 
+    const addNewExerciseToExerciseList = useStore((state) => state.addNewExerciseToExerciseList);
+
     // console.log('createNewExerciseModal useStore', createNewExerciseModal)
+
+    console.log('comingFromStartEmptyWorkout', comingFromStartEmptyWorkout)
+    console.log('comingFromExercisePage', comingFromExercisePage)
+    console.log('comingFromNewTemplate', comingFromNewTemplate)
+
 
     // for react-native-dropdown-picker
     const [muscleValue, setMuscleValue] = useState(null);
@@ -62,7 +92,7 @@ const CreateNewExerciseModal = ({
             // remove error
         }
 
-        console.log("All history data has been deleted.");
+        console.log("All user added exercises has been deleted.");
     };
 
     const muscles = [
@@ -108,9 +138,8 @@ const CreateNewExerciseModal = ({
                         <Pressable
                             style={styles.closeExerciseModal}
                             onPress={() => {
-                                console.log('comingFromStartEmptyWorkout', comingFromStartEmptyWorkout)
-                                console.log('comingFromExercisePage', comingFromExercisePage)
-                                closeCreateNewExerciseModal
+
+                                closeCreateNewExerciseModal()
                                 toggleCreateNewExerciseModal(false);
                                 if (comingFromStartEmptyWorkout) {
                                     setTimeout(() => {
@@ -174,41 +203,13 @@ const CreateNewExerciseModal = ({
                                     // check and see if exercise already exists, if yes, throw catch
                                     // can I do this within the try/catch? instead of here?
 
-                                    // else stores new exercise
-                                    const storeData = async (finalNewExercise) => {
-                                        try {
-                                            const oldData = await AsyncStorage.getItem(
-                                                "userAddedExerciseList"
-                                            );
-                                            const parsedOldData = JSON.parse(oldData);
-                                            console.log("parsed old data:", parsedOldData);
-                                            if (oldData === null) {
-                                                await AsyncStorage.setItem(
-                                                    "userAddedExerciseList",
-                                                    JSON.stringify([finalNewExercise])
-                                                );
-                                            } else {
-                                                parsedOldData.push(finalNewExercise);
-                                                await AsyncStorage.setItem(
-                                                    "userAddedExerciseList",
-                                                    JSON.stringify(parsedOldData)
-                                                );
-                                            }
-                                            console.log("item saved");
-                                            const currentData = await AsyncStorage.getItem(
-                                                "userAddedExerciseList"
-                                            );
-                                            console.log("current data:", currentData);
-                                            const sortedExerciseList =
-                                                await helperFunctions.completeExerciseList();
-                                            setFilterExerciseList(sortedExerciseList);
+                                    addNewExerciseToExerciseList(finalNewExercise)
 
-                                        } catch (e) {
-                                            // saving error
-                                            console.log(e);
-                                        }
-                                    };
-                                    storeData(finalNewExercise);
+                                    // clear results 
+                                    setNewExercise('')
+                                    setEquipmentValue(null)
+                                    setMuscleValue(null)
+
                                     toggleCreateNewExerciseModal(false);
                                     if (comingFromStartEmptyWorkout) {
                                         setTimeout(setAddExerciseModal(true), '200')

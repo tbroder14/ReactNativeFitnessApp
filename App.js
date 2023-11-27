@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useState,
   useEffect,
+  useContext
 } from "react";
 import {
   Text,
@@ -33,6 +34,7 @@ import DraggableFlatList, {
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import Collapsible from "react-native-collapsible";
+// import { LevelContext } from './LevelContext.js';
 
 // state management library
 import { useStore } from "./src/store";
@@ -51,17 +53,17 @@ import SaveWorkoutConfirmationModal from "./components/SaveWorkoutConfirmationMo
 import NotAllSetsCompleteAlertModal from "./components/NotAllSetsCompleteAlertModal";
 import NewTemplate from "./components/NewTemplate";
 import AddExerciseToWorkoutOrTemplateModal from "./components/AddExerciseToWorkoutOrTemplateModal";
-import CreateNewExerciseModal from "./components/CreateNewExerciseModal";
 
 //             to do list
 // figure out how to create a state for workoutExercises and WorkoutData instead of prop drilling (i.e. use hookstate, redux, context, etc.)
+// if someone has selects exercises and tries to create a new exercise, those previously selected exercises are lost 
 // save templates to local data
 // long press to reorder exercises -> https://github.com/computerjazz/react-native-draggable-flatlist/
 // update exercise list from Start Empty Workout to have utilize async storage and update the create New Exercise functionality
-// saving new order of collapisble exercises
+// saving new order of collapsible exercises
 // three button dropdown/bottom sheet to delete exercise -> complete styling
 // format/style sets/text input parts
-// create logic in SaveWorkoutConfirmationModal that checks if all sets are completed when hitting the "Save" button
+// finish logic in SaveWorkoutConfirmationModal that checks if all sets are completed when hitting the "Save" button
 // remove bottom unused styles and collapse/clean-up inline styles
 // refactor code to simplify app.js; possibly move things to single component files
 // on Strong app, when you select "Add Exercises", none are selected -> meaning, you could have two more or more of the same exercise in the same workout
@@ -236,16 +238,6 @@ function BottomSheetFooterComponents({
           Cancel Workout
         </Text>
       </Pressable>
-      <AddExerciseToWorkoutOrTemplateModal
-        workoutExercises={workoutExercises}
-        setWorkoutExercises={setWorkoutExercises}
-        addExerciseModal={addExerciseModal}
-        setAddExerciseModal={setAddExerciseModal}
-        templateExercises={templateExercises}
-        setTemplateExercises={setTemplateExercises}
-        templateData={templateData}
-        setTemplateData={setTemplateData}
-      />
     </View>
   );
 }
@@ -841,7 +833,6 @@ export default function App() {
                     break;
                   case "History":
                     iconName = "bar-chart";
-                    //load history data
                     break;
                   case "Start Workout":
                     iconName = "add-outline";
@@ -1026,9 +1017,19 @@ export default function App() {
           templateData={templateData}
           setTemplateData={setTemplateData}
         />
-        <CreateNewExerciseModal
+        {/* <CreateNewExerciseModal
           addExerciseModal={addExerciseModal}
           setAddExerciseModal={setAddExerciseModal}
+        /> */}
+        <AddExerciseToWorkoutOrTemplateModal
+          workoutExercises={workoutExercises}
+          setWorkoutExercises={setWorkoutExercises}
+          addExerciseModal={addExerciseModal}
+          setAddExerciseModal={setAddExerciseModal}
+          templateExercises={templateExercises}
+          setTemplateExercises={setTemplateExercises}
+          templateData={templateData}
+          setTemplateData={setTemplateData}
         />
       </SafeAreaProvider>
     </GestureHandlerRootView>
